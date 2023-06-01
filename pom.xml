@@ -216,6 +216,8 @@
         <module>ruoyi-modules</module>
         <module>ruoyi-api</module>
         <module>ruoyi-common</module>
+        <module>ruoyi-modules/mybatisplus-generator</module>
+        <module>ruoyi-modules/xanadu_base</module>
     </modules>
     <packaging>pom</packaging>
 
