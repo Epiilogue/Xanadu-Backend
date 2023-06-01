@@ -1,0 +1,40 @@
+server:
+  port: 8003
+  servlet:
+    context-path: /cc/
+
+spring:
+  application:
+    name: xanadu-customer-center
+  profiles:
+      # 环境配置
+    active: dev
+  datasource:
+    username: root
+    password: xgs1150840779
+    url: jdbc:mysql://localhost:3306/xanadu_cc?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 127.0.0.1:8848
+      config:
+        # 配置中心地址
+        server-addr: 127.0.0.1:8848
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+
+mybatis-plus:
+  type-aliases-package: edu.neu.cc.domain
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)

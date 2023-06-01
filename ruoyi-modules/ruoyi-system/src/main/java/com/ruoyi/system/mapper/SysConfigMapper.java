@@ -8,6 +8,7 @@ import com.ruoyi.system.domain.SysConfig;
  * 
  * @author ruoyi
  */
+
 public interface SysConfigMapper
 {
     /**
