@@ -32,9 +32,9 @@ public class Main {
                 })
                 //3、包配置
                 .packageConfig(builder -> {
-                    builder.parent("edu") // 设置父包名
-                            .moduleName("neu")   //设置模块包名
-                            .entity("dto")   //pojo 实体类包名
+                    builder.parent("edu.neu") // 设置父包名
+                            .moduleName("cc")   //设置模块包名
+                            .entity("entity")   //pojo 实体类包名
                             .service("service") //Service 包名
                             .serviceImpl("serviceImpl") // ***ServiceImpl 包名
                             .mapper("mapper")   //Mapper 包名
@@ -62,7 +62,7 @@ public class Main {
                             .enableLombok() //开启 Lombok
                             .logicDeleteColumnName("deleted")   //逻辑删除字段名
                             .naming(NamingStrategy.underline_to_camel)  //数据库表映射到实体的命名策略：下划线转驼峰命
-                            .columnNaming(NamingStrategy.underline_to_camel).formatFileName("%sDto")    //数据库表字段映射到实体的命名策略：下划线转驼峰命
+                            .columnNaming(NamingStrategy.underline_to_camel).formatFileName("%s")    //数据库表字段映射到实体的命名策略：下划线转驼峰命
                             .addTableFills(
                                     new Column("create_time", FieldFill.INSERT),
                                     new Column("modify_time", FieldFill.INSERT_UPDATE),
@@ -73,7 +73,7 @@ public class Main {
                             //4.4、Controller策略配置
                             .controllerBuilder()
                             .formatFileName("%sController") //格式化 Controller 类文件名称，%s进行匹配表名，如 UserController
-                            .enableRestStyle().mapperBuilder().formatMapperFileName("%sDtoMapper").formatXmlFileName("%sDtoMapper");  //开启生成 @RestController 控制器
+                            .enableRestStyle().mapperBuilder().formatMapperFileName("%sMapper").formatXmlFileName("%sMapper");  //开启生成 @RestController 控制器
 
                 })
                 //5、模板
