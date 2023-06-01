@@ -21,11 +21,15 @@
 
 
     <dependencies>
-
         <!-- SpringCloud Alibaba Nacos -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <!-- SpringCloud Alibaba Nacos Config -->
@@ -59,7 +63,7 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!-- RuoYi Common DataSource -->
+        <!--  ndash; RuoYi Common DataSource -->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-datasource</artifactId>
@@ -71,16 +75,10 @@
             <artifactId>ruoyi-common-datascope</artifactId>
         </dependency>
 
-        <!-- RuoYi Common Log -->
-        <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-log</artifactId>
-        </dependency>
-
         <!-- RuoYi Common Swagger -->
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-swagger</artifactId>
+            <artifactId>ruoyi-common-core</artifactId>
         </dependency>
 
         <dependency>
