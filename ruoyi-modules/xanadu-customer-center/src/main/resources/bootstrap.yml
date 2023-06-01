@@ -60,7 +60,7 @@ spring:
           # driver-class-name:
 
 mybatis-plus:
-  type-aliases-package: edu.neu.cc.domain
+  type-aliases-package: edu.neu.cc.entity
   mapper-locations: classpath*:/mapper/**/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
