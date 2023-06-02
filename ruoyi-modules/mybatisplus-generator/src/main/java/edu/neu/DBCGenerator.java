@@ -1,25 +1,21 @@
 package edu.neu;
 
-
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.generator.*;
+import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
-import com.baomidou.mybatisplus.generator.config.rules.DbColumnType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
-import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
 
-import java.sql.Types;
 import java.util.Collections;
 
-public class Main {
+public class DBCGenerator {
 
     public static void main(String[] args) {
         //1、配置数据源
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/xanadu_cc", "root", "xgs1150840779")
+        FastAutoGenerator.create("jdbc:mysql://localhost:3306/xanadu_dbc", "root", "xgs1150840779")
                 //2、全局配置
                 .globalConfig(builder -> {
                     builder.author("Gaosong Xu") // 设置作者名
@@ -33,7 +29,7 @@ public class Main {
                 //3、包配置
                 .packageConfig(builder -> {
                     builder.parent("edu.neu") // 设置父包名
-                            .moduleName("cc")   //设置模块包名
+                            .moduleName("dbc")   //设置模块包名
                             .entity("entity")   //pojo 实体类包名
                             .service("service") //Service 包名
                             .serviceImpl("serviceImpl") // ***ServiceImpl 包名
@@ -45,16 +41,16 @@ public class Main {
                 })
                 //4、策略配置
                 .strategyConfig(builder -> {
-                    builder.addInclude("cc_customer", "cc_new_order","cc_operation","cc_order","cc_product","cc_refund","cc_stockout") // 设置需要生成的数据表名
-                            .addTablePrefix("cc_") // 设置过滤表前缀
+                    builder.addInclude("dbc_categary", "dbc_lack_record","dbc_product","dbc_purchase_record","dbc_refund","dbc_supplier") // 设置需要生成的数据表名
+                            .addTablePrefix("dbc_") // 设置过滤表前缀
                             //4.1、Mapper策略配置
                             .mapperBuilder()
                             .superClass(BaseMapper.class)   //设置父类
                             .formatMapperFileName("%sMapper")   //格式化 mapper 文件名称
                             .enableMapperAnnotation()       //开启 @Mapper 注解
                             .formatXmlFileName("%sXml") //格式化 Xml 文件名称
-                    //4.2、service 策略配置
-            	.serviceBuilder()
+                            //4.2、service 策略配置
+                            .serviceBuilder()
                             .formatServiceFileName("%sService") //格式化 service 接口文件名称，%s进行匹配表名，如 UserService
                             .formatServiceImplFileName("%sServiceImpl") //格式化 service 实现类文件名称，%s进行匹配表名，如 UserServiceImpl
                             //4.3、实体类策略配置
@@ -65,9 +61,9 @@ public class Main {
                             .columnNaming(NamingStrategy.underline_to_camel).formatFileName("%s")    //数据库表字段映射到实体的命名策略：下划线转驼峰命
                             .addTableFills(
                                     new Column("create_time", FieldFill.INSERT),
-                                    new Column("modify_time", FieldFill.INSERT_UPDATE),
+                                    new Column("update_time", FieldFill.INSERT_UPDATE),
                                     new Column("create_by", FieldFill.INSERT),
-                                    new Column("modify_by", FieldFill.INSERT_UPDATE)
+                                    new Column("update_by", FieldFill.INSERT_UPDATE)
                             )   //添加表字段填充，"create_time"字段自动填充为插入时间，"modify_time"字段自动填充为插入修改时间
                             .enableTableFieldAnnotation()       // 开启生成实体时生成字段注解
                             //4.4、Controller策略配置
@@ -81,5 +77,4 @@ public class Main {
                 //6、执行
                 .execute();
     }
-
 }
