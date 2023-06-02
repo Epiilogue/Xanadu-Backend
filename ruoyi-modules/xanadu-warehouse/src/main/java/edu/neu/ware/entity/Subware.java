@@ -51,5 +51,8 @@ public class Subware implements Serializable {
     @TableField("master")
     private Long master;
 
+    @ApiModelProperty("仓库城市位置")
+    @TableField("city")
+    private String city;
 
 }

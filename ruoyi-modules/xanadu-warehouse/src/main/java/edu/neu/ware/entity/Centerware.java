@@ -49,5 +49,9 @@ public class Centerware implements Serializable {
     @TableField("max_number")
     private Integer maxNumber;
 
+    @ApiModelProperty("仓库城市位置")
+    @TableField("city")
+    private String city;
+
 
 }

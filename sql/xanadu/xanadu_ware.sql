@@ -69,6 +69,7 @@ DROP TABLE IF EXISTS `ware_centerware`;
 CREATE TABLE `ware_centerware`  (
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '仓库名称',
   `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '中心仓库地址',
+  `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '仓库城市',
   `x` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库经度',
   `y` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库纬度',
   `warn_number` int(10) NULL DEFAULT NULL COMMENT '仓库预警值',
@@ -131,6 +132,7 @@ CREATE TABLE `ware_subware`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分库房ID',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房名称',
   `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房地址',
+  `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房城市',
   `x` double(20, 4) NULL DEFAULT NULL COMMENT '经度',
   `y` double(20, 4) NULL DEFAULT NULL COMMENT '纬度',
   `master` bigint(20) NULL DEFAULT NULL COMMENT '库管员',

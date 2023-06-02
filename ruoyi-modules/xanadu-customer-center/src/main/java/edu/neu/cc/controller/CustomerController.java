@@ -39,7 +39,7 @@ public class CustomerController {
             return AjaxResult.error("创建用户失败");
         }
         //返回结果
-        return AjaxResult.success("创建用户成功");
+        return AjaxResult.success(customer);
     }
 
     /**

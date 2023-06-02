@@ -42,7 +42,7 @@ public class CategaryController {
         //前端可能同时添加多个分类，交给前端构建,后端直接保存即可
         boolean saved = categaryService.save(categary);
         if (saved) {
-            return AjaxResult.success("添加成功");
+            return AjaxResult.success(categary);
         }
         return AjaxResult.error("添加失败");
     }

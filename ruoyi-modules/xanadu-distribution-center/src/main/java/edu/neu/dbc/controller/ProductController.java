@@ -55,7 +55,7 @@ public class ProductController {
     public AjaxResult add(@RequestBody Product product) {
         boolean saved = productService.save(product);
         if (saved) {
-            return AjaxResult.success("商品添加成功");
+            return AjaxResult.success(product);
         }
         return AjaxResult.error("商品添加失败");
     }
