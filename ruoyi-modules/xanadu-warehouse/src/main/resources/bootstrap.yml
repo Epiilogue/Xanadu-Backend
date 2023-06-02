@@ -1,0 +1,72 @@
+server:
+  port: 8005
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: xanadu-dbc
+  profiles:
+    # 环境配置
+    active: dev
+  autoconfigure:
+    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 127.0.0.1:8848
+  redis:
+    database: 0
+    host: r-2zejdda9dyam2q9f2zpd.redis.rds.aliyuncs.com
+    password: 'xgs:Xgs1150840779'
+    port: 6379
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: true
+        loginUsername: admin
+        loginPassword: 123456
+    dynamic:
+      druid:
+        initial-size: 5
+        min-idle: 5
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,slf4j
+      datasource:
+        # 主库数据源
+        master:
+          username: root
+          password: xgs1150840779
+          url: jdbc:mysql://localhost:3306/xanadu_ware?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          # 从库数据源
+          # slave:
+          # username:
+          # password:
+          # url:
+          # driver-class-name:
+
+mybatis-plus:
+  type-aliases-package: edu.neu.ware.entity
+  mapper-locations: classpath*:/mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+      logic-delete-field: deleted # 逻辑删除字段(默认为 deleted)
