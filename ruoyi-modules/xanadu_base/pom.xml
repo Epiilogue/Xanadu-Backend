@@ -10,9 +10,32 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <description>
-        存放公共实体类
+       工具集合类
     </description>
+    <groupId>edu.neu.xanadu</groupId>
     <artifactId>xanadu_base</artifactId>
+    <version>0.0.1</version>
+    <dependencies>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.7.10</version>
+        </dependency>
+
+    </dependencies>
+
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

@@ -1,4 +1,4 @@
-package edu.neu.xanadu.distributioncenter;
+package edu.neu.dbc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

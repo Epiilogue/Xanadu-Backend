@@ -1,10 +1,9 @@
 package edu.neu.cc.serviceImpl;
 
-import com.alibaba.cloud.commons.lang.StringUtils;
 import edu.neu.cc.entity.Customer;
 import edu.neu.cc.mapper.CustomerMapper;
-import edu.neu.cc.service.CustomerService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.neu.cc.service.CustomerService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,8 +15,6 @@ import org.springframework.stereotype.Service;
  * @since 2023-06-01 11:10:58
  */
 @Service
-public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> implements CustomerService {
-
-
+public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer>implements CustomerService {
 
 }

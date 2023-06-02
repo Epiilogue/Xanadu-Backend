@@ -1,4 +1,4 @@
-package edu.neu.xanadu.distributioncenter;
+package edu.neu.dbc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

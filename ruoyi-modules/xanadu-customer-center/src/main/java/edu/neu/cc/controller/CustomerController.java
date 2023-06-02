@@ -1,6 +1,7 @@
 package edu.neu.cc.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.cc.entity.Customer;
@@ -97,12 +98,16 @@ public class CustomerController extends BaseController {
     /*
     * 用户列表查询
     * */
-    @GetMapping("/list")
-    public AjaxResult list() {
-        //校验用户信息是否合法
-        return AjaxResult.success("查询用户成功", customerService.list());
+    @GetMapping("/list/{page}/{size}")
+    public AjaxResult list( @PathVariable("page") Long page, @PathVariable("size") Long size) {
+        //分页查询客户信息
+        Page<Customer> customerPage = customerService.page(new Page<>(page, size));
+        if (customerPage == null) {
+            return AjaxResult.error("查询用户列表失败");
+        }
+        //返回结果
+        return AjaxResult.success("查询用户列表成功", customerPage);
     }
-
 
 }
 

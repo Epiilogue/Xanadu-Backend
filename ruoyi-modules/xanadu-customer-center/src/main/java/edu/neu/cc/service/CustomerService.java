@@ -1,5 +1,6 @@
 package edu.neu.cc.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import edu.neu.cc.entity.Customer;
 import com.baomidou.mybatisplus.extension.service.IService;
 
