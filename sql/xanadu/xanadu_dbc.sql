@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 01/06/2023 23:36:55
+ Date: 02/06/2023 11:05:47
 */
 
 SET NAMES utf8mb4;
@@ -30,10 +30,10 @@ CREATE TABLE `dbc_categary`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for dbc_lack_list
+-- Table structure for dbc_lack_record
 -- ----------------------------
-DROP TABLE IF EXISTS `dbc_lack_list`;
-CREATE TABLE `dbc_lack_list`  (
+DROP TABLE IF EXISTS `dbc_lack_record`;
+CREATE TABLE `dbc_lack_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '缺货单ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `categary_id` int(10) NULL DEFAULT NULL COMMENT '分类ID',
@@ -64,14 +64,15 @@ CREATE TABLE `dbc_product`  (
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否已被删除',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
+  `picture` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品图片',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for dbc_purchase_list
+-- Table structure for dbc_purchase_record
 -- ----------------------------
-DROP TABLE IF EXISTS `dbc_purchase_list`;
-CREATE TABLE `dbc_purchase_list`  (
+DROP TABLE IF EXISTS `dbc_purchase_record`;
+CREATE TABLE `dbc_purchase_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '进货单ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `roduct_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
