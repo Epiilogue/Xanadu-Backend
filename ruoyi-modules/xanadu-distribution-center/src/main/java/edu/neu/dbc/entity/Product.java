@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -85,7 +86,7 @@ public class Product implements Serializable {
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
 
-    @ApiModelProperty("商品图片")
+    @ApiModelProperty("商品图片url")
     @TableField("picture")
     private String picture;
 

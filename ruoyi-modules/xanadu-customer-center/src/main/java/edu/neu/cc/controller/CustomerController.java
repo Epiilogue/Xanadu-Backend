@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/cc/customer")
-public class CustomerController extends BaseController {
+public class CustomerController {
 
     //提供后端增删改查接口
     @Autowired
@@ -78,6 +78,7 @@ public class CustomerController extends BaseController {
 
     /**
      * 查询用户信息
+     *
      * @param id
      * @return AjaxResult
      */
@@ -96,10 +97,10 @@ public class CustomerController extends BaseController {
     }
 
     /*
-    * 用户列表查询
-    * */
+     * 用户列表查询
+     * */
     @GetMapping("/list/{page}/{size}")
-    public AjaxResult list( @PathVariable("page") Long page, @PathVariable("size") Long size) {
+    public AjaxResult list(@PathVariable("page") Long page, @PathVariable("size") Long size) {
         //分页查询客户信息
         Page<Customer> customerPage = customerService.page(new Page<>(page, size));
         if (customerPage == null) {
@@ -107,6 +108,12 @@ public class CustomerController extends BaseController {
         }
         //返回结果
         return AjaxResult.success("查询用户列表成功", customerPage);
+    }
+
+    @GetMapping("/listAll")
+    public AjaxResult listAll() {
+        //查询客户信息
+        return AjaxResult.success("查询用户列表成功", customerService.list());
     }
 
 }

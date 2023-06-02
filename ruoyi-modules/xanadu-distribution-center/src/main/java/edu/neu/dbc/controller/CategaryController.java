@@ -4,9 +4,6 @@ package edu.neu.dbc.controller;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Categary;
 import edu.neu.dbc.service.CategaryService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +26,7 @@ public class CategaryController {
     @Autowired
     private CategaryService categaryService;
 
-    @GetMapping("/list")
+    @GetMapping("/listAll")
     @ApiOperation("获取所有分类")
     public AjaxResult list() {
         List<Categary> list = categaryService.list();
@@ -61,7 +58,7 @@ public class CategaryController {
         return AjaxResult.error("更新失败");
     }
 
-    @DeleteMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     @ApiOperation("删除分类")
     public AjaxResult delete(@PathVariable Integer id) {
         //前端可能同时添加多个分类，交给前端构建,后端直接保存即可
