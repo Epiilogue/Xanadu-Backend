@@ -12,5 +12,5 @@ import edu.neu.ware.entity.Subware;
  * @since 2023-06-02 03:42:21
  */
 public interface SubwareService extends IService<Subware> {
-
+     String validateSubware(Subware subware);
 }
