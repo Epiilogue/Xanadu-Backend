@@ -82,3 +82,33 @@ spring:
             - Path=/file/**
           filters:
             - StripPrefix=1
+        # 客服中心服务
+        - id: xanadu-cc
+          uri: lb://xanadu-cc
+          predicates:
+            - Path=/cc/**
+        # 配送中心服务
+        - id: xanadu-dbc
+          uri: lb://xanadu-dbc
+          predicates:
+            - Path=/dbc/**
+        # 仓库服务
+        - id: xanadu-ware
+          uri: lb://xanadu-ware
+          predicates:
+            - Path=/ware/**
+        # 调度服务
+        - id: xanadu-dpc
+          uri: lb://xanadu-dpc
+          predicates:
+            - Path=/dpc/**
+        # 财务服务
+        - id: xanadu-ac
+          uri: lb://xanadu-ac
+          predicates:
+             - Path=/ac/**
+          # 子站服务
+        - id: xanadu-sub
+          uri: lb://xanadu-sub
+          predicates:
+            - Path=/sub/**
