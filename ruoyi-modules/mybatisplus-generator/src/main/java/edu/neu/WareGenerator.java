@@ -16,7 +16,7 @@ public class WareGenerator {
 
     public static void main(String[] args) {
         //1、配置数据源
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/xanadu_cc", "root", "xgs1150840779")
+        FastAutoGenerator.create("jdbc:mysql://localhost:3306/xanadu_ware", "root", "xgs1150840779")
                 //2、全局配置
                 .globalConfig(builder -> {
                     builder.author("Gaosong Xu") // 设置作者名
@@ -30,7 +30,7 @@ public class WareGenerator {
                 //3、包配置
                 .packageConfig(builder -> {
                     builder.parent("edu.neu") // 设置父包名
-                            .moduleName("cc")   //设置模块包名
+                            .moduleName("ware")   //设置模块包名
                             .entity("entity")   //pojo 实体类包名
                             .service("service") //Service 包名
                             .serviceImpl("serviceImpl") // ***ServiceImpl 包名
@@ -42,8 +42,9 @@ public class WareGenerator {
                 })
                 //4、策略配置
                 .strategyConfig(builder -> {
-                    builder.addInclude("cc_customer", "cc_new_order","cc_operation","cc_order","cc_product","cc_refund","cc_stockout") // 设置需要生成的数据表名
-                            .addTablePrefix("cc_") // 设置过滤表前缀
+                    builder.addInclude("ware_centerware", "ware_center_input","ware_center_output",
+                                    "ware_center_storage_record","ware_subware","ware_sub_input","ware_sub_output","ware_sub_storage_record") // 设置需要生成的数据表名
+                            .addTablePrefix("ware_") // 设置过滤表前缀
                             //4.1、Mapper策略配置
                             .mapperBuilder()
                             .superClass(BaseMapper.class)   //设置父类

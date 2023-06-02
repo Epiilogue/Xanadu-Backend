@@ -11,24 +11,11 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 01/06/2023 23:37:13
+ Date: 02/06/2023 15:42:27
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for ware_center
--- ----------------------------
-DROP TABLE IF EXISTS `ware_center`;
-CREATE TABLE `ware_center`  (
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '仓库名称',
-  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '中心仓库地址',
-  `x` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库经度',
-  `y` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库纬度',
-  `warn_number` int(10) NULL DEFAULT NULL COMMENT '仓库预警值',
-  `max_number` int(10) NULL DEFAULT NULL COMMENT '仓库最高值'
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ware_center_input
@@ -61,10 +48,10 @@ CREATE TABLE `ware_center_output`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for ware_center_product
+-- Table structure for ware_center_storage_record
 -- ----------------------------
-DROP TABLE IF EXISTS `ware_center_product`;
-CREATE TABLE `ware_center_product`  (
+DROP TABLE IF EXISTS `ware_center_storage_record`;
+CREATE TABLE `ware_center_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_num` int(10) NULL DEFAULT NULL COMMENT '库存数量',
@@ -76,18 +63,17 @@ CREATE TABLE `ware_center_product`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for ware_sub
+-- Table structure for ware_centerware
 -- ----------------------------
-DROP TABLE IF EXISTS `ware_sub`;
-CREATE TABLE `ware_sub`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分库房ID',
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房名称',
-  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房地址',
-  `x` double(20, 4) NULL DEFAULT NULL COMMENT '经度',
-  `y` double(20, 4) NULL DEFAULT NULL COMMENT '纬度',
-  `master` bigint(20) NULL DEFAULT NULL COMMENT '库管员',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+DROP TABLE IF EXISTS `ware_centerware`;
+CREATE TABLE `ware_centerware`  (
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '仓库名称',
+  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '中心仓库地址',
+  `x` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库经度',
+  `y` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库纬度',
+  `warn_number` int(10) NULL DEFAULT NULL COMMENT '仓库预警值',
+  `max_number` int(10) NULL DEFAULT NULL COMMENT '仓库最高值'
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ware_sub_input
@@ -122,10 +108,10 @@ CREATE TABLE `ware_sub_output`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for ware_sub_product
+-- Table structure for ware_sub_storage_record
 -- ----------------------------
-DROP TABLE IF EXISTS `ware_sub_product`;
-CREATE TABLE `ware_sub_product`  (
+DROP TABLE IF EXISTS `ware_sub_storage_record`;
+CREATE TABLE `ware_sub_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
@@ -134,6 +120,20 @@ CREATE TABLE `ware_sub_product`  (
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for ware_subware
+-- ----------------------------
+DROP TABLE IF EXISTS `ware_subware`;
+CREATE TABLE `ware_subware`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分库房ID',
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房名称',
+  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房地址',
+  `x` double(20, 4) NULL DEFAULT NULL COMMENT '经度',
+  `y` double(20, 4) NULL DEFAULT NULL COMMENT '纬度',
+  `master` bigint(20) NULL DEFAULT NULL COMMENT '库管员',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
