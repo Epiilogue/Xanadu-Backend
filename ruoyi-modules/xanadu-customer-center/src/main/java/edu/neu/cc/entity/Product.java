@@ -3,7 +3,9 @@ package edu.neu.cc.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -11,7 +13,7 @@ import lombok.Setter;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -52,6 +54,10 @@ public class Product implements Serializable {
     @ApiModelProperty("商品大类")
     @TableField("product_categary")
     private String productCategary;
+
+    @ApiModelProperty("商品是否缺货")
+    @TableField("islack")
+    private Boolean islack;
 
 
 }

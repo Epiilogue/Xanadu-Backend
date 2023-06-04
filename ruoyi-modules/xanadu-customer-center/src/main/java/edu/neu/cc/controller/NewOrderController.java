@@ -15,6 +15,7 @@ import edu.neu.cc.service.*;
 import edu.neu.cc.vo.NewOrderVo;
 import edu.neu.cc.vo.ProductRecordsVo;
 import edu.neu.cc.vo.UnSubscribeVo;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
@@ -105,20 +106,21 @@ public class NewOrderController {
         if (productRecordsVo.getIsLack()) {
             //生成缺货记录
             Long finalUserId = userId;
+            Map<Long, Integer> lackMap = productRecordsVo.getProductIdNumberMap();
             products.forEach(product -> {
+                if (lackMap.containsKey(product.getProductId())) product.setIslack(true);
                 product.setOrderId(order.getId());
                 if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
-                if (productRecordsVo.getProductIdNumberMap().containsKey(product.getProductId())) {
+                if (lackMap.containsKey(product.getProductId())) {
                     //生成缺货记录
                     Stockout stockout = new Stockout();
                     stockout.setProductId(product.getProductId());
                     stockout.setOrderId(order.getId());
-                    stockout.setNeedNumbers(productRecordsVo.getProductIdNumberMap().get(product.getProductId()));
+                    stockout.setNeedNumbers(lackMap.get(product.getProductId()));
                     stockout.setCreateBy(finalUserId);
                     stockout.setStatus(StockoutConstant.STOCKOUT);
                     //插入缺货记录
-                    if (!stockoutService.save(stockout)) throw new ServiceException("生成缺货记录异常");
-
+                    stockoutService.save(stockout);
                 }
             });
         }
@@ -130,7 +132,7 @@ public class NewOrderController {
         operation.setCustomerId(order.getCustomerId());
         operation.setTotalAmount(order.getTotalAmount());
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
-        if (!operationService.save(operation)) throw new ServiceException("生成操作记录异常");
+        operationService.save(operation);
 
         //填充newOrderID等字段,返回给前端
         newOrderVo.setId(newOrder.getId());
@@ -265,9 +267,11 @@ public class NewOrderController {
 
         orderService.updateById(order);//更新原订单
         //更新原订单的商品记录
+        Map<Long, Integer> idNumberMap = result.getProductIdNumberMap();
         productIdNumberMap.forEach((productId, number) -> {
             Product product = productService.getOne(new QueryWrapper<Product>().eq("order_id", orderId).eq("product_id", productId));
             product.setNumber(product.getNumber() - number);
+            if (idNumberMap.containsKey(productId)) product.setIslack(true);
             if (product.getNumber() == 0) {
                 productService.removeById(product.getId());
             } else {
@@ -277,6 +281,7 @@ public class NewOrderController {
         //退订成功
         return AjaxResult.success("退订成功");
     }
+
 
 
 }
