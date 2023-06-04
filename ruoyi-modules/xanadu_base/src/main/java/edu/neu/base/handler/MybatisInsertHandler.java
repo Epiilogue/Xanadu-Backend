@@ -18,6 +18,7 @@ public class MybatisInsertHandler implements MetaObjectHandler {
         log.info("start insert fill ....");
         this.strictInsertFill(metaObject, "createTime", Date.class, new Date()); // 起始版本 3.3.0(推荐使用)
         this.strictInsertFill(metaObject, "updateTime", Date.class, new Date()); // 起始版本 3.3.0(推荐使用)
+
     }
 
     @Override

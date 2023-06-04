@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Date;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +26,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("cc_stockout")
+@Data
 @ApiModel(value = "Stockout对象", description = "")
 public class Stockout implements Serializable {
 
@@ -41,9 +44,6 @@ public class Stockout implements Serializable {
     @TableField("product_id")
     private Long productId;
 
-    @ApiModelProperty("缺货商品当前数量")
-    @TableField("now_numbers")
-    private Integer nowNumbers;
 
     @ApiModelProperty("缺货商品数量")
     @TableField("need_numbers")

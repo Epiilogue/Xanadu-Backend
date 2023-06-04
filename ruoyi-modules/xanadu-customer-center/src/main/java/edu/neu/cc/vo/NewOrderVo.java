@@ -1,38 +1,45 @@
-package edu.neu.cc.entity;
+package edu.neu.cc.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+
+import com.baomidou.mybatisplus.annotation.*;
+import edu.neu.cc.entity.Product;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
- * <p>
- * 
- * </p>
- *
- * @author Gaosong Xu
- * @since 2023-06-01 11:10:58
+ * 接受前端参数
  */
-@Getter
-@Setter
-@TableName("cc_new_order")
-@ApiModel(value = "NewOrder对象", description = "")
-public class NewOrder extends Order implements Serializable{
-
+@Data
+public class NewOrderVo  implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("对应的order主表ID")
+    @ApiModelProperty("记录ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    @ApiModelProperty("操作人ID")
+    @TableField("user_id")
+    private Long userId;
+
+    @ApiModelProperty("客户ID")
+    @TableField("customer_id")
+    private Long customerId;
+
+    @ApiModelProperty("创建日期")
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private Date createTime;
+
+    @ApiModelProperty("订单类型")
+    @TableField("order_type")
+    private String orderType;
+
+    @ApiModelProperty("要求完成日期")
+    @TableField("deadline")
+    private Date deadline;
 
     @ApiModelProperty("订单状态")
     @TableField("status")
@@ -79,6 +86,7 @@ public class NewOrder extends Order implements Serializable{
     @ApiModelProperty("商品列表")
     @TableField(exist = false)
     private List<Product> products;
+
 
 
 }

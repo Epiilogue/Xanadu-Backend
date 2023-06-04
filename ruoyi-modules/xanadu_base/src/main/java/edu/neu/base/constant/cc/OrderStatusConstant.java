@@ -1,4 +1,4 @@
-package edu.neu.base.constant;
+package edu.neu.base.constant.cc;
 
 /**
  * 订单的状态常量，使用String类型明文存储

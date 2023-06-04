@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: xanadu-dbc
+    name: xanadu-ware
   profiles:
     # 环境配置
     active: dev
