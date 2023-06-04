@@ -17,11 +17,7 @@ import edu.neu.cc.service.RefundService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -82,6 +78,21 @@ public class OrderController {
         ajaxResult.put("productList", productList);
         return ajaxResult;
     }
+
+
+    @ApiOperation("修改订单状态")
+    @PostMapping("/update/{orderId}/{status}")
+    public AjaxResult updateOrderStatus(
+            @ApiParam(name = "orderId", value = "订单ID") @PathVariable Long orderId,
+            @ApiParam(name = "status", value = "订单状态") @PathVariable String status) {
+        //根据订单ID获取订单信息
+        Order order = orderService.getById(orderId);
+        if (order == null) return AjaxResult.error("订单不存在");
+        order.setStatus(status);
+        orderService.updateById(order);
+        return AjaxResult.success();
+    }
+
 
 
 }
