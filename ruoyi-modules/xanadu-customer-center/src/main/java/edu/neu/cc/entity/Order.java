@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -14,7 +16,7 @@ import lombok.Setter;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -52,5 +54,17 @@ public class Order implements Serializable {
     @TableField("deadline")
     private Date deadline;
 
+    @ApiModelProperty("涉及的金额")
+    @TableField("total_amount")
+    private Double totalAmount;
+
+
+    @ApiModelProperty("涉及的商品数量")
+    @TableField("numbers")
+    private Integer numbers;
+
+    @ApiModelProperty("订单状态")
+    @TableField("status")
+    private String status;
 
 }

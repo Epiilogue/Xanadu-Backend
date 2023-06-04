@@ -26,17 +26,13 @@ import lombok.Setter;
 @Setter
 @TableName("cc_new_order")
 @ApiModel(value = "NewOrder对象", description = "")
-public class NewOrder extends Order implements Serializable{
+public class NewOrder  implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("对应的order主表ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    @ApiModelProperty("订单状态")
-    @TableField("status")
-    private String status;
 
     @ApiModelProperty("电话号码")
     @TableField("telephone")
@@ -62,10 +58,6 @@ public class NewOrder extends Order implements Serializable{
     @TableField("receiver_name")
     private String receiverName;
 
-    @ApiModelProperty("支付总价")
-    @TableField("total_amount")
-    private Double totalAmount;
-
     @ApiModelProperty("分站ID")
     @TableField("substation_id")
     private Long substationId;
@@ -74,7 +66,6 @@ public class NewOrder extends Order implements Serializable{
     @TableField("deleted")
     @TableLogic
     private Boolean deleted;
-
 
     @ApiModelProperty("商品列表")
     @TableField(exist = false)

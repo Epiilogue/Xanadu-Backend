@@ -5,6 +5,8 @@ package edu.neu.base.constant.cc;
  */
 public class OrderStatusConstant {
     //可分配
+    public static final String INVALID = "无效";
+    //可分配
     public static final String CAN_BE_ALLOCATED = "可分配";
     //缺货
     public static final String OUT_OF_STOCK = "缺货";

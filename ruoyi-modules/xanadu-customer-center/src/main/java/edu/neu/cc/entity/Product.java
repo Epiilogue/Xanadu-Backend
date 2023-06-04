@@ -25,6 +25,10 @@ public class Product implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @ApiModelProperty("对应的记录ID")
+    @TableId("id")
+    private Long id;
+
     @ApiModelProperty("对应的订单ID号")
     @TableId("order_id")
     private Long orderId;

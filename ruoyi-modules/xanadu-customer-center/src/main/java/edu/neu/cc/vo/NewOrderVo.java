@@ -88,5 +88,10 @@ public class NewOrderVo  implements Serializable {
     private List<Product> products;
 
 
+    @ApiModelProperty("涉及的商品数量")
+    @TableField("numbers")
+    private Integer numbers;
+
+
 
 }

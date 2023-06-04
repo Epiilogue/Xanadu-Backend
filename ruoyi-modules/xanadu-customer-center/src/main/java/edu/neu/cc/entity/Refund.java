@@ -34,14 +34,6 @@ public class Refund implements Serializable {
     @TableField("order_id")
     private Long orderId;
 
-    @ApiModelProperty("商品ID")
-    @TableField("product_id")
-    private Long productId;
-
-    @ApiModelProperty("操作数量")
-    @TableField("numbers")
-    private Integer numbers;
-
     @ApiModelProperty("原因")
     @TableField("reason")
     private String reason;
@@ -49,10 +41,6 @@ public class Refund implements Serializable {
     @ApiModelProperty("操作类型(退货，换货)")
     @TableField("operation_type")
     private Integer operationType;
-
-    @ApiModelProperty("退换货状态")
-    @TableField("status")
-    private String status;
 
 
 }

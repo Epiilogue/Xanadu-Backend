@@ -9,4 +9,6 @@ public class OperationTypeConstant {
     public static final String UNSUBSCRIBE = "退订";
     //换货
     public static final String EXCHANGE = "换货";
+    //撤销
+    public static final String CANCEL = "撤销";
 }
