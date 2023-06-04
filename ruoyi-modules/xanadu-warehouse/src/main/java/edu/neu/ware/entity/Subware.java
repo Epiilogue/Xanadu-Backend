@@ -17,7 +17,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author Gaosong Xu
- * @since 2023-06-02 03:42:21
+ * @since 2023-06-04 05:08:31
  */
 @Getter
 @Setter
@@ -51,8 +51,9 @@ public class Subware implements Serializable {
     @TableField("master")
     private Long master;
 
-    @ApiModelProperty("仓库城市位置")
+    @ApiModelProperty("分库城市地址")
     @TableField("city")
     private String city;
+
 
 }

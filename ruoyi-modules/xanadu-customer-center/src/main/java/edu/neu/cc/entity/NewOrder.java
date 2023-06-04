@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -60,26 +62,6 @@ public class NewOrder implements Serializable {
     @TableField("receiver_name")
     private String receiverName;
 
-    @ApiModelProperty("商品大类")
-    @TableField("product_categray")
-    private String productCategray;
-
-    @ApiModelProperty("商品ID")
-    @TableField("product_id")
-    private String productId;
-
-    @ApiModelProperty("购买商品数量")
-    @TableField("product_numbers")
-    private Integer productNumbers;
-
-    @ApiModelProperty("商品名称")
-    @TableField("product_name")
-    private String productName;
-
-    @ApiModelProperty("商品单价")
-    @TableField("single_amount")
-    private Double singleAmount;
-
     @ApiModelProperty("支付总价")
     @TableField("total_amount")
     private Double totalAmount;
@@ -92,6 +74,11 @@ public class NewOrder implements Serializable {
     @TableField("deleted")
     @TableLogic
     private Boolean deleted;
+
+
+    @ApiModelProperty("商品列表")
+    @TableField(exist = false)
+    private List<Product> products;
 
 
 }

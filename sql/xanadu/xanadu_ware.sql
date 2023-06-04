@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 02/06/2023 15:42:27
+ Date: 04/06/2023 17:09:47
 */
 
 SET NAMES utf8mb4;
@@ -54,11 +54,14 @@ DROP TABLE IF EXISTS `ware_center_storage_record`;
 CREATE TABLE `ware_center_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `product_num` int(10) NULL DEFAULT NULL COMMENT '库存数量',
+  `allocate_able_num` int(10) NULL DEFAULT NULL COMMENT '可分配商品数量',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `allocated_num` int(11) NULL DEFAULT NULL COMMENT '已分配的商品数量',
+  `refund_num` int(10) NULL DEFAULT NULL COMMENT '退货的商品数量',
+  `total_num` int(11) NULL DEFAULT NULL COMMENT '总计商品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -67,14 +70,16 @@ CREATE TABLE `ware_center_storage_record`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `ware_centerware`;
 CREATE TABLE `ware_centerware`  (
+  `id` bigint(25) NOT NULL AUTO_INCREMENT COMMENT '中心仓库id',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '仓库名称',
   `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '中心仓库地址',
-  `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '仓库城市',
   `x` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库经度',
   `y` double(20, 4) NULL DEFAULT NULL COMMENT '中心仓库纬度',
   `warn_number` int(10) NULL DEFAULT NULL COMMENT '仓库预警值',
-  `max_number` int(10) NULL DEFAULT NULL COMMENT '仓库最高值'
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+  `max_number` int(10) NULL DEFAULT NULL COMMENT '仓库最高值',
+  `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '中心仓库城市地址',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ware_sub_input
@@ -116,11 +121,14 @@ CREATE TABLE `ware_sub_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `product_num` int(10) NULL DEFAULT NULL COMMENT '库存数量',
+  `allocate_able_num` int(10) NULL DEFAULT NULL COMMENT '可分配数量',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `allocated_num` int(10) NULL DEFAULT NULL COMMENT '已分配数量',
+  `refund_num` int(10) NULL DEFAULT NULL COMMENT '退货产品数量',
+  `total_num` int(10) NULL DEFAULT NULL COMMENT '总计产品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -132,10 +140,10 @@ CREATE TABLE `ware_subware`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分库房ID',
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房名称',
   `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房地址',
-  `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房城市',
   `x` double(20, 4) NULL DEFAULT NULL COMMENT '经度',
   `y` double(20, 4) NULL DEFAULT NULL COMMENT '纬度',
   `master` bigint(20) NULL DEFAULT NULL COMMENT '库管员',
+  `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '分库城市地址',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

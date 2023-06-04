@@ -1,7 +1,7 @@
 package edu.neu.ware.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import edu.neu.ware.entity.SubInput;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
  * </p>
  *
  * @author Gaosong Xu
- * @since 2023-06-02 03:42:21
+ * @since 2023-06-04 05:08:31
  */
 @Mapper
 public interface SubInputMapper extends BaseMapper<SubInput> {

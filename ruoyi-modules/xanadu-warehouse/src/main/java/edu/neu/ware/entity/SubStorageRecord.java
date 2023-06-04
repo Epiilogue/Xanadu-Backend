@@ -15,7 +15,7 @@ import java.util.Date;
  * </p>
  *
  * @author Gaosong Xu
- * @since 2023-06-02 03:42:21
+ * @since 2023-06-04 05:08:31
  */
 @Getter
 @Setter
@@ -37,9 +37,9 @@ public class SubStorageRecord implements Serializable {
     @TableField("product_id")
     private Long productId;
 
-    @ApiModelProperty("库存数量")
-    @TableField("product_num")
-    private Integer productNum;
+    @ApiModelProperty("可分配数量")
+    @TableField("allocate_able_num")
+    private Integer allocateAbleNum;
 
     @ApiModelProperty("商品名称")
     @TableField("product_name")
@@ -56,6 +56,18 @@ public class SubStorageRecord implements Serializable {
     @ApiModelProperty("更新时间")
     @TableField("update_time")
     private Date updateTime;
+
+    @ApiModelProperty("已分配数量")
+    @TableField("allocated_num")
+    private Integer allocatedNum;
+
+    @ApiModelProperty("退货产品数量")
+    @TableField("refund_num")
+    private Integer refundNum;
+
+    @ApiModelProperty("总计产品数量")
+    @TableField("total_num")
+    private Integer totalNum;
 
 
 }
