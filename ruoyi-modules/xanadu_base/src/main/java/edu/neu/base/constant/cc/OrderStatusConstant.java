@@ -10,4 +10,6 @@ public class OrderStatusConstant {
     public static final String CAN_BE_ALLOCATED = "可分配";
     //缺货
     public static final String OUT_OF_STOCK = "缺货";
+    //已完成
+    public static final String COMPLETED = "已完成";
 }

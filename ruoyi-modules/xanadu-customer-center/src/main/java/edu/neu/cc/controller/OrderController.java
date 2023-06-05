@@ -4,6 +4,7 @@ package edu.neu.cc.controller;
 import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.common.core.constant.HttpStatus;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.OperationTypeConstant;
 import edu.neu.cc.entity.NewOrder;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- *
  * @author Gaosong Xu
  * @since 2023-06-01 11:10:58
  */
@@ -61,7 +61,8 @@ public class OrderController {
             @ApiParam(name = "orderId", value = "订单ID") @PathVariable Long orderId,
             @ApiParam(name = "orderType", value = "订单类型") @PathVariable String orderType) {
         //根据不同的订单信息回显不同的数据
-        AjaxResult ajaxResult = new AjaxResult();
+        AjaxResult ajaxResult = new AjaxResult(HttpStatus.SUCCESS, "查询成功");
+
         if (OperationTypeConstant.ORDER.equals(orderType)) {
             //回显neworder信息以及对应的商品信息
             NewOrder newOrder = newOrderService.getById(orderId);
@@ -92,7 +93,6 @@ public class OrderController {
         orderService.updateById(order);
         return AjaxResult.success();
     }
-
 
 
 }

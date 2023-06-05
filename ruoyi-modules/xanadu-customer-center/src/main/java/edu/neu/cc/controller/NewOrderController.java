@@ -81,7 +81,10 @@ public class NewOrderController {
         Order order = new Order();
         BeanUtils.copyProperties(newOrderVo, order);
         List<Product> products = newOrder.getProducts();
-        if (products == null || products.size() == 0) return AjaxResult.error("订单中商品不能为空");
+        //过滤掉数量为0的商品
+        products= products.stream().filter(p->p.getNumber()>0).collect(Collectors.toList());
+        if (products.size() == 0) return AjaxResult.error("订单中商品数量不合法");
+
         //将商品ID和数量封装成键值对
         Map<Long, Integer> productIdNumberMap = products.stream().collect(Collectors.toMap(Product::getProductId, Product::getNumber));
         //调用远程接口，检查商品是否缺货
@@ -89,11 +92,9 @@ public class NewOrderController {
         if (productRecordsVo == null) return AjaxResult.error("商品信息不能为空");
         if (productRecordsVo.getIsLack()) order.setStatus(OrderStatusConstant.OUT_OF_STOCK);
         else order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
-
         order.setOrderType(OperationTypeConstant.ORDER);
         //插入订单数据库
         orderService.save(order);
-
         newOrder.setId(order.getId());
         newOrderService.save(newOrder);
 
@@ -249,21 +250,9 @@ public class NewOrderController {
         });
         //发起远程调用，获取新的状态
         ProductRecordsVo result = wareCenterStorageRecordClient.check(productIdNumberMap);
-
         //删除所有原来的缺货记录
         stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId));
         if (!result.getIsLack()) order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
-        else {
-            //插入新的缺货记录
-            Map<Long, Integer> lackMap = result.getProductIdNumberMap();
-            lackMap.forEach((productId, number) -> {
-                Stockout stockout = new Stockout();
-                stockout.setOrderId(orderId);
-                stockout.setProductId(productId);
-                stockout.setNeedNumbers(number);
-                stockoutService.save(stockout);
-            });
-        }
 
         orderService.updateById(order);//更新原订单
         //更新原订单的商品记录

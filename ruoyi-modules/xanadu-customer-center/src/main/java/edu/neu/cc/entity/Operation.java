@@ -9,7 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -20,10 +22,10 @@ import lombok.Setter;
  * @author Gaosong Xu
  * @since 2023-06-01 11:10:58
  */
-@Getter
-@Setter
 @TableName("cc_operation")
+@Data
 @ApiModel(value = "Operation对象", description = "")
+@NoArgsConstructor
 public class Operation implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -60,5 +62,12 @@ public class Operation implements Serializable {
     @TableField("total_amount")
     private Double totalAmount;
 
-
+    public Operation(Long userId, Long customerId, Long orderId, String operatorType, Integer numbers, Double totalAmount) {
+        this.userId = userId;
+        this.customerId = customerId;
+        this.orderId = orderId;
+        this.operatorType = operatorType;
+        this.numbers = numbers;
+        this.totalAmount = totalAmount;
+    }
 }

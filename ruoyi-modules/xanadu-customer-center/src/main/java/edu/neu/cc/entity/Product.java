@@ -59,5 +59,13 @@ public class Product implements Serializable {
     @TableField("islack")
     private Boolean islack;
 
+    @ApiModelProperty("商品能否退货")
+    @TableField("refund_able")
+    private Boolean refundAble;
+
+    @ApiModelProperty("商品能否换货")
+    @TableField("change_able")
+    private Boolean changeAble;
+
 
 }

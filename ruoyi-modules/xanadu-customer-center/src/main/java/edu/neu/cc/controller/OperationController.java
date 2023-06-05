@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/cc/operation")
 public class OperationController {
     //需要提供方法，按照用户id查询所有的操作记录
-
     @Autowired
     private OperationService operationService;
 
