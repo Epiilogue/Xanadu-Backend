@@ -129,7 +129,7 @@ public class RefundController {
                     stockout.setOrderId(order.getId());
                     stockout.setNeedNumbers(lackMap.get(product.getProductId()));
                     stockout.setCreateBy(finalUserId);
-                    stockout.setStatus(StockoutConstant.COMMITTED);
+                    stockout.setStatus(StockoutConstant.UNCOMMITTED);
                     //插入缺货记录
                     stockoutService.save(stockout);
                 }

@@ -13,4 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface SubwareService extends IService<Subware> {
 
+
+    String validateSubware(Subware subware);
 }

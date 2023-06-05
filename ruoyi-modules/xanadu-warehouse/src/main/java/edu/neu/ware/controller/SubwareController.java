@@ -3,6 +3,8 @@ package edu.neu.ware.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+
+import edu.neu.ware.entity.Subware;
 import edu.neu.ware.service.SubwareService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

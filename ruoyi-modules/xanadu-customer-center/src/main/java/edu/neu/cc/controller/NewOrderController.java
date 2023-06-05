@@ -79,7 +79,7 @@ public class NewOrderController {
         BeanUtils.copyProperties(newOrderVo, order);
         List<Product> products = newOrder.getProducts();
         //过滤掉数量为0的商品
-        products= products.stream().filter(p->p.getNumber()>0).collect(Collectors.toList());
+        products = products.stream().filter(p -> p.getNumber() > 0).collect(Collectors.toList());
         if (products.size() == 0) return AjaxResult.error("订单中商品数量不合法");
 
         //将商品ID和数量封装成键值对
@@ -116,7 +116,7 @@ public class NewOrderController {
                     stockout.setOrderId(order.getId());
                     stockout.setNeedNumbers(lackMap.get(product.getProductId()));
                     stockout.setCreateBy(finalUserId);
-                    stockout.setStatus(StockoutConstant.COMMITTED);
+                    stockout.setStatus(StockoutConstant.UNCOMMITTED);
                     //插入缺货记录
                     stockoutService.save(stockout);
                 }
@@ -163,8 +163,8 @@ public class NewOrderController {
         newOrderService.removeById(orderId);
         //删除商品记录
         productService.remove(new QueryWrapper<Product>().eq("order_id", orderId));
-        //删除缺货记录
-        stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId));
+        //删除缺货记录，只有状态为未提交才允许删除
+        stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
         //生成操作记录,记录订单撤销操作
         Operation operation = new Operation();
         operation.setOrderId(orderId);
@@ -267,7 +267,6 @@ public class NewOrderController {
         //退订成功
         return AjaxResult.success("退订成功");
     }
-
 
 
 }
