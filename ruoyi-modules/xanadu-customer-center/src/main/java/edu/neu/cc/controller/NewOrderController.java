@@ -2,7 +2,6 @@ package edu.neu.cc.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.security.utils.SecurityUtils;
@@ -15,12 +14,10 @@ import edu.neu.cc.service.*;
 import edu.neu.cc.vo.NewOrderVo;
 import edu.neu.cc.vo.ProductRecordsVo;
 import edu.neu.cc.vo.UnSubscribeVo;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -119,7 +116,7 @@ public class NewOrderController {
                     stockout.setOrderId(order.getId());
                     stockout.setNeedNumbers(lackMap.get(product.getProductId()));
                     stockout.setCreateBy(finalUserId);
-                    stockout.setStatus(StockoutConstant.STOCKOUT);
+                    stockout.setStatus(StockoutConstant.COMMITTED);
                     //插入缺货记录
                     stockoutService.save(stockout);
                 }

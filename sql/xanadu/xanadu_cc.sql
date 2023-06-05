@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 04/06/2023 23:24:01
+ Date: 05/06/2023 10:44:23
 */
 
 SET NAMES utf8mb4;
@@ -99,6 +99,8 @@ CREATE TABLE `cc_product`  (
   `price` double(10, 2) NULL DEFAULT NULL COMMENT '商品单价',
   `product_categary` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品大类',
   `islack` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否缺货',
+  `refund_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以退货',
+  `change_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以换货',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -110,7 +112,7 @@ CREATE TABLE `cc_refund`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '对应的order表记录ID',
   `order_id` bigint(20) NULL DEFAULT NULL COMMENT '操作订单ID',
   `reason` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '原因',
-  `operation_type` int(10) NULL DEFAULT NULL COMMENT '操作类型(退货，换货，退订)',
+  `operation_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '操作类型(退货，换货，退订)',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '退换货状态',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE
