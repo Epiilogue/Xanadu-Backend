@@ -40,7 +40,7 @@ public class Refund implements Serializable {
 
     @ApiModelProperty("操作类型(退货，换货)")
     @TableField("operation_type")
-    private Integer operationType;
+    private String operationType;
 
 
 }

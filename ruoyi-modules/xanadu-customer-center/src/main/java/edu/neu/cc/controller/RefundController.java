@@ -106,6 +106,7 @@ public class RefundController {
         //插入订单数据库
         orderService.save(order);
         refund.setOrderId(order.getId());
+        refund.setOperationType(OperationTypeConstant.RETURN);
         refundService.save(refund);
         Long userId = SecurityUtils.getUserId();
         //一开始是空，可以设置默认值
@@ -120,6 +121,7 @@ public class RefundController {
                 if (lackMap.containsKey(product.getProductId())) product.setIslack(true);
                 product.setOrderId(order.getId());
                 if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
+
                 if (lackMap.containsKey(product.getProductId())) {
                     //生成缺货记录
                     Stockout stockout = new Stockout();
@@ -134,8 +136,8 @@ public class RefundController {
             });
         }
         //生成操作记录,记录订单创建操作
-        Operation operation = new Operation(order.getId(),order.getCustomerId(),order.getId(),
-                OperationTypeConstant.EXCHANGE,order.getNumbers(),order.getTotalAmount());
+        Operation operation = new Operation(order.getId(), order.getCustomerId(), order.getId(),
+                OperationTypeConstant.EXCHANGE, order.getNumbers(), order.getTotalAmount());
         operationService.save(operation);
         //填充newOrderID等字段,返回给前端
         refundVo.setId(order.getId());
@@ -147,6 +149,53 @@ public class RefundController {
     }
 
     //退货申请，创建退货订单，插入商品，直接可分配状态
+    @PostMapping("/refund")
+    @ApiOperation("退货申请")
+    public AjaxResult refund(@RequestBody RefundVo refundVo) {
+        //1.前端已经拿到了原来的订单信息，并且完成了校验不允许传入非换货商品，并且完成了订单状态的检查
+        // 只有完成状态的订单才允许换货
+        //客户希望创建订单，检查对应的商品是否缺货，如果缺货则生成缺货记录，否则订单状态为可分配
+        if (refundVo == null) return AjaxResult.error("退货信息不能为空");
+
+        Order preOrder = orderService.getById(refundVo.getOrderId());
+        if (preOrder == null) return AjaxResult.error("原订单不存在");
+        //检查订单状态
+        if (!preOrder.getStatus().equals(OrderStatusConstant.COMPLETED))
+            return AjaxResult.error("原订单状态不是已完成，不能退货");
+        //检查提交的商品是否都允许退货
+
+        Order order = new Order();
+        Refund refund = new Refund();
+        BeanUtils.copyProperties(refundVo, order);
+        BeanUtils.copyProperties(refundVo, refund);//属性注入
+
+        List<Product> products = refundVo.getProducts();
+        products = products.stream().filter(p -> p.getNumber() > 0).collect(Collectors.toList());
+        if (products.size() == 0) return AjaxResult.error("退货商品数量为0");
+        products.forEach(p -> {
+            if (!p.getRefundAble()) throw new ServiceException("存在不允许退货的商品");
+        });
+
+        products.forEach(p -> {
+            //插入商品记录
+            p.setOrderId(order.getId());
+            if (!productService.save(p)) throw new ServiceException("插入商品记录异常");
+        });
+
+        order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+        order.setOrderType(OperationTypeConstant.RETURN);
+        //插入订单数据库
+        orderService.save(order);
+        refund.setOrderId(order.getId());
+        refund.setOperationType(OperationTypeConstant.RETURN);
+        refundService.save(refund);
+
+        refundVo.setId(order.getId());
+        refundVo.setCreateTime(order.getCreateTime());
+        refundVo.setStatus(order.getStatus());
+        return AjaxResult.success("创建退货订单成功", refundVo);
+    }
+
 
 }
 
