@@ -95,5 +95,11 @@ public class OrderController {
     }
 
 
+    @ApiOperation("根据子站ID查询订单数量")
+    @GetMapping("/count/{substationId}")
+    public Boolean getOrderCountBySubstationId(@PathVariable Long substationId) {
+        int count = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
+        return count > 0;
+    }
 }
 
