@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.neu.cc.mapper.OperationResultMapper">
+
+
+    <select id="listOperationResult" resultType="edu.neu.cc.vo.OperationResultVo" >
+        select cp.product_categary       as productType,
+               cp.product_name           as productName,
+               sum(numbers)              as number,
+               count(1)                  as count,
+               sum(cp.price * cp.number) as amount
+        from cc_order
+                 join cc_product cp
+                      on cc_order.id = cp.order_id
+        where cc_order.create_time between #{startTime} and #{endTime}
+          and cc_order.status = #{status}
+          and cc_order.user_id = #{userId}
+        group by cp.product_categary, cp.product_name
+    </select>
+</mapper>

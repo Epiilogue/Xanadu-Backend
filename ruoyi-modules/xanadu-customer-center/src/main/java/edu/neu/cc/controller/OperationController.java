@@ -45,6 +45,17 @@ public class OperationController {
         return AjaxResult.success(operationService.page(new Page<>(pageNum, pageSize)));
     }
 
+    //查找所有客服的工作量列表，需要按照时间筛选，需要按照id进行分组group
+    @GetMapping("/statics/{pageNum}/{pageSize}")
+    @ApiOperation("查找所有客服的工作量列表，需要按照时间筛选，需要按照id进行分组group")
+    public AjaxResult statics(@RequestParam("startTime") String startTime,
+                                @RequestParam("endTime") String endTime,
+                              @PathVariable(value = "pageNum", required = false) Integer pageNum,
+                              @PathVariable(value = "pageSize", required = false) Integer pageSize) {
+        return null;
+
+    }
+
 
 
 }
