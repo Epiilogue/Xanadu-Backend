@@ -37,7 +37,7 @@ public class CategaryServiceImpl extends ServiceImpl<CategaryMapper, Categary> i
             return null;
         }
         return list.stream().filter(categary -> categary.getLevel() == 1).peek(categary -> {
-            categary.setChildrenCategary(this.getChildrenCategary(categary.getId()));
+            categary.setChildren(this.getChildrenCategary(categary.getId()));
         }).collect(Collectors.toList());
     }
 }

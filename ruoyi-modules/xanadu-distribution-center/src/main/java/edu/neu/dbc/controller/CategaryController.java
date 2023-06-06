@@ -29,7 +29,7 @@ public class CategaryController {
     @GetMapping("/listAll")
     @ApiOperation("获取所有分类")
     public AjaxResult list() {
-        List<Categary> list = categaryService.list();
+        List<Categary> list = categaryService.listTree();
         if (list == null || list.size() == 0) {
             return AjaxResult.error("没有分类");
         }

@@ -96,5 +96,9 @@ public class Product implements Serializable {
     @TableField("safe_stock")
     private Integer safeStock;
 
+    @ApiModelProperty("货物最大库存量")
+    @TableField("max_count")
+    private Integer maxCount;
+
 
 }

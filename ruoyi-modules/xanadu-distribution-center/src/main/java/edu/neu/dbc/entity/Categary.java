@@ -51,7 +51,7 @@ public class Categary implements Serializable {
 
     @TableField(exist = false)
     @ApiModelProperty("子节点")
-    private List<Categary> childrenCategary;
+    private List<Categary> children;
 
 
 }
