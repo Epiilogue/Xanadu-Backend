@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 02/06/2023 11:05:47
+ Date: 06/06/2023 16:12:20
 */
 
 SET NAMES utf8mb4;
@@ -43,6 +43,7 @@ CREATE TABLE `dbc_lack_record`  (
   `need_count` int(10) NULL DEFAULT NULL COMMENT '缺货数量',
   `input_count` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '进货数量',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建日期',
+  `source` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '缺货来源',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -65,6 +66,8 @@ CREATE TABLE `dbc_product`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   `picture` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品图片',
+  `safe_stock` int(10) NULL DEFAULT NULL COMMENT '安全库存量',
+  `max_count` int(10) NULL DEFAULT NULL COMMENT '货物最大库存量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
