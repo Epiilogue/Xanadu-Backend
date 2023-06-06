@@ -13,5 +13,6 @@ public class OperationResultVo implements java.io.Serializable {
     private Integer count; //笔数
     private Integer number;//数量
     private Double amount;//金额
-   /* private String operationType;//操作类型*/
+    private String orderType;//订单类型
+    /* private String operationType;//操作类型*/
 }

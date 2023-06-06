@@ -2,7 +2,7 @@ package edu.neu.base.constant.cc;
 
 public class OperationTypeConstant {
     //订货
-    public static final String ORDER = "订货";
+    public static final String ORDER = "新订";
     //退货
     public static final String RETURN = "退货";
     //退订
