@@ -2,6 +2,7 @@ package edu.neu.ware.controller;
 
 
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.ware.entity.Centerware;
 import edu.neu.ware.service.CenterwareService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
