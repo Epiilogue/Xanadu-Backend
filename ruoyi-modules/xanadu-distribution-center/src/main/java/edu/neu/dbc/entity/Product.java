@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -16,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -89,6 +91,10 @@ public class Product implements Serializable {
     @ApiModelProperty("商品图片url")
     @TableField("picture")
     private String picture;
+
+    @ApiModelProperty("商品安全库存")
+    @TableField("safe_stock")
+    private Integer safeStock;
 
 
 }

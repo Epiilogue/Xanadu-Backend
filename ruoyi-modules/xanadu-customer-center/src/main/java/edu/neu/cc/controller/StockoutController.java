@@ -1,16 +1,23 @@
 package edu.neu.cc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.StockoutConstant;
 import edu.neu.cc.entity.Stockout;
 import edu.neu.cc.service.StockoutService;
+import edu.neu.cc.vo.RecordVo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.stylesheets.LinkStyle;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -81,6 +88,28 @@ public class StockoutController {
         } else {
             return AjaxResult.error("只允许到货已提交的记录");
         }
+    }
+
+
+    @GetMapping("/feign/getAllLackRecord")
+    @ApiOperation("获取所有商品缺货记录,feign远程调用专用，前端不要使用该接口")
+    public List<RecordVo> getAllLackRecord() {
+        //首先需要远程获取缺货的记录，要求必须为已提交
+        return stockoutService.list(new QueryWrapper<Stockout>().eq("status", StockoutConstant.COMMITTED)).stream().map(
+                stockout -> new RecordVo(stockout.getId(), stockout.getOrderId(), stockout.getNeedNumbers(), stockout.getCreateTime(),
+                        stockout.getCreateBy(), "订单缺货")
+        ).collect(Collectors.toList());
+    }
+
+    @GetMapping("/feign/getLackRecord/{productId}")
+    @ApiOperation("获取缺货记录,feign远程调用专用，前端不要使用该接口")
+    public List<RecordVo> getLackRecordById(
+            @PathVariable(value = "productId", required = true) Long productId) {
+        //首先需要远程获取缺货的记录，要求必须为已提交
+        return stockoutService.list(new QueryWrapper<Stockout>().eq("status", StockoutConstant.COMMITTED).eq("product_id", productId)).stream().map(
+                stockout -> new RecordVo(stockout.getId(), stockout.getOrderId(), stockout.getNeedNumbers(), stockout.getCreateTime(),
+                        stockout.getCreateBy(), "订单缺货")
+        ).collect(Collectors.toList());
     }
 
 

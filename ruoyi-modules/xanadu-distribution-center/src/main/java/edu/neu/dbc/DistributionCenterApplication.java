@@ -7,8 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 
 @SpringBootApplication(exclude = {UtilAutoConfiguration.class}, scanBasePackages = {"edu.neu.*"})
-@EnableFeignClients
-
+@EnableFeignClients(basePackages = {"edu.neu.dbc.feign"})
 public class DistributionCenterApplication {
     public static void main(String[] args) {
         SpringApplication.run(DistributionCenterApplication.class, args);

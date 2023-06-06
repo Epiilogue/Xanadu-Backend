@@ -80,5 +80,20 @@ public class CenterStorageRecordController {
     }
 
 
+    @GetMapping("/feign/getStorage/{productId}")
+    @ApiOperation("获取商品总库存")
+    @ApiParam(name = "productId", value = "商品ID")
+    public Integer getStorage(@PathVariable("productId") Long productId) {
+        if (productId == null) {
+            return null;//商品ID不能为空
+        }
+        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+        if (centerStorageRecord == null) {
+            return 0;//中心仓库中不存在该商品
+        }
+        return centerStorageRecord.getTotalNum();
+    }
+
 }
 
