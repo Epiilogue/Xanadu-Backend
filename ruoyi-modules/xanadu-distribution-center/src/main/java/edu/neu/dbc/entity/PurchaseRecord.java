@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -15,7 +17,7 @@ import lombok.Setter;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -38,8 +40,8 @@ public class PurchaseRecord implements Serializable {
     private Long productId;
 
     @ApiModelProperty("商品名称")
-    @TableField("roduct_name")
-    private String roductName;
+    @TableField("product_name")
+    private String productName;
 
     @ApiModelProperty("供销商ID")
     @TableField("supplier_id")
@@ -65,6 +67,16 @@ public class PurchaseRecord implements Serializable {
     @TableField("deleted")
     @TableLogic
     private Boolean deleted;
+
+
+    @ApiModelProperty("商品单价")
+    @TableField("product_price")
+    private Double productPrice;
+
+
+    @ApiModelProperty("采购单总消费")
+    @TableField("total_cost")
+    private Double totalCost;
 
 
 }
