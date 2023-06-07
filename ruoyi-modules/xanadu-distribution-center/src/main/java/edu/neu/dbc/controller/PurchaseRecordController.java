@@ -3,27 +3,28 @@ package edu.neu.dbc.controller;
 
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.InputOutputStatus;
+import edu.neu.base.constant.cc.InputType;
 import edu.neu.base.constant.cc.PurchaseRecordStatusConstant;
 import edu.neu.base.constant.cc.StockoutConstant;
 import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.entity.PurchaseRecord;
 import edu.neu.dbc.entity.Supplier;
+import edu.neu.dbc.feign.CenterWareClient;
 import edu.neu.dbc.feign.OrderClient;
 import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.SupplierService;
 import edu.neu.dbc.vo.AllLackRecordVo;
+import edu.neu.dbc.vo.CenterInputVo;
 import edu.neu.dbc.vo.SingleLackRecordVo;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
-
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,37 @@ public class PurchaseRecordController {
     @Autowired
     @ApiModelProperty("远程订单服务")
     OrderClient orderClient;
+
+    @Autowired
+    CenterWareClient centerWareClient;
+
+
+    @ApiOperation("列表查看采购单，后面有已到货按钮，点击后，需要填写实际到货数量，将采购单状态置为已到货，生成入库调拨单")
+    @GetMapping("/list")
+    public AjaxResult list() {
+        List<PurchaseRecord> purchaseRecords = purchaseRecordService.list();
+        return AjaxResult.success(purchaseRecords);
+    }
+
+    @ApiOperation("确认采购到货，需要填写实际的到货数量，点击后生成入库调拨单，之后需要修改采购单的实际数量以及花费，状态改为已到货")
+    @PutMapping("/confirmPurchase")
+    public AjaxResult confirmPurchase(@ApiParam("对应的采购单ID") @RequestParam("id") Long id, @ApiParam("实际的到货数量") @RequestParam("number") Integer number) {
+        PurchaseRecord record = purchaseRecordService.getById(id);
+        if (record == null) return AjaxResult.error("采购单不存在");
+        if (!record.getStatus().equals(PurchaseRecordStatusConstant.PURCHASED))
+            return AjaxResult.error("采购单状态非法");
+        if (number == null || number <= 0) return AjaxResult.error("到货数量非法");
+        //更新采购单状态
+        record.setTotalCost(record.getProductPrice() * number);
+        record.setNumber(number);
+        record.setStatus(PurchaseRecordStatusConstant.ARRIVED);
+        if (!purchaseRecordService.updateById(record)) throw new ServiceException("更新采购单状态失败");
+        //生成入库调拨单
+        CenterInputVo centerInputVo = new CenterInputVo(null, id, InputType.PURCHASE, record.getProductId(), record.getProductName(), number, new Date(), InputOutputStatus.NOT_INPUT);
+        //远程调用接口，保存入库调拨单，之后可以根据入库调拨单进行入库操作
+        if (!centerWareClient.add(centerInputVo)) throw new ServiceException("生成入库调拨单失败");
+        return AjaxResult.success("确认采购到货成功");
+    }
 
 
     @PostMapping("/generatePurchaseOrder")
