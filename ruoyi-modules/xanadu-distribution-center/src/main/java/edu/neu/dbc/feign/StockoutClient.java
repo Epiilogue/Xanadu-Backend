@@ -3,11 +3,13 @@ package edu.neu.dbc.feign;
 import edu.neu.dbc.vo.SingleLackRecordVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@FeignClient(value = "xanadu-cc", url = "/cc/stockout")
+@FeignClient(value = "xanadu-cc", url = "/cc/stockout",contextId = "dbc-cc-2")
+@Component
 public interface StockoutClient {
 
 
