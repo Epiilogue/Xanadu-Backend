@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
-@SpringBootApplication(exclude = {UtilAutoConfiguration.class}, scanBasePackages = {"edu.neu.*"})
+@SpringBootApplication(exclude = {UtilAutoConfiguration.class}, scanBasePackages = {"edu.neu"})
 @EnableFeignClients(basePackages = {"edu.neu.dbc.feign"})
 @EnableTransactionManagement
 public class DistributionCenterApplication {

@@ -1,25 +1,29 @@
 package edu.neu.dbc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.InputOutputStatus;
-import edu.neu.base.constant.cc.InputType;
+import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.base.constant.cc.PurchaseRecordStatusConstant;
 import edu.neu.base.constant.cc.StockoutConstant;
 import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.entity.PurchaseRecord;
+import edu.neu.dbc.entity.Refund;
 import edu.neu.dbc.entity.Supplier;
 import edu.neu.dbc.feign.CenterWareClient;
 import edu.neu.dbc.feign.OrderClient;
+import edu.neu.dbc.feign.WareCenterStorageRecordClient;
+import edu.neu.dbc.service.ProductService;
 import edu.neu.dbc.service.PurchaseRecordService;
+import edu.neu.dbc.service.RefundService;
 import edu.neu.dbc.service.SupplierService;
-import edu.neu.dbc.vo.AllLackRecordVo;
-import edu.neu.dbc.vo.CenterInputVo;
-import edu.neu.dbc.vo.SingleLackRecordVo;
+import edu.neu.dbc.vo.*;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -78,9 +82,10 @@ public class PurchaseRecordController {
         record.setStatus(PurchaseRecordStatusConstant.ARRIVED);
         if (!purchaseRecordService.updateById(record)) throw new ServiceException("更新采购单状态失败");
         //生成入库调拨单
-        CenterInputVo centerInputVo = new CenterInputVo(null, id, InputType.PURCHASE, record.getProductId(), record.getProductName(), number, new Date(), InputOutputStatus.NOT_INPUT);
+        CenterInputVo centerInputVo = new CenterInputVo(null, id, InputOutputType.PURCHASE, record.getProductId(),
+                record.getProductName(), number, new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId());
         //远程调用接口，保存入库调拨单，之后可以根据入库调拨单进行入库操作
-        if (!centerWareClient.add(centerInputVo)) throw new ServiceException("生成入库调拨单失败");
+        if (!centerWareClient.addInputRecord(centerInputVo)) throw new ServiceException("生成入库调拨单失败");
         return AjaxResult.success("确认采购到货成功");
     }
 
@@ -125,6 +130,7 @@ public class PurchaseRecordController {
 
         return AjaxResult.success("采购单生成成功");
     }
+
 
 
 }

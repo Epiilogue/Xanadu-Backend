@@ -43,5 +43,9 @@ public class CenterInputVo implements Serializable {
     @ApiModelProperty("入库状态")
     private String status;
 
+    @ApiModelProperty("来源ID")
+    private Long sourceId;
+
+
 
 }

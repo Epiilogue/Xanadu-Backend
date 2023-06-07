@@ -61,5 +61,9 @@ public class CenterInput implements Serializable {
     @TableField("status")
     private String status;
 
+    @ApiModelProperty("来源ID")
+    @TableField("source_id")
+    private Long sourceId;
+
 
 }
