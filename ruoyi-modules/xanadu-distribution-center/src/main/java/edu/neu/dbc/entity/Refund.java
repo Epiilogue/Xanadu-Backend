@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +24,7 @@ import lombok.Setter;
 @Setter
 @TableName("dbc_refund")
 @ApiModel(value = "Refund对象", description = "")
+@AllArgsConstructor
 public class Refund implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -100,8 +100,18 @@ public class OrderController {
     @ApiOperation("根据子站ID查询订单数量")
     @GetMapping("/count/{substationId}")
     public Boolean getOrderCountBySubstationId(@PathVariable Long substationId) {
-        int count = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
+        long count = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
         return count > 0;
     }
+
+    @ApiOperation("批量更新订单状态,远程调用专用")
+    @PostMapping("/feign/batchUpdateStatus")
+    public Boolean batchUpdateStatus(@RequestParam String status, @RequestBody List<Long> orderIdList) {
+        return orderService.batchUpdateStatus(status, orderIdList);
+    }
+
+
+
+
 }
 

@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 06/06/2023 16:12:20
+ Date: 07/06/2023 15:51:09
 */
 
 SET NAMES utf8mb4;
@@ -78,13 +78,15 @@ DROP TABLE IF EXISTS `dbc_purchase_record`;
 CREATE TABLE `dbc_purchase_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '进货单ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `roduct_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
+  `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供销商ID',
   `number` int(10) NULL DEFAULT NULL COMMENT '进货数量',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '进货状态',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '软删除标记',
+  `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
+  `total_cost` double(20, 2) NULL DEFAULT NULL COMMENT '进货单总消费',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
