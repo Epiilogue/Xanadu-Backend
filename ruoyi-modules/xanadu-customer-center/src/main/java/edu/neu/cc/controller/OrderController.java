@@ -28,6 +28,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/cc/order")
+@CrossOrigin
 public class OrderController {
 
 
@@ -45,6 +46,7 @@ public class OrderController {
 
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
     @GetMapping("/list/{customerId}")
+    @CrossOrigin
     public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId) {
         if (customerId == null) {
             return AjaxResult.success(orderService.list());

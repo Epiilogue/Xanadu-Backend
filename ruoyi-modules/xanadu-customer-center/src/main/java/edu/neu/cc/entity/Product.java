@@ -32,7 +32,8 @@ public class Product implements Serializable {
     private Long id;
 
     @ApiModelProperty("对应的订单ID号")
-    @TableId("order_id")
+//    @TableId("order_id")
+    @TableField("order_id")
     private Long orderId;
 
     @ApiModelProperty("商品ID")
