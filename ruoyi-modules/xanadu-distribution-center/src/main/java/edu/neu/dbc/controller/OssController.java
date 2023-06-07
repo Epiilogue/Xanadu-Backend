@@ -7,6 +7,8 @@ import com.aliyun.oss.model.PolicyConditions;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +19,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@RestController("/dbc/oss")
+@RequestMapping("/dbc/oss")
+@RestController
 @Api(tags = "OssController", description = "OssController | 阿里云oss管理")
 public class OssController {
 
@@ -30,7 +33,8 @@ public class OssController {
     @Value("${spring.cloud.alicloud.access-key}")
     private String accessId;
 
-    @RequestMapping("/oss/policy")
+    @CrossOrigin
+    @GetMapping("/policy")
     public AjaxResult policy(){
         String bucket = "xanadu-image";
         // 填写Host地址，格式为https://bucketname.endpoint。
