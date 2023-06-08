@@ -26,7 +26,7 @@ public class Refund implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("对应的order表记录ID")
+    @ApiModelProperty("记录ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -38,7 +38,7 @@ public class Refund implements Serializable {
     @TableField("reason")
     private String reason;
 
-    @ApiModelProperty("操作类型(退货，换货)")
+    @ApiModelProperty("操作类型(退货，换货,退订)")
     @TableField("operation_type")
     private String operationType;
 
