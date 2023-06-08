@@ -79,4 +79,9 @@ public class PurchaseRecord implements Serializable {
     private Double totalCost;
 
 
+    @ApiModelProperty("对应的缺货单的ID列表字符串")
+    @TableField("lack_ids")
+    private String lackIds;
+
+
 }

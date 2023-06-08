@@ -52,6 +52,10 @@ public class CenterInput implements Serializable {
     @TableField("input_num")
     private Integer inputNum;
 
+    @ApiModelProperty("商品价格")
+    @TableField("product_price")
+    private Double productPrice;
+
     @ApiModelProperty("入库日期")
     @TableField("input_time")
     private Date inputTime;

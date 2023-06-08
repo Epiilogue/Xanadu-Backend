@@ -5,10 +5,12 @@ import edu.neu.dbc.vo.CenterInputVo;
 import edu.neu.dbc.vo.CenterOutputVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(value = "xanadu-ware", url = "/ware")
+@FeignClient(value = "xanadu-ware", url = "/ware",contextId = "CenterWareClient")
+@Component
 public interface CenterWareClient {
 
     @PostMapping("/centerInput/feign/add")

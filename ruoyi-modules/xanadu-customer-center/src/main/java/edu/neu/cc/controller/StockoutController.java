@@ -2,6 +2,7 @@ package edu.neu.cc.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.StockoutConstant;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -112,6 +114,35 @@ public class StockoutController {
         ).collect(Collectors.toList());
     }
 
+
+    @PostMapping("/feign/updateLackRecordStatusToArrival")
+    @ApiOperation("更新缺货记录状态,feign远程调用专用，前端不要使用该接口,传递的参数id列表,实际到货数量")
+    public Boolean updateLackRecordStatusToArrival(@RequestParam("number") Integer number, @RequestBody List<Long> ids) {
+        //查询所有的缺货记录，然后按照需要的商品数量从小到大排序，如果入库数量足够的话就可以更新状态为已到货，否则重新置为已提交等待下一轮采购
+        List<Stockout> stockouts = stockoutService.listByIds(ids);
+        if (Objects.isNull(stockouts) || stockouts.size() == 0) return false;
+        stockouts.sort(Comparator.comparingInt(Stockout::getNeedNumbers));
+        //如果入库数量足够的话就可以更新状态为已到货，否则重新置为已提交等待下一轮采购
+        for (Stockout stockout : stockouts) {
+            if (number >= stockout.getNeedNumbers()) {
+                stockout.setStatus(StockoutConstant.ARRIVAL);
+                stockoutService.updateById(stockout);
+                number -= stockout.getNeedNumbers();
+            } else {
+                stockout.setStatus(StockoutConstant.COMMITTED);
+                stockoutService.updateById(stockout);
+            }
+        }
+        return true;
+    }
+
+
+    @PostMapping("/feign/updateLackRecordStatusToPurchased")
+    @ApiOperation("更新缺货记录状态,feign远程调用专用，前端不要使用该接口,传递的参数id列表")
+    public Boolean updateLackRecordStatusToPurchased(@RequestBody List<Long> ids) {
+        UpdateWrapper<Stockout> set = new UpdateWrapper<Stockout>().in("id", ids).set("status", StockoutConstant.PURCHASED);
+        return stockoutService.update(set);
+    }
 
 }
 

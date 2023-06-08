@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(value = "xanadu-ware")
+@FeignClient(value = "xanadu-ware",contextId = "WareCenterStorageRecordClient")
 public interface WareCenterStorageRecordClient {
 
     @RequestMapping("/ware/centerStorageRecord/check")
