@@ -37,6 +37,9 @@ public class CenterInputVo implements Serializable {
     @ApiModelProperty("商品数量")
     private Integer inputNum;
 
+    @ApiModelProperty("商品价格")
+    private Double productPrice;
+
     @ApiModelProperty("入库日期")
     private Date inputTime;
 

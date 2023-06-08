@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,7 +84,7 @@ public class PurchaseRecordController {
         if (!purchaseRecordService.updateById(record)) throw new ServiceException("更新采购单状态失败");
         //生成入库调拨单
         CenterInputVo centerInputVo = new CenterInputVo(null, id, InputOutputType.PURCHASE, record.getProductId(),
-                record.getProductName(), number, new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId());
+                record.getProductName(), number, record.getProductPrice(), new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId());
         //远程调用接口，保存入库调拨单，之后可以根据入库调拨单进行入库操作
         if (!centerWareClient.addInputRecord(centerInputVo)) throw new ServiceException("生成入库调拨单失败");
         return AjaxResult.success("确认采购到货成功");
@@ -108,6 +109,12 @@ public class PurchaseRecordController {
         if (allLackRecordVo.getInputCount() + allLackRecordVo.getNowCount() > product.getMaxCount())
             return AjaxResult.error("进货数量加上当前库存数量不能大于该商品最大库存量");
 
+        StringBuilder stringBuilder = new StringBuilder();
+        //获取所有缺货记录ID，拼接为字符串保存至数据库
+        allLackRecordVo.getSingleLackRecordVos().stream().
+                map(SingleLackRecordVo::getId).collect(Collectors.toList()).forEach(id -> stringBuilder.append(id).append(","));
+
+
         //完成校验后，生成采购单
         PurchaseRecord purchaseRecord = new PurchaseRecord();
         purchaseRecord.setNumber(allLackRecordVo.getInputCount());
@@ -116,6 +123,7 @@ public class PurchaseRecordController {
         purchaseRecord.setProductPrice(product.getPrice());
         purchaseRecord.setSupplierId(supplierId);
         purchaseRecord.setNumber(allLackRecordVo.getInputCount());
+        purchaseRecord.setLackIds(stringBuilder.toString());
 
         //设置采购单状态
         purchaseRecord.setStatus(PurchaseRecordStatusConstant.PURCHASED);
@@ -123,14 +131,22 @@ public class PurchaseRecordController {
         //插入数据库
         boolean saved = purchaseRecordService.save(purchaseRecord);
         if (!saved) throw new ServiceException("采购单生成失败");
-        //接下来需要找到所有的相关采购记录，将其状态置为已采购，需要调用远程服务
-        List<Long> orderIdList = allLackRecordVo.getSingleLackRecordVos().stream().map(SingleLackRecordVo::getOrderId).collect(Collectors.toList());
-        boolean updated = orderClient.batchUpdateStatus(StockoutConstant.PURCHASED, orderIdList);
-        if (!updated) throw new ServiceException("采购单生成失败");
+        //TODO：更新所有的缺货记录状态，将其置为已采购，这样缺货检查就不会重复检查
+
 
         return AjaxResult.success("采购单生成成功");
     }
 
+
+    @ApiOperation("获取缺货记录ID列表,feign调用")
+    @GetMapping("/feign/getLackIds/{purchaseId}}")
+    public List<Long> getLackIdsAndUpdate(@PathVariable("purchaseId") Long purchaseId) {
+        PurchaseRecord record = purchaseRecordService.getById(purchaseId);
+        if (record == null) return null;
+        record.setStatus(PurchaseRecordStatusConstant.IN_STORAGE);
+        purchaseRecordService.updateById(record);
+        return Arrays.stream(record.getLackIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
+    }
 
 
 }

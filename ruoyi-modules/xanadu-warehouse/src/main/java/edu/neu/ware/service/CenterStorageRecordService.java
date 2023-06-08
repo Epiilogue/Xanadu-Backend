@@ -1,5 +1,6 @@
 package edu.neu.ware.service;
 
+import edu.neu.ware.entity.CenterInput;
 import edu.neu.ware.entity.CenterStorageRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface CenterStorageRecordService extends IService<CenterStorageRecord> {
 
+    CenterStorageRecord createProduct(CenterInput productId);
 }

@@ -61,9 +61,21 @@ public class CenterStorageRecord implements Serializable {
     @TableField("refund_num")
     private Integer refundNum;
 
+    @ApiModelProperty("下单锁定的商品数量")
+    @TableField("lock_num")
+    private Integer lockNum;
+
+
     @ApiModelProperty("总计商品数量")
     @TableField("total_num")
     private Integer totalNum;
 
 
+    public CenterStorageRecord() {
+        //所有的Integer类型都填0
+        this.allocatedNum = 0;
+        this.refundNum = 0;
+        this.lockNum = 0;
+        this.totalNum = 0;
+    }
 }
