@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(value = "xanadu-ware", url = "/ware",contextId = "dbc-xanadu-ware")
+@FeignClient(value = "xanadu-ware", url = "/ware",contextId = "CenterWareClient")
 @Component
 public interface CenterWareClient {
 

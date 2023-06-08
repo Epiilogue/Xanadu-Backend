@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(value = "xanadu-cc" ,contextId = "ccOrderClient")
+@FeignClient(value = "xanadu-cc" ,contextId = "CCOrderClient")
 public interface CCOrderClient {
     @GetMapping("/cc/order/feign/count/{substationId}")
     public Boolean getOrderCountBySubstationId(@PathVariable("substationId") Long substationId);

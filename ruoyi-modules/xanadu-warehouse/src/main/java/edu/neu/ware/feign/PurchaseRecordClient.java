@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "xanadu-dbc", contextId = "purchaseRecordClient")
+@FeignClient(value = "xanadu-dbc", contextId = "PurchaseRecordClient")
 public interface PurchaseRecordClient {
 
     @ApiOperation("获取缺货记录ID列表,feign调用")

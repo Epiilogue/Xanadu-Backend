@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "xanadu-cc", url = "/cc/order",contextId = "dbc-cc-1")
+@FeignClient(value = "xanadu-cc", url = "/cc/order",contextId = "OrderClient")
 
 public interface OrderClient {
     @PostMapping("/feign/batchUpdateStatus")
