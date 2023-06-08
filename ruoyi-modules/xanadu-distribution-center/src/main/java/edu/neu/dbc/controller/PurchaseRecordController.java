@@ -14,6 +14,7 @@ import edu.neu.dbc.entity.Refund;
 import edu.neu.dbc.entity.Supplier;
 import edu.neu.dbc.feign.CenterWareClient;
 import edu.neu.dbc.feign.OrderClient;
+import edu.neu.dbc.feign.StockoutClient;
 import edu.neu.dbc.feign.WareCenterStorageRecordClient;
 import edu.neu.dbc.service.ProductService;
 import edu.neu.dbc.service.PurchaseRecordService;
@@ -57,6 +58,11 @@ public class PurchaseRecordController {
     @Autowired
     @ApiModelProperty("远程订单服务")
     OrderClient orderClient;
+
+
+    @Autowired
+    @ApiModelProperty("远程缺货记录服务")
+    StockoutClient stockoutClient;
 
     @Autowired
     CenterWareClient centerWareClient;
@@ -132,7 +138,10 @@ public class PurchaseRecordController {
         boolean saved = purchaseRecordService.save(purchaseRecord);
         if (!saved) throw new ServiceException("采购单生成失败");
         //TODO：更新所有的缺货记录状态，将其置为已采购，这样缺货检查就不会重复检查
+        Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream().
+                map(SingleLackRecordVo::getId).collect(Collectors.toList()));
 
+        if (!updateSuccess) throw new ServiceException("更新缺货记录状态失败");
 
         return AjaxResult.success("采购单生成成功");
     }

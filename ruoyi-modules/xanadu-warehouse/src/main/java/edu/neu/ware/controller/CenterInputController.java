@@ -75,7 +75,7 @@ public class CenterInputController {
             List<Long> lackIds = purchaseRecordClient.getLackIdsAndUpdate(sourceId);
             if (lackIds == null || lackIds.size() == 0) return AjaxResult.error("入库错误,入库对应缺货单不存在");
             //更新缺货状态
-            Boolean aBoolean = ccOrderClient.updateLackRecordStatus(centerInput.getInputNum(), lackIds);
+            Boolean aBoolean = ccOrderClient.updateLackRecordStatusToArrival(centerInput.getInputNum(), lackIds);
 
             if (aBoolean == null || !aBoolean) return AjaxResult.error("入库错误,更新缺货记录失败");
         }

@@ -14,6 +14,6 @@ public interface CCOrderClient {
 
     @PostMapping("/cc/stockout/feign/updateLackRecordStatusToArrival")
     @ApiOperation("更新缺货记录状态,feign远程调用专用，前端不要使用该接口,传递的参数id列表,实际到货数量")
-    public Boolean updateLackRecordStatus(@RequestParam("number") Integer number, @RequestBody List<Long> ids);
+    public Boolean updateLackRecordStatusToArrival(@RequestParam("number") Integer number, @RequestBody List<Long> ids);
 
 }
