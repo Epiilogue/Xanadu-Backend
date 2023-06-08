@@ -14,7 +14,7 @@ import java.util.Map;
 public interface WareCenterStorageRecordClient {
 
     @GetMapping("/feign/check")
-    public ProductRecordsVo check(@RequestParam("productIdNumberMap") Map<Long, Integer> productIdMap);
+    public ProductRecordsVo check(@RequestBody Map<Long, Integer> productIdMap);
 
 
     @PutMapping("/feign/unlock/{productId}/{num}")

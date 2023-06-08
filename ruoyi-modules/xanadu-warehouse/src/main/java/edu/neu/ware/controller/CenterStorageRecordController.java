@@ -54,7 +54,7 @@ public class CenterStorageRecordController {
     @ApiOperation("输入多件商品ID，检查是否缺货,并返回对应的缺货数量")
     @ApiResponse(code = 200, message = "返回每个商品对应的缺货数量")
     @ApiParam(name = "productIdNumberMap", value = "商品ID和数量的键值对")
-    public ProductRecordsVo check(@RequestParam("productIdNumberMap") Map<Long, Integer> productIdMap) {
+    public ProductRecordsVo check(@RequestBody Map<Long, Integer> productIdMap) {
         //首先需要根据ID 查出所有的商品的可分配数量，并根据可分配数量确定是否缺货
         //如果缺货，返回对应缺货商品的ID和缺货数量
         //如果不缺货，返回null

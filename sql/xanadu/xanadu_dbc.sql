@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 07/06/2023 15:51:09
+ Date: 08/06/2023 15:33:01
 */
 
 SET NAMES utf8mb4;
@@ -87,6 +87,7 @@ CREATE TABLE `dbc_purchase_record`  (
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '软删除标记',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
   `total_cost` double(20, 2) NULL DEFAULT NULL COMMENT '进货单总消费',
+  `lack_ids` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '缺货单的ID列表字符串',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
