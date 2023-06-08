@@ -104,7 +104,7 @@ public class OrderController {
 
     @ApiOperation("批量更新订单状态,远程调用专用")
     @PostMapping("/feign/batchUpdateStatus")
-    public Boolean batchUpdateStatus(@RequestParam String status, @RequestBody List<Long> orderIdList) {
+    public Boolean batchUpdateStatus(@RequestParam("status") String status, @RequestBody List<Long> orderIdList) {
         return orderService.batchUpdateStatus(status, orderIdList);
     }
 
