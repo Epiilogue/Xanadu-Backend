@@ -2,6 +2,7 @@ package edu.neu.ware.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 
 import edu.neu.ware.entity.CenterStorageRecord;
@@ -94,6 +95,43 @@ public class CenterStorageRecordController {
         }
         return centerStorageRecord.getTotalNum();
     }
+
+
+    @PutMapping("/feign/lock/{productId}/{num}")
+    @ApiOperation("锁定商品库存")
+    public Boolean lock(@PathVariable("productId") Long productId, @PathVariable("num") Integer num) {
+        if (productId == null) {
+            return null;//商品ID不能为空
+        }
+        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+        if (centerStorageRecord == null) {
+            return false;//中心仓库中不存在该商品,锁定失败
+        }
+        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                .setSql("lock_num=lock_num+" + num).setSql("allocate_able_num=allocate_able_num-" + num)
+                .ge("allocate_able_num", num).eq("id", centerStorageRecord.getId());
+        return centerStorageRecordService.update(updateWrapper);
+    }
+
+
+    @PutMapping("/feign/unlock/{productId}/{num}")
+    @ApiOperation("锁定商品库存")
+    public Boolean unlock(@PathVariable("productId") Long productId, @PathVariable("num") Integer num) {
+        if (productId == null) {
+            return null;//商品ID不能为空
+        }
+        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+        if (centerStorageRecord == null) {
+            return false;//中心仓库中不存在该商品,解锁失败
+        }
+        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                .setSql("lock_num=lock_num-" + num).setSql("allocate_able_num=allocate_able_num+" + num)
+                .ge("lock_num", num).eq("id", centerStorageRecord.getId());
+        return centerStorageRecordService.update(updateWrapper);
+    }
+
 
 }
 

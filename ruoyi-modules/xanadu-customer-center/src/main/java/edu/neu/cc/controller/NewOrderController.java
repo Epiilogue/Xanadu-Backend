@@ -88,7 +88,16 @@ public class NewOrderController {
         ProductRecordsVo productRecordsVo = wareCenterStorageRecordClient.check(productIdNumberMap);
         if (productRecordsVo == null) return AjaxResult.error("商品信息不能为空");
         if (productRecordsVo.getIsLack()) order.setStatus(OrderStatusConstant.OUT_OF_STOCK);
-        else order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+        else {
+            order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+            //需要为订单锁定库存
+            productIdNumberMap.forEach((k, v) -> {
+                Boolean success = wareCenterStorageRecordClient.lock(k, v);
+                if (!success) throw new ServiceException("锁定库存失败");
+            });
+
+        }
+
         order.setOrderType(OperationTypeConstant.ORDER);
         //插入订单数据库
         orderService.save(order);
@@ -165,6 +174,16 @@ public class NewOrderController {
         productService.remove(new QueryWrapper<Product>().eq("order_id", orderId));
         //删除缺货记录，只有状态为未提交才允许删除
         stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
+        //如果订单为可分配状态，还需要撤销锁定的库存
+        if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED)) {
+            //获取订单中的商品ID和数量
+            productService.list(new QueryWrapper<Product>().eq("order_id", orderId)).forEach(
+                    product -> {
+                        Boolean unlock = wareCenterStorageRecordClient.unlock(product.getProductId(), product.getNumber());
+                        if (!unlock) throw new ServiceException("撤销失败，库存解锁失败");
+                    }
+            );
+        }
         //生成操作记录,记录订单撤销操作
         Operation operation = new Operation();
         operation.setOrderId(orderId);
@@ -236,27 +255,38 @@ public class NewOrderController {
             product.setNumber(number);
             product.setPrice(productIdPriceMap.get(productId));
             productService.save(product);
+            //如果原订单状态为可分配订单，还需要解锁库存
+            if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED)) {
+                Boolean unlock = wareCenterStorageRecordClient.unlock(productId, number);
+                if (!unlock) throw new ServiceException("退订失败，库存解锁失败");
+            }
         });
         //更新原订单状态，例如商品数量、总价等，更新商品数量，更新缺货记录，添加操作记录
         order.setNumbers(order.getNumbers() - unsubscribeOrder.getNumbers());
         order.setTotalAmount(order.getTotalAmount() - unsubscribeOrder.getTotalAmount());
 
         //更新map
-        unSubscribeVo.getProductsMap().forEach((productId, number) -> {
-            productIdNumberMap.put(productId, productIdNumberMap.get(productId) - number);
-        });
+        unSubscribeVo.getProductsMap().forEach((productId, number) -> productIdNumberMap.put(productId, productIdNumberMap.get(productId) - number));
         //发起远程调用，获取新的状态
         ProductRecordsVo result = wareCenterStorageRecordClient.check(productIdNumberMap);
-        //删除所有原来的缺货记录
-        stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId));
-        if (!result.getIsLack()) order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+
+        if (!result.getIsLack() && order.getStatus().equals(OrderStatusConstant.OUT_OF_STOCK)) {
+            //删除所有原来的未提交的缺货记录
+            stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
+            order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+            //锁定库存
+            productIdNumberMap.forEach((productId, number) -> {
+                Boolean lock = wareCenterStorageRecordClient.lock(productId, number);
+                if (!lock) throw new ServiceException("退订失败，库存锁定失败");
+            });
+        }
 
         orderService.updateById(order);//更新原订单
         //更新原订单的商品记录
         Map<Long, Integer> idNumberMap = result.getProductIdNumberMap();
         productIdNumberMap.forEach((productId, number) -> {
             Product product = productService.getOne(new QueryWrapper<Product>().eq("order_id", orderId).eq("product_id", productId));
-            product.setNumber(product.getNumber() - number);
+            product.setNumber(number);
             if (idNumberMap.containsKey(productId)) product.setIslack(true);
             if (product.getNumber() == 0) {
                 productService.removeById(product.getId());
