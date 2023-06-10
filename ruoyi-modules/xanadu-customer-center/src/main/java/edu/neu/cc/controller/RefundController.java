@@ -202,5 +202,10 @@ public class RefundController {
         return AjaxResult.success(check);
     }
 
+    @PostMapping("/postTest")
+    public AjaxResult postTest(){
+        ProductRecordsVo check = wareCenterStorageRecordClient.check(new HashMap<>());
+        return AjaxResult.success(check);
+    }
 }
 

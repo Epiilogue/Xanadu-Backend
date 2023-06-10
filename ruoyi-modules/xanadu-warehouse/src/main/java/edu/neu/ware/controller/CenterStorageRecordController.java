@@ -50,7 +50,7 @@ public class CenterStorageRecordController {
         return AjaxResult.success(centerStorageRecord);
     }
 
-    @GetMapping("/feign/check")
+    @PostMapping("/feign/check")
     @ApiOperation("输入多件商品ID，检查是否缺货,并返回对应的缺货数量")
     @ApiResponse(code = 200, message = "返回每个商品对应的缺货数量")
     @ApiParam(name = "productIdNumberMap", value = "商品ID和数量的键值对")

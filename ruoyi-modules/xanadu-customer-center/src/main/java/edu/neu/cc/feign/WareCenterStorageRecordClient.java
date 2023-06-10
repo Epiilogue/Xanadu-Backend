@@ -13,7 +13,7 @@ import java.util.Map;
 @FeignClient(value = "xanadu-ware", contextId = "WareCenterStorageRecordClient")
 public interface WareCenterStorageRecordClient {
 
-    @GetMapping("/ware/centerStorageRecord/feign/check")
+    @PostMapping ("/ware/centerStorageRecord/feign/check")
     public ProductRecordsVo check(@RequestBody Map<Long, Integer> productIdMap);
 
 
