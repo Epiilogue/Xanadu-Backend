@@ -13,7 +13,7 @@ import java.util.List;
 public interface PurchaseRecordClient {
 
     @ApiOperation("获取缺货记录ID列表,feign调用")
-    @GetMapping("/feign/getLackIds/{purchaseId}}")
+    @GetMapping("/dbc/purchaseRecord/feign/getLackIds/{purchaseId}}")
     public List<Long> getLackIdsAndUpdate(@PathVariable("purchaseId") Long purchaseId);
 
 }

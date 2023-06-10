@@ -10,18 +10,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@FeignClient(value = "xanadu-ware", contextId = "WareCenterStorageRecordClient",url = "/ware/centerStorageRecord")
+@FeignClient(value = "xanadu-ware", contextId = "WareCenterStorageRecordClient")
 public interface WareCenterStorageRecordClient {
 
-    @GetMapping("/feign/check")
+    @GetMapping("/ware/centerStorageRecord/feign/check")
     public ProductRecordsVo check(@RequestBody Map<Long, Integer> productIdMap);
 
 
-    @PutMapping("/feign/unlock/{productId}/{num}")
+    @PutMapping("/ware/centerStorageRecord/feign/unlock/{productId}/{num}")
     @ApiOperation("解锁商品库存")
     public Boolean unlock(@PathVariable("productId") Long productId, @PathVariable("num") Integer num);
 
-    @PutMapping("/feign/lock/{productId}/{num}")
+    @PutMapping("/ware/centerStorageRecord/feign/lock/{productId}/{num}")
     @ApiOperation("锁定商品库存")
     public Boolean lock(@PathVariable("productId") Long productId, @PathVariable("num") Integer num);
 

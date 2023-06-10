@@ -34,8 +34,6 @@ public class DispatchController {
     @Autowired
     CCOrderClient ccOrderClient;
 
-    @Autowired
-
 
 
     @GetMapping("/check/{id}")

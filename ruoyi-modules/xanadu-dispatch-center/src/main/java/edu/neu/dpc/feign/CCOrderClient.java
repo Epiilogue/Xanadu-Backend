@@ -7,15 +7,15 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(value = "xanadu-cc", contextId = "CCOrderClient", path = "/cc/order")
+@FeignClient(value = "xanadu-cc", contextId = "CCOrderClient")
 public interface CCOrderClient {
 
 
-    @GetMapping("/feign/checkAllArrival/{id}")
+    @GetMapping("/cc/order/feign/checkAllArrival/{id}")
     AjaxResult checkAllArrival(@PathVariable("id") Long id);
 
 
-    @GetMapping("/feign/getOrder/{id}")
+    @GetMapping("/cc/order/feign/getOrder/{id}")
     AjaxResult getOrder(@PathVariable("id") Long id);
 
 }
