@@ -83,14 +83,17 @@ public class CenterInputController {
         //入库，增加可分配库存,可能查不到这个商品，此时就需要创建商品
         CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(new QueryWrapper<CenterStorageRecord>().eq("product_id", centerInput.getProductId()));
 
-        CenterStorageRecord record = null;
-        if (centerStorageRecord == null) record = centerStorageRecordService.createProduct(centerInput);
-        if (record == null) return AjaxResult.error("入库失败，创建商品失败");
+        if (centerStorageRecord == null) centerStorageRecord = centerStorageRecordService.createProduct(centerInput);
+        if (centerStorageRecord == null) return AjaxResult.error("入库失败，创建商品失败");
 
-        //更新库存
-        record.setAllocateAbleNum(record.getAllocateAbleNum() + centerInput.getInputNum());
-        record.setTotalNum(record.getTotalNum() + centerInput.getInputNum());
-        boolean update = centerStorageRecordService.updateById(record);
+        //更新库存，此时需要判断来源，如果是采购的，我们需要锁定库存，如果是退货入库的，我们需要增加可分配库存
+        if(centerInput.getInputType().equals(InputOutputType.PURCHASE)){
+            centerStorageRecord.setLockNum(centerStorageRecord.getLockNum() + centerInput.getInputNum());
+        }else {
+            centerStorageRecord.setAllocateAbleNum(centerStorageRecord.getAllocateAbleNum() + centerInput.getInputNum());
+        }
+        centerStorageRecord.setTotalNum(centerStorageRecord.getTotalNum() + centerInput.getInputNum());
+        boolean update = centerStorageRecordService.updateById(centerStorageRecord);
         if (!update) return AjaxResult.error("入库失败，更新库存失败");
 
         return AjaxResult.success("入库成功");

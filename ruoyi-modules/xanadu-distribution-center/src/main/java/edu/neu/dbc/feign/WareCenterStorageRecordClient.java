@@ -1,7 +1,6 @@
 package edu.neu.dbc.feign;
 
 
-//import edu.neu.cc.vo.ProductRecordsVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,12 +16,6 @@ import java.util.Map;
 @FeignClient(value = "xanadu-ware", url = "/ware/centerStorageRecord",contextId = "WareCenterStorageRecordClient")
 @Component
 public interface WareCenterStorageRecordClient {
-
-//    @RequestMapping("/check")
-//    public ProductRecordsVo check(Map<Long, Integer> productIdMap);
-
-
-    @GetMapping("/feign/getStorage/{productId}")
+    @GetMapping("/ware/centerStorageRecord/feign/getStorage/{productId}")
     public Integer getStorage(@PathVariable("productId") Long productId);
-
 }

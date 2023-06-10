@@ -7,16 +7,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.common.core.constant.HttpStatus;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.OperationTypeConstant;
-import edu.neu.cc.entity.NewOrder;
-import edu.neu.cc.entity.Order;
-import edu.neu.cc.entity.Product;
-import edu.neu.cc.entity.Refund;
-import edu.neu.cc.service.NewOrderService;
-import edu.neu.cc.service.OrderService;
-import edu.neu.cc.service.ProductService;
-import edu.neu.cc.service.RefundService;
+import edu.neu.base.constant.cc.OrderStatusConstant;
+import edu.neu.base.constant.cc.StockoutConstant;
+import edu.neu.cc.entity.*;
+import edu.neu.cc.service.*;
+import edu.neu.cc.vo.OrderVo;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +42,9 @@ public class OrderController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private StockoutService stockoutService;
 
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
     @GetMapping("/list/{customerId}")
@@ -105,7 +107,6 @@ public class OrderController {
     }
 
 
-
     @ApiOperation("批量更新订单状态,远程调用专用")
     @PostMapping("/feign/batchUpdateStatus")
     public Boolean batchUpdateStatus(@RequestParam("status") String status, @RequestBody List<Long> orderIdList) {
@@ -113,6 +114,72 @@ public class OrderController {
     }
 
 
+    @ApiOperation("根据订单ID检查订单是否可从缺货到货")
+    @GetMapping("/feign/checkAllArrival/{id}")
+    public AjaxResult checkAllArrival(@PathVariable("id") Long id) {
+        //先校验，检查订单是否存在
+        Order order = orderService.getById(id);
+        if (order == null) return AjaxResult.error("订单不存在");
+        //检查订单状态是否为缺货
+        if (!OrderStatusConstant.OUT_OF_STOCK.equals(order.getStatus())) return AjaxResult.error("订单状态非缺货状态");
+        //获取订单的所有缺货记录
+        List<Stockout> stockouts = stockoutService.list(new QueryWrapper<Stockout>().eq("order_id", id));
+        //检查订单的所有缺货记录是否都已经到货
+        for (Stockout stockout : stockouts) {
+            if (!stockout.getStatus().equals(StockoutConstant.ARRIVAL))
+                return AjaxResult.error("订单中存在未到货的商品");
+        }
+        //TODO: 修改订单状态为可分配，我们需要提前锁定库存，避免其他的订单把这部分库存划走
+        order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+        //更新订单状态
+        boolean b = orderService.updateById(order);
+        if (!b) return AjaxResult.error("更新订单状态失败");
+        return AjaxResult.success("订单状态更新成功,订单可分配");
+    }
+
+
+    @ApiOperation("根据订单ID获取订单信息")
+    @GetMapping("/feign/getOrder/{id}")
+    public AjaxResult getOrderById(@PathVariable("id") Long id) {
+        Order order = orderService.getById(id);
+        if (order == null) return AjaxResult.error("订单不存在");
+        if (order.getOrderType().equals(OperationTypeConstant.UNSUBSCRIBE))
+            return AjaxResult.error("该订单为退订订单,无法调度");
+        //检查订单状态是否为可分配
+        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED))
+            return AjaxResult.error("订单状态非可分配状态");
+
+        //根据订单类型获取对应的订单信息
+        OrderVo orderVo = new OrderVo();
+        BeanUtils.copyProperties(order, orderVo);
+
+        //根据订单类型获取对应的订单信息
+        switch (order.getOrderType()) {
+            case OperationTypeConstant.ORDER:
+                NewOrder newOrder = newOrderService.getById(id);
+                BeanUtils.copyProperties(newOrder, orderVo);
+                //如果是新订单，则获取商品列表后返回
+                List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", id));
+                orderVo.setProducts(productList);
+                return AjaxResult.success(orderVo);
+            case OperationTypeConstant.EXCHANGE:
+            case OperationTypeConstant.RETURN:
+                //需要获取refund，然后反查neworder，然后获取商品列表
+                Refund refund = refundService.getById(id);
+                if (refund == null) return AjaxResult.error("订单不存在");
+                //拿到原始的订单id
+                Long newOrderId = refund.getOrderId();
+                NewOrder prevOrder = newOrderService.getById(newOrderId);
+                if (prevOrder == null) return AjaxResult.error("原始订单不存在");
+                BeanUtils.copyProperties(prevOrder, orderVo);
+                List<Product> refundProducts = productService.list(new QueryWrapper<Product>().eq("order_id", id));
+                orderVo.setProducts(refundProducts);
+                return AjaxResult.success(orderVo);
+            default:
+                return AjaxResult.error("订单类型错误");
+        }
+
+    }
 
 
 }

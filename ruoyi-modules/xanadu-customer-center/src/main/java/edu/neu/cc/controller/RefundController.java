@@ -17,12 +17,9 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -196,6 +193,14 @@ public class RefundController {
         return AjaxResult.success("创建退货订单成功", refundVo);
     }
 
+
+
+
+    @GetMapping("/test")
+    public AjaxResult test(){
+        ProductRecordsVo check = wareCenterStorageRecordClient.check(new HashMap<>());
+        return AjaxResult.success(check);
+    }
 
 }
 

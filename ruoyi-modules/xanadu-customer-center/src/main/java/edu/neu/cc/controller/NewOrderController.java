@@ -237,7 +237,7 @@ public class NewOrderController {
         if (Objects.equals(totalNumbers, order.getNumbers())) return AjaxResult.error("退订数量不能等于订购数量");
         unsubscribeOrder.setNumbers(totalNumbers);
 
-        unsubscribeOrder.setUserId(userId);//TODO: 由gateway设置用户ID，若未登陆则提示错误
+        unsubscribeOrder.setUserId(userId);
         unsubscribeOrder.setStatus(OrderStatusConstant.INVALID);//无效订单
         unsubscribeOrder.setOrderType(OperationTypeConstant.UNSUBSCRIBE);//退订订单
         orderService.save(unsubscribeOrder);
