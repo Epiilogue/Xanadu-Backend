@@ -1,4 +1,4 @@
-package edu.neu.dpc.vo;
+package edu.neu.dpc.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductVo implements Serializable {
+public class Product implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

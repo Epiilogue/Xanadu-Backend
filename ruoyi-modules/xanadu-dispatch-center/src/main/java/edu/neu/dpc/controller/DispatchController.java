@@ -3,16 +3,21 @@ package edu.neu.dpc.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.dpc.entity.Task;
 import edu.neu.dpc.feign.CCOrderClient;
+import edu.neu.dpc.service.TaskService;
 import edu.neu.dpc.vo.OrderVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 /**
@@ -26,6 +31,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("/dpc/dispatch")
 @Api(value = "调度中心", tags = "调度中心")
+@Transactional
 public class DispatchController {
 
     //1. 列出所有的订单，可以复用order接口，获取所有订单
@@ -34,6 +40,8 @@ public class DispatchController {
     @Autowired
     CCOrderClient ccOrderClient;
 
+    @Autowired
+    TaskService taskService;
 
 
     @GetMapping("/check/{id}")
@@ -41,7 +49,6 @@ public class DispatchController {
     public AjaxResult checkOrder(@PathVariable("id") Long id) {
         return ccOrderClient.checkAllArrival(id);
     }
-
 
 
     /**
@@ -65,7 +72,20 @@ public class DispatchController {
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.ASSIGNED
                 , false, orderVo.getOrderType());
+        boolean success;
+        //1.保存任务
+        success = taskService.save(task);
+        if (!success) return AjaxResult.error("保存任务失败");
+        // 拿到对应的记录ID
+        Long taskId = task.getId();
+        //2.更新订单状态为已调度
+        Boolean isRemoteSuccess = ccOrderClient.batchUpdateStatus(OrderStatusConstant.DISPATCHED, Collections.singletonList(orderVo.getId()));
+        if (isRemoteSuccess == null || !isRemoteSuccess) return AjaxResult.error("更新订单状态失败");
+        //3.自动生成商品调拨列表，id为任务id
 
+
+
+        //4.解锁商品库存
 
 
         return null;
