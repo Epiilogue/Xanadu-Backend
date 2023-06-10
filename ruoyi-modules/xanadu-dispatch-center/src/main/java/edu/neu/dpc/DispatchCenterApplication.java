@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication(scanBasePackages = {"edu.neu"})
 @EnableFeignClients(basePackages = {"edu.neu"})
-@MapperScan("edu.neu.cc.mapper")
+@MapperScan("edu.neu.dpc.mapper")
 @EnableTransactionManagement
 public class DispatchCenterApplication{
     public static void main(String[] args) {

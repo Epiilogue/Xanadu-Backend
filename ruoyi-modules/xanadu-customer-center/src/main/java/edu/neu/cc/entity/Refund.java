@@ -42,5 +42,8 @@ public class Refund implements Serializable {
     @TableField("operation_type")
     private String operationType;
 
+    @ApiModelProperty("子站ID")
+    @TableField("substation_id")
+    private Long substationId;
 
 }
