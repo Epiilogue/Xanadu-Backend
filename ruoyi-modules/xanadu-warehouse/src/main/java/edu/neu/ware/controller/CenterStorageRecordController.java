@@ -134,9 +134,9 @@ public class CenterStorageRecordController {
         return centerStorageRecordService.update(updateWrapper);
     }
 
-    @PutMapping("/feign/dispatch/{productId}/{num}")
+    @PutMapping("/feign/dispatch/{productId}/{num}/{from}")
     @ApiOperation("分配商品库存,将商品库存由锁定的数量添加到已分配的数量中")
-    public AjaxResult dispatch(@PathVariable("productId") Long productId, @PathVariable("num") Integer num) {
+    public AjaxResult dispatch(@PathVariable("productId") Long productId, @PathVariable("num") Integer num, @PathVariable("from") String from) {
         if (productId == null) {
             return AjaxResult.error("商品ID不能为空");
         }
@@ -145,11 +145,17 @@ public class CenterStorageRecordController {
         if (centerStorageRecord == null) {
             return AjaxResult.error("中心仓库中不存在该商品,分配失败");
         }
-        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
-                .setSql("lock_num=lock_num-" + num).setSql("allocated_num=allocated_num+" + num)
-                .ge("lock_num", num).eq("id", centerStorageRecord.getId());
+        UpdateWrapper<CenterStorageRecord> updateWrapper = null;
+        if (from.equals("lock")) {
+            updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                    .setSql("lock_num=lock_num-" + num).setSql("allocated_num=allocated_num+" + num)
+                    .ge("lock_num", num).eq("id", centerStorageRecord.getId());
+        } else if (from.equals("unlock")) {
+            updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                    .setSql("allocate_able_num=allocate_able_num-" + num).setSql("allocated_num=allocated_num+" + num)
+                    .ge("allocate_able_num", num).eq("id", centerStorageRecord.getId());
+        }
         boolean update = centerStorageRecordService.update(updateWrapper);
-
         if (update) return AjaxResult.success("分配成功");
         else throw new RuntimeException("分配失败");
     }
