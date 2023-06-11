@@ -4,16 +4,20 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -23,7 +27,13 @@ import lombok.Setter;
 @Setter
 @TableName("dpc_dispatch")
 @ApiModel(value = "Dispatch对象", description = "")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Dispatch implements Serializable {
+    //已提交，已完成
+    public static final String SUBMITTED = "已提交";
+    public static final String FINISHED = "已完成";
+
 
     private static final long serialVersionUID = 1L;
 
@@ -59,5 +69,8 @@ public class Dispatch implements Serializable {
     @TableField("task_id")
     private Long taskId;
 
+    @ApiModelProperty("调度状态")
+    @TableField("status")
+    private String status;
 
 }
