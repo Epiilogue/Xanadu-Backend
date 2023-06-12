@@ -131,6 +131,11 @@ public class RefundController {
                     stockoutService.save(stockout);
                 }
             });
+        }else{
+            products.forEach(product -> {
+                product.setOrderId(order.getId());
+                if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
+            });
         }
         //生成操作记录,记录订单创建操作
         Operation operation = new Operation(order.getId(), order.getCustomerId(), order.getId(),
@@ -173,16 +178,17 @@ public class RefundController {
             if (!p.getRefundAble()) throw new ServiceException("存在不允许退货的商品");
         });
 
+        order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+        order.setOrderType(OperationTypeConstant.RETURN);
+        //插入订单数据库
+        orderService.save(order);
+
         products.forEach(p -> {
             //插入商品记录
             p.setOrderId(order.getId());
             if (!productService.save(p)) throw new ServiceException("插入商品记录异常");
         });
 
-        order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
-        order.setOrderType(OperationTypeConstant.RETURN);
-        //插入订单数据库
-        orderService.save(order);
         refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
         refundService.save(refund);

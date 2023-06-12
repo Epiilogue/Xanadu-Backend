@@ -47,7 +47,7 @@ public class OrderController {
     private StockoutService stockoutService;
 
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
-    @GetMapping("/list/{customerId}")
+    @GetMapping(value={"/list/{customerId}","/list"})
     @CrossOrigin
     public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId) {
         if (customerId == null) {
@@ -66,7 +66,6 @@ public class OrderController {
             @ApiParam(name = "orderType", value = "订单类型") @PathVariable String orderType) {
         //根据不同的订单信息回显不同的数据
         AjaxResult ajaxResult = new AjaxResult(HttpStatus.SUCCESS, "查询成功");
-
         if (OperationTypeConstant.ORDER.equals(orderType)) {
             //回显neworder信息以及对应的商品信息
             NewOrder newOrder = newOrderService.getById(orderId);
@@ -74,7 +73,9 @@ public class OrderController {
             ajaxResult.put("order", newOrder);
         } else {
             //回显refund信息以及对应的商品信息
-            Refund refund = refundService.getById(orderId);
+            QueryWrapper<Refund> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("order_id", orderId);
+            Refund refund = refundService.getOne(queryWrapper);
             if (refund == null) return AjaxResult.error("订单不存在");
             ajaxResult.put("order", refund);
         }
