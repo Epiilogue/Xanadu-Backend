@@ -15,6 +15,7 @@ import edu.neu.dpc.service.ProductService;
 import edu.neu.dpc.service.TaskService;
 import edu.neu.dpc.vo.DispatchVo;
 import edu.neu.dpc.vo.OrderVo;
+import edu.neu.dpc.vo.StorageVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -143,9 +144,16 @@ public class DispatchController {
         Dispatch dispatch = dispatchService.getById(id);
         if (dispatch == null) return AjaxResult.error("调度单不存在");
         //需要查询商品 填充vo
-
-        return AjaxResult.success(dispatch);
+        DispatchVo dispatchVo = new DispatchVo();
+        BeanUtils.copyProperties(dispatch, dispatchVo);
+        Long productId = dispatch.getProductId();
+        //商品ID 查询库存信息
+        StorageVo storage = centerWareClient.getStorage(productId);
+        if (storage == null) return AjaxResult.error("库存信息不存在");
+        BeanUtils.copyProperties(storage, dispatchVo);
+        return AjaxResult.success(dispatchVo);
     }
+
 
 
 

@@ -1,8 +1,10 @@
 package edu.neu.dpc.feign;
 
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.dpc.vo.StorageVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -17,4 +19,8 @@ public interface CenterWareClient {
     @ApiOperation("解锁商品库存")
     public Boolean unlock(@PathVariable("productId") Long productId, @PathVariable("num") Integer num);
 
+
+    @GetMapping("/feign/getStorage/{productId}")
+    @ApiOperation("获取商品各类库存信息")
+    public StorageVo getStorage(@PathVariable("productId") Long productId);
 }

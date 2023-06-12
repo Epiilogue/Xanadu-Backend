@@ -8,6 +8,7 @@ import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.ware.entity.CenterStorageRecord;
 import edu.neu.ware.service.CenterStorageRecordService;
 import edu.neu.ware.vo.ProductRecordsVo;
+import edu.neu.ware.vo.StorageVo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -86,7 +87,7 @@ public class CenterStorageRecordController {
     @GetMapping("/feign/getStorage/{productId}")
     @ApiOperation("获取商品总库存")
     @ApiParam(name = "productId", value = "商品ID")
-    public Integer getStorage(@PathVariable("productId") Long productId) {
+    public Integer getTotalStorage(@PathVariable("productId") Long productId) {
         if (productId == null) {
             return null;//商品ID不能为空
         }
@@ -159,6 +160,26 @@ public class CenterStorageRecordController {
         if (update) return AjaxResult.success("分配成功");
         else throw new RuntimeException("分配失败");
     }
+
+    @GetMapping("/feign/getStorage/{productId}")
+    @ApiOperation("获取商品各类库存信息")
+    public StorageVo getStorage(@PathVariable("productId") Long productId) {
+        if (productId == null) {
+            return null;//商品ID不能为空
+        }
+        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+        if (centerStorageRecord == null) {
+            return new StorageVo();//中心仓库中不存在该商品
+        }
+        StorageVo storageVo = new StorageVo();
+        storageVo.setTotalNum(centerStorageRecord.getTotalNum());
+        storageVo.setLockedNum(centerStorageRecord.getLockNum());
+        storageVo.setAvailableNum(centerStorageRecord.getAllocateAbleNum());
+        storageVo.setAllocatedNum(centerStorageRecord.getAllocatedNum());
+        return storageVo;
+    }
+
 
 
 }
