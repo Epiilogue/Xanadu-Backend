@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 05/06/2023 10:44:23
+ Date: 12/06/2023 12:12:13
 */
 
 SET NAMES utf8mb4;
@@ -48,8 +48,9 @@ CREATE TABLE `cc_new_order`  (
   `invoice_need` int(1) NULL DEFAULT 0 COMMENT '是否要发票',
   `delivery_address` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '送货地址',
   `receiver_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '接收人姓名',
-  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
+  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
+  `new_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '订购类型（先付款后送货，先送货后付款）',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
@@ -84,7 +85,7 @@ CREATE TABLE `cc_order`  (
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '订单状态',
   `total_amout` double(20, 2) NULL DEFAULT NULL COMMENT '涉及的金额',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cc_product
@@ -102,7 +103,7 @@ CREATE TABLE `cc_product`  (
   `refund_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以退货',
   `change_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以换货',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cc_refund
@@ -115,6 +116,7 @@ CREATE TABLE `cc_refund`  (
   `operation_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '操作类型(退货，换货，退订)',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '退换货状态',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
+  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
