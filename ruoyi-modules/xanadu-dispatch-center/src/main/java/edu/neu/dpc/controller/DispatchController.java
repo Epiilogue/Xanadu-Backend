@@ -3,8 +3,10 @@ package edu.neu.dpc.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.NewOrderType;
 import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.TaskStatus;
+import edu.neu.base.constant.cc.TaskType;
 import edu.neu.dpc.entity.Dispatch;
 import edu.neu.dpc.entity.Product;
 import edu.neu.dpc.entity.Task;
@@ -15,6 +17,7 @@ import edu.neu.dpc.service.ProductService;
 import edu.neu.dpc.service.TaskService;
 import edu.neu.dpc.vo.DispatchVo;
 import edu.neu.dpc.vo.OrderVo;
+import edu.neu.dpc.vo.StorageVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -79,7 +82,7 @@ public class DispatchController {
 
 
     @PutMapping("/dispatchOrder/{id}/{substationId}")
-    @ApiOperation(value = "调度订单,传入参数为订单id和分站id,要求出库日期", notes = "调度订单")
+    @ApiOperation(value = "调度订单,传入参数为订单id和分站id", notes = "调度订单")
     public AjaxResult dispatchOrder(@ApiParam("订单ID") @PathVariable("id") Long id,
                                     @ApiParam("子站ID") @PathVariable("substationId") Long substationId) {
         //拉取订单信息，生成任务单
@@ -91,9 +94,13 @@ public class DispatchController {
         Object data = orderResult.get("data");
         //转为OrderVo
         OrderVo orderVo = JSON.copyTo(data, OrderVo.class);
+
+        String taskType = taskService.resolveTaskType(orderVo);
+        if (taskType == null) throw new RuntimeException("无法解析任务类型");
+
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.ASSIGNED
-                , false, orderVo.getOrderType());
+                , false, taskType);
         boolean success;
         //1.保存任务
         success = taskService.save(task);
@@ -132,10 +139,18 @@ public class DispatchController {
         //尝试修改库存，调度需要从可分配库存中减去对应的数量，添加到已分配库存中，后续从已分配库存中减去对应的数量
         if (!success) throw new RuntimeException("保存调度单失败");
         AjaxResult unlock = centerWareClient.dispatch(product.getId(), product.getNumber(), "unlock");
-        if (unlock.isError()) throw new RuntimeException("解锁库存失败");
+        if (unlock.isError()) throw new RuntimeException("可分配库存不足");
         return AjaxResult.success("调度成功");
     }
 
+
+    @GetMapping("/list")
+    @ApiOperation(value = "获取调度单列表", notes = "获取调度单列表")
+    public AjaxResult getDispatchList() {
+        List<Dispatch> dispatches = dispatchService.list();
+        if (dispatches == null || dispatches.size() == 0) return AjaxResult.error("无调度单存在");
+        return AjaxResult.success(dispatches);
+    }
 
     @GetMapping("/info/{id}")
     @ApiOperation(value = "获取调度单信息", notes = "获取调度单信息")
@@ -143,10 +158,15 @@ public class DispatchController {
         Dispatch dispatch = dispatchService.getById(id);
         if (dispatch == null) return AjaxResult.error("调度单不存在");
         //需要查询商品 填充vo
-
-        return AjaxResult.success(dispatch);
+        DispatchVo dispatchVo = new DispatchVo();
+        BeanUtils.copyProperties(dispatch, dispatchVo);
+        Long productId = dispatch.getProductId();
+        //商品ID 查询库存信息
+        StorageVo storage = centerWareClient.getStorage(productId);
+        if (storage == null) return AjaxResult.error("库存信息不存在");
+        BeanUtils.copyProperties(storage, dispatchVo);
+        return AjaxResult.success(dispatchVo);
     }
-
 
 
 }

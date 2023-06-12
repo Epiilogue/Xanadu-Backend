@@ -1,5 +1,6 @@
 package edu.neu.dpc.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import edu.neu.dpc.entity.Product;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -55,5 +56,8 @@ public class OrderVo implements Serializable {
 
     @ApiModelProperty("商品列表")
     private List<Product> products;
+
+    @ApiModelProperty("新订单类型")
+    private String newType;
 
 }

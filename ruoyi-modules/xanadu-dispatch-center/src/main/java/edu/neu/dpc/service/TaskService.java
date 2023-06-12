@@ -2,6 +2,7 @@ package edu.neu.dpc.service;
 
 import edu.neu.dpc.entity.Task;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.neu.dpc.vo.OrderVo;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface TaskService extends IService<Task> {
 
+    String resolveTaskType(OrderVo orderVo);
 }
