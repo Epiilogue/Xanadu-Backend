@@ -3,6 +3,7 @@ package edu.neu.ware.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 
 import edu.neu.ware.entity.CenterStorageRecord;
@@ -84,7 +85,7 @@ public class CenterStorageRecordController {
     }
 
 
-    @GetMapping("/feign/getStorage/{productId}")
+    @GetMapping("/feign/getTotalStorage/{productId}")
     @ApiOperation("获取商品总库存")
     @ApiParam(name = "productId", value = "商品ID")
     public Integer getTotalStorage(@PathVariable("productId") Long productId) {
@@ -158,7 +159,7 @@ public class CenterStorageRecordController {
         }
         boolean update = centerStorageRecordService.update(updateWrapper);
         if (update) return AjaxResult.success("分配成功");
-        else throw new RuntimeException("分配失败");
+        else throw new ServiceException("分配失败");
     }
 
     @GetMapping("/feign/getStorage/{productId}")
@@ -180,6 +181,32 @@ public class CenterStorageRecordController {
         return storageVo;
     }
 
+
+    @PutMapping("/feign/reDispatch/{productId}/{prevNum}/{nowNum}")
+    @ApiOperation("回滚商品分配库存")
+    AjaxResult reDispatch(@PathVariable("productId") Long productId, @PathVariable("prevNum") Integer prevNum, @PathVariable("nowNum") Integer nowNum) {
+        if (productId == null) {
+            return AjaxResult.error("商品ID不能为空");
+        }
+        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+        if (centerStorageRecord == null) {
+            return AjaxResult.error("中心仓库中不存在该商品,撤回分配库存失败");
+        }
+        UpdateWrapper<CenterStorageRecord> rollbackWrapper = new UpdateWrapper<CenterStorageRecord>()
+                .setSql("allocated_num=allocated_num-" + prevNum).setSql("allocate_able_num=allocate_able_num+" + prevNum)
+                .ge("allocated_num", prevNum).eq("id", centerStorageRecord.getId());
+        boolean update = centerStorageRecordService.update(rollbackWrapper);
+        if (!update) throw new ServiceException("撤回分配库存失败");
+
+        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                .setSql("allocate_able_num=allocate_able_num-" + nowNum).setSql("allocated_num=allocated_num+" + nowNum)
+                .ge("allocate_able_num", nowNum).eq("id", centerStorageRecord.getId());
+        update = centerStorageRecordService.update(updateWrapper);
+        if (update) return AjaxResult.success("调度成功");
+        else throw new ServiceException("调度失败");
+
+    }
 
 
 }

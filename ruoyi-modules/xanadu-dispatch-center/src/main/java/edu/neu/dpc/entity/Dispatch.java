@@ -30,7 +30,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Dispatch implements Serializable {
-    //已提交，已完成
+
+    public static final String UN_SUBMITTED = " 未提交";
     public static final String SUBMITTED = "已提交";
     public static final String FINISHED = "已完成";
 

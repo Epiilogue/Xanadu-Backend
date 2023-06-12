@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication(scanBasePackages = {"edu.neu"})
+@SpringBootApplication(scanBasePackages = {"edu.neu","com.ruoyi.common.security.handler"})
 @EnableFeignClients
 @EnableDiscoveryClient
 public class WarehouseApplication {

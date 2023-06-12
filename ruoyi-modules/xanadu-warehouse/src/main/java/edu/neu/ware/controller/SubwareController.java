@@ -1,11 +1,14 @@
 package edu.neu.ware.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 
+import edu.neu.ware.entity.SubStorageRecord;
 import edu.neu.ware.entity.Subware;
 import edu.neu.ware.feign.CCOrderClient;
+import edu.neu.ware.service.SubStorageRecordService;
 import edu.neu.ware.service.SubwareService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,9 @@ public class SubwareController {
 
     @Autowired
     private CCOrderClient ccOrderClient;
+
+    @Autowired
+    private SubStorageRecordService subStorageRecordService;
 
     @PostMapping("/add")
     @ApiOperation(value = "添加分库", notes = "添加分库")
@@ -65,10 +71,9 @@ public class SubwareController {
         Subware subware = subwareService.getById(id);
         if (subware == null) return AjaxResult.error("分库不存在");
 
-        //TODO:检查分库是否有未完成的订单或者任务单,如果存在则不能删除
-        if (ccOrderClient.getOrderCountBySubstationId(id)) {
-            return AjaxResult.error("仓库存在订单记录,不能删除");
-        }
+        QueryWrapper<SubStorageRecord> totalNum = new QueryWrapper<SubStorageRecord>().gt("total_num", 0);
+        List<SubStorageRecord> list = subStorageRecordService.list(totalNum);
+        if (list.size() > 0) return AjaxResult.error("分库有货物，不能删除");
 
         boolean res = subwareService.removeById(id);
         if (!res) return AjaxResult.error("删除分库失败");

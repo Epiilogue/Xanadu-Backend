@@ -23,4 +23,7 @@ public interface CenterWareClient {
     @GetMapping("/feign/getStorage/{productId}")
     @ApiOperation("获取商品各类库存信息")
     public StorageVo getStorage(@PathVariable("productId") Long productId);
+
+
+    AjaxResult reDispatch(Long productId, Integer prevNum, Integer nowNum);
 }

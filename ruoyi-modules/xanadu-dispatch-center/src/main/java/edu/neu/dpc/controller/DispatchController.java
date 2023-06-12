@@ -27,10 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -134,13 +131,54 @@ public class DispatchController {
                                       @ApiParam("要求出库日期") @RequestParam("requireDate") Date requireDate,
                                       @ApiParam("商品信息") Product product) {
         //构造并保存调度单
-        Dispatch dispatch = new Dispatch(null, subwareId, product.getId(), product.getNumber(), product.getProductName(), product.getProductCategary(), requireDate, Dispatch.SUBMITTED);
+        Dispatch dispatch = new Dispatch(null, subwareId, product.getId(), product.getNumber(), product.getProductName(), product.getProductCategary(), requireDate, Dispatch.UN_SUBMITTED);
         boolean success = dispatchService.save(dispatch);
         //尝试修改库存，调度需要从可分配库存中减去对应的数量，添加到已分配库存中，后续从已分配库存中减去对应的数量
         if (!success) throw new RuntimeException("保存调度单失败");
         AjaxResult unlock = centerWareClient.dispatch(product.getId(), product.getNumber(), "unlock");
         if (unlock.isError()) throw new RuntimeException("可分配库存不足");
         return AjaxResult.success("调度成功");
+    }
+
+    @PutMapping("/submitDispatch/{id}")
+    @ApiOperation(value = "提交调度单,传入参数为调度单id", notes = "提交调度单")
+    public AjaxResult submitDispatch(@ApiParam("调度单ID") @PathVariable("id") Long id) {
+        //修改调度单状态为已提交
+        Dispatch dispatch = dispatchService.getById(id);
+        if (dispatch == null) return AjaxResult.error("调度单不存在");
+        //检查状态是否为未提交
+        if (!Objects.equals(dispatch.getStatus(), Dispatch.UN_SUBMITTED)) return AjaxResult.error("调度单状态不正确");
+        dispatch.setStatus(Dispatch.SUBMITTED);
+        if (!dispatchService.updateById(dispatch)) throw new RuntimeException("更新调度单状态失败");
+        return AjaxResult.success("提交成功");
+    }
+
+    @DeleteMapping("/deleteDispatch/{id}")
+    @ApiOperation(value = "删除调度单,传入参数为调度单id", notes = "删除调度单")
+    public AjaxResult deleteDispatch(@ApiParam("调度单ID") @PathVariable("id") Long id) {
+        //修改调度单状态为已提交
+        Dispatch dispatch = dispatchService.getById(id);
+        if (dispatch == null) return AjaxResult.error("调度单不存在");
+        //检查状态是否为未提交
+        if (!Objects.equals(dispatch.getStatus(), Dispatch.UN_SUBMITTED)) return AjaxResult.error("调度单状态不正确");
+        dispatch.setStatus(Dispatch.SUBMITTED);
+        if (!dispatchService.updateById(dispatch)) throw new RuntimeException("更新调度单状态失败");
+        return AjaxResult.success("提交成功");
+    }
+
+
+    @PostMapping("/editDispatch")
+    @ApiOperation(value = "修改商品调度单, 只允许修改调度的数量以及时间，目的地等信息", notes = "修改商品调度单")
+    public AjaxResult editDispatch(@RequestBody Dispatch dispatch) {
+        if (!Objects.equals(dispatch.getStatus(), Dispatch.UN_SUBMITTED)) return AjaxResult.error("当前状态不允许修改");
+        Dispatch prevDispatch = dispatchService.getById(dispatch.getId());
+        if (prevDispatch == null) return AjaxResult.error("调度单不存在");
+        //若是需要修改调度的数量，需要将已分配减去原来的，可分配添加上原来的，已分配添加新增的，可分配减去新增的
+        AjaxResult reDispatchSuccess = centerWareClient.reDispatch(prevDispatch.getProductId(), prevDispatch.getProductNum(), dispatch.getProductNum());
+        if (reDispatchSuccess.isError()) throw new RuntimeException("修改库存失败: " + reDispatchSuccess.getMsg());
+        //更新调度单
+        if (!dispatchService.updateById(dispatch)) throw new RuntimeException("更新调度单失败");
+        return AjaxResult.success("修改成功");
     }
 
 

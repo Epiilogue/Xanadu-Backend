@@ -203,4 +203,8 @@ public class AjaxResult extends HashMap<String, Object>
         super.put(key, value);
         return this;
     }
+
+    public String getMsg() {
+        return (String) this.get(MSG_TAG);
+    }
 }
