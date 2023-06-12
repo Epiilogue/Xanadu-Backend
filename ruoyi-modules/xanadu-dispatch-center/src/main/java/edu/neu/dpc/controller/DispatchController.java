@@ -80,7 +80,7 @@ public class DispatchController {
 
 
     @PutMapping("/dispatchOrder/{id}/{substationId}")
-    @ApiOperation(value = "调度订单,传入参数为订单id和分站id,要求出库日期", notes = "调度订单")
+    @ApiOperation(value = "调度订单,传入参数为订单id和分站id", notes = "调度订单")
     public AjaxResult dispatchOrder(@ApiParam("订单ID") @PathVariable("id") Long id,
                                     @ApiParam("子站ID") @PathVariable("substationId") Long substationId) {
         //拉取订单信息，生成任务单
@@ -133,10 +133,18 @@ public class DispatchController {
         //尝试修改库存，调度需要从可分配库存中减去对应的数量，添加到已分配库存中，后续从已分配库存中减去对应的数量
         if (!success) throw new RuntimeException("保存调度单失败");
         AjaxResult unlock = centerWareClient.dispatch(product.getId(), product.getNumber(), "unlock");
-        if (unlock.isError()) throw new RuntimeException("解锁库存失败");
+        if (unlock.isError()) throw new RuntimeException("可分配库存不足");
         return AjaxResult.success("调度成功");
     }
 
+
+    @GetMapping("/list")
+    @ApiOperation(value = "获取调度单列表", notes = "获取调度单列表")
+    public AjaxResult getDispatchList() {
+        List<Dispatch> dispatches = dispatchService.list();
+        if (dispatches == null || dispatches.size() == 0) return AjaxResult.error("无调度单存在");
+        return AjaxResult.success(dispatches);
+    }
 
     @GetMapping("/info/{id}")
     @ApiOperation(value = "获取调度单信息", notes = "获取调度单信息")
@@ -153,6 +161,8 @@ public class DispatchController {
         BeanUtils.copyProperties(storage, dispatchVo);
         return AjaxResult.success(dispatchVo);
     }
+
+
 
 
 
