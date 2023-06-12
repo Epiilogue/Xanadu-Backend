@@ -1,8 +1,9 @@
-package edu.neu.dpc.vo;
+package edu.neu.dpc.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,8 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductVo implements Serializable {
+@TableName("dpc_product")
+public class Product implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,6 +27,10 @@ public class ProductVo implements Serializable {
 
     @ApiModelProperty("对应的订单ID号")
     private Long orderId;
+
+    @ApiModelProperty("对应的任务ID号")
+    private Long taskId;
+
 
     @ApiModelProperty("商品ID")
     @TableField("product_id")
@@ -46,17 +52,9 @@ public class ProductVo implements Serializable {
     @TableField("product_categary")
     private String productCategary;
 
-    @ApiModelProperty("商品是否缺货")
-    @TableField("islack")
-    private Boolean islack;
-
-    @ApiModelProperty("商品能否退货")
-    @TableField("refund_able")
-    private Boolean refundAble;
-
-    @ApiModelProperty("商品能否换货")
-    @TableField("change_able")
-    private Boolean changeAble;
+    @ApiModelProperty("实际接收数量")
+    @TableField("actual_number")
+    private Integer actualNumber;
 
 
 }
