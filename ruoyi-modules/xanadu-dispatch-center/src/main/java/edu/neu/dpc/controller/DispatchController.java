@@ -2,6 +2,7 @@ package edu.neu.dpc.controller;
 
 
 import com.alibaba.fastjson2.JSON;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.NewOrderType;
 import edu.neu.base.constant.cc.OrderStatusConstant;
@@ -162,8 +163,11 @@ public class DispatchController {
         //检查状态是否为未提交
         if (!Objects.equals(dispatch.getStatus(), Dispatch.UN_SUBMITTED)) return AjaxResult.error("调度单状态不正确");
         dispatch.setStatus(Dispatch.SUBMITTED);
-        if (!dispatchService.updateById(dispatch)) throw new RuntimeException("更新调度单状态失败");
-        return AjaxResult.success("提交成功");
+        //重新回滚库存,删除掉之前的但是增加0
+        AjaxResult reDispatchSuccess = centerWareClient.reDispatch(dispatch.getProductId(), dispatch.getProductNum(), 0);
+        if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
+        if (!dispatchService.updateById(dispatch)) throw new ServiceException("更新调度单状态失败");
+        return AjaxResult.success("删除成功");
     }
 
 
@@ -175,9 +179,9 @@ public class DispatchController {
         if (prevDispatch == null) return AjaxResult.error("调度单不存在");
         //若是需要修改调度的数量，需要将已分配减去原来的，可分配添加上原来的，已分配添加新增的，可分配减去新增的
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(prevDispatch.getProductId(), prevDispatch.getProductNum(), dispatch.getProductNum());
-        if (reDispatchSuccess.isError()) throw new RuntimeException("修改库存失败: " + reDispatchSuccess.getMsg());
+        if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
         //更新调度单
-        if (!dispatchService.updateById(dispatch)) throw new RuntimeException("更新调度单失败");
+        if (!dispatchService.updateById(dispatch)) throw new ServiceException("更新调度单失败");
         return AjaxResult.success("修改成功");
     }
 
