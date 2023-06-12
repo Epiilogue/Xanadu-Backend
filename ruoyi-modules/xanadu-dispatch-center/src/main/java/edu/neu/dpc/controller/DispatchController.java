@@ -3,8 +3,10 @@ package edu.neu.dpc.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.NewOrderType;
 import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.TaskStatus;
+import edu.neu.base.constant.cc.TaskType;
 import edu.neu.dpc.entity.Dispatch;
 import edu.neu.dpc.entity.Product;
 import edu.neu.dpc.entity.Task;
@@ -92,9 +94,13 @@ public class DispatchController {
         Object data = orderResult.get("data");
         //转为OrderVo
         OrderVo orderVo = JSON.copyTo(data, OrderVo.class);
+
+        String taskType = taskService.resolveTaskType(orderVo);
+        if (taskType == null) throw new RuntimeException("无法解析任务类型");
+
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.ASSIGNED
-                , false, orderVo.getOrderType());
+                , false, taskType);
         boolean success;
         //1.保存任务
         success = taskService.save(task);
@@ -161,10 +167,6 @@ public class DispatchController {
         BeanUtils.copyProperties(storage, dispatchVo);
         return AjaxResult.success(dispatchVo);
     }
-
-
-
-
 
 
 }

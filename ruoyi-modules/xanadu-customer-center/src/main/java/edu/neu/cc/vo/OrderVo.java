@@ -56,4 +56,8 @@ public class OrderVo implements Serializable {
     @ApiModelProperty("商品列表")
     private List<Product> products;
 
+
+    @ApiModelProperty("新订单类型")
+    private String newType;
+
 }

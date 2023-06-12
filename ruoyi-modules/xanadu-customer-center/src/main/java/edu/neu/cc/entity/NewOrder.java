@@ -72,4 +72,9 @@ public class NewOrder  implements Serializable{
     private List<Product> products;
 
 
+    @ApiModelProperty("新订单类型")
+    @TableField("new_type")
+    private String newType;
+
+
 }
