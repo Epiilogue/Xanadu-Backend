@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 12/06/2023 13:53:08
+ Date: 13/06/2023 11:45:24
 */
 
 SET NAMES utf8mb4;
@@ -49,6 +49,8 @@ CREATE TABLE `ware_center_output`  (
   `output_time` datetime NULL DEFAULT NULL COMMENT '出库时间',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库状态(未出库，已出库)',
   `target_id` bigint(20) NULL DEFAULT NULL COMMENT '源ID，可以为供应商ID或者分站ID',
+  `require_time` datetime NULL DEFAULT NULL COMMENT '预计出库时间',
+  `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
