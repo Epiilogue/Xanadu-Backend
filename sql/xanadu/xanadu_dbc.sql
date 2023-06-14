@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 12/06/2023 13:53:19
+ Date: 14/06/2023 15:39:24
 */
 
 SET NAMES utf8mb4;
@@ -58,7 +58,7 @@ CREATE TABLE `dbc_product`  (
   `second_categray` int(10) NULL DEFAULT NULL COMMENT '二级分类ID',
   `price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `cost` double(10, 2) NULL DEFAULT NULL COMMENT '商品成本',
-  `upplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供销商ID',
+  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供销商ID',
   `refund_able` tinyint(1) NULL DEFAULT NULL COMMENT '能否退货',
   `change_able` tinyint(1) NULL DEFAULT NULL COMMENT '能否换货',
   `comment` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
