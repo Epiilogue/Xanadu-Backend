@@ -1,22 +1,21 @@
 package edu.neu.ware.controller;
 
 
-import cn.hutool.core.date.DateUtil;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.InputOutputStatus;
 import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.base.constant.cc.OrderStatusConstant;
-import edu.neu.ware.entity.CenterInput;
 import edu.neu.ware.entity.CenterOutput;
 import edu.neu.ware.entity.CenterStorageRecord;
 import edu.neu.ware.entity.Subware;
 import edu.neu.ware.feign.CCOrderClient;
 import edu.neu.ware.feign.SupplierClient;
 import edu.neu.ware.feign.TaskClient;
-import edu.neu.ware.service.CenterInputService;
 import edu.neu.ware.service.CenterOutputService;
 import edu.neu.ware.service.CenterStorageRecordService;
 import edu.neu.ware.service.SubwareService;
@@ -27,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -119,7 +117,7 @@ public class CenterOutputController {
         String status = centerOutput.getStatus();
         if (!status.equals(InputOutputStatus.NOT_OUTPUT)) return AjaxResult.error("确认失败，该出库记录已经出库");
         //拿到出库记录的出库数量
-        Integer outputNum = centerOutput.getOuputNum();
+        Integer outputNum = centerOutput.getOutputNum();
         //获取出库类型
         String outputType = centerOutput.getOutputType();
         boolean updateSuccess;
@@ -162,47 +160,104 @@ public class CenterOutputController {
         if (!updateSuccess) throw new ServiceException("出库失败，更新总库存量失败");
         centerOutput.setStatus(InputOutputStatus.OUTPUT);
         centerOutput.setOutputTime(new Date());
-        centerOutput.setOuputNum(number);
+        centerOutput.setOutputNum(number);
+        //TODO：动态获取登录用户作为操作人
+        centerOutput.setOperatorId(1L);
         return AjaxResult.success(centerOutputService.updateById(centerOutput));
     }
 
 
     @GetMapping("/printInventoryList")
-    @ApiOperation("打印出库单接口")
-    public AjaxResult printInventoryList(@RequestParam("startTime") Date date) {
+    @ApiOperation("打印出库单接口,只找未出库的")
+    public AjaxResult printInventoryList(@RequestParam(value = "date") Date date,
+                                         @RequestParam(value = "productName", required = false) String productName) {
         //获取指定日期的出库记录,需要获取当日所有时间的出库记录,从当日00：00 到当日 23：59
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
 
-        Map<Long, String> supplierNames = supplierClient.getSupplierNames();
 
         calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         Date start = calendar.getTime();
         calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         Date end = calendar.getTime();
         //获取所有的出库记录，字段为require_time
-        List<CenterOutput> centerOutputs = centerOutputService.list(new QueryWrapper<CenterOutput>().between("require_time", start, end));
+        List<CenterOutput> centerOutputs = centerOutputService.list(new QueryWrapper<CenterOutput>().between("require_time", start, end).eq("status", InputOutputStatus.NOT_OUTPUT));
+        if (productName != null && !productName.equals("")) {
+            centerOutputs = centerOutputs.stream().filter(centerOutput -> centerOutput.getProductName().contains(productName)).collect(Collectors.toList());
+        }
         //根据商品进行分类统计
-        HashMap<Long, Inventory> longInventoryHashMap = new HashMap<>();
+
+        Map<Long, String> supplierNames = supplierClient.getSupplierNames();
+        HashMap<Long, InventoryVo> longInventoryHashMap = new HashMap<>();
+
         centerOutputs.forEach(centerOutput -> {
             //获取商品ID
-            Inventory inventory = longInventoryHashMap.getOrDefault(centerOutput.getProductId(), new Inventory(centerOutput));
+            InventoryVo inventoryVo = longInventoryHashMap.getOrDefault(centerOutput.getProductId(), new InventoryVo(centerOutput));
             String supplierName;
-            if (inventory.getSupplierName() == null) {
+            if (inventoryVo.getSupplierName() == null) {
                 //说明初始化，此时需要查询总库存量以及供应商的名称
                 supplierName = supplierNames.getOrDefault(centerOutput.getSupplierId(), "未知供应商");
-                inventory.setSupplierName(supplierName);
+                inventoryVo.setSupplierName(supplierName);
                 Integer storage = centerStorageRecordService.getById(centerOutput.getProductId()).getTotalNum();
-                inventory.setTotalNum(storage);
-                inventory.setDate(date);
+                inventoryVo.setTotalNum(storage);
+                inventoryVo.setDate(date);
             }
-            inventory.setNumber(inventory.getNumber() + centerOutput.getOuputNum());
-            inventory.setTotalPrice(inventory.getTotalPrice() + centerOutput.getOuputNum() * centerOutput.getProductPrice());
+            inventoryVo.setNumber(inventoryVo.getNumber() + centerOutput.getOutputNum());
+            inventoryVo.setTotalPrice(inventoryVo.getTotalPrice() + centerOutput.getOutputNum() * centerOutput.getProductPrice());
         });
+
+
         return AjaxResult.success(longInventoryHashMap.values());
     }
 
 
+    /**
+     * 仓库名称、操作员、商品编号、商品名称、售价、数量、供销商、备注、商品数量总计、总金额、分发员、签收人、日期
+     */
+    @GetMapping("/printDistributionList")
+    @ApiOperation("打印配送单接口,只找已出库的")
+    public AjaxResult printDistributionList(@RequestParam("date") Date date
+            , @RequestParam(value = "productName", required = false) String productName,
+                                            @RequestParam("subwareId") Long SubwareId) {
+        //获取指定日期的出库记录,需要获取当日所有时间的出库记录,从当日00：00 到当日 23：59
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        Date start = calendar.getTime();
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        Date end = calendar.getTime();
+        //查询子库名称
+        String subwareName = subwareService.getById(SubwareId).getName();
+
+        //获取所有的出库记录，字段为require_time
+        List<CenterOutput> centerOutputs = centerOutputService.list(new QueryWrapper<CenterOutput>().between("", start, end).eq("status", InputOutputStatus.OUTPUT));
+        centerOutputs = centerOutputs.stream().filter(centerOutput -> centerOutput.getSubwareId().equals(SubwareId)).collect(Collectors.toList());
+        if (centerOutputs.size() == 0) return AjaxResult.error("未找到对应的出库记录");
+        if (!StringUtil.isBlank(productName)) {
+            centerOutputs = centerOutputs.stream().filter(centerOutput -> centerOutput.getProductName().contains(productName)).collect(Collectors.toList());
+        }
+        //根据商品进行分类统计
+        HashMap<Long, InventoryVo> longInventoryHashMap = new HashMap<>();
+        Map<Long, String> supplierNames = supplierClient.getSupplierNames();
+        centerOutputs.forEach(centerOutput -> {
+            //获取商品ID
+            InventoryVo inventoryVo = longInventoryHashMap.getOrDefault(centerOutput.getProductId(), new InventoryVo(centerOutput));
+            String supplierName;
+            if (inventoryVo.getSupplierName() == null) {
+                //说明初始化，此时需要查询总库存量以及供应商的名称
+                supplierName = supplierNames.getOrDefault(centerOutput.getSupplierId(), "未知供应商");
+                inventoryVo.setSupplierName(supplierName);
+                Integer storage = centerStorageRecordService.getById(centerOutput.getProductId()).getTotalNum();
+                inventoryVo.setTotalNum(storage);
+                inventoryVo.setDate(date);
+            }
+            inventoryVo.setSubwareName(subwareName);
+            inventoryVo.setNumber(inventoryVo.getNumber() + centerOutput.getOutputNum());
+            inventoryVo.setOperatorId(centerOutput.getOperatorId());
+            inventoryVo.setTotalPrice(inventoryVo.getTotalPrice() + centerOutput.getOutputNum() * centerOutput.getProductPrice());
+        });
+        return AjaxResult.success(longInventoryHashMap.values());
+    }
 
 
     @PostMapping("/feign/add")

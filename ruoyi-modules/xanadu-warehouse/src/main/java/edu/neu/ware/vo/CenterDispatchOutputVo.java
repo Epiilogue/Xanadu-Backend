@@ -34,7 +34,7 @@ public class CenterDispatchOutputVo implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    private Integer ouputNum;
+    private Integer outputNum;
 
     @ApiModelProperty("出库状态")
     private String status;

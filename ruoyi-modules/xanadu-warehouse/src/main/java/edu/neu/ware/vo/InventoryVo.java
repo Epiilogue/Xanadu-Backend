@@ -5,7 +5,6 @@ import edu.neu.ware.entity.CenterOutput;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -15,7 +14,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @Api("出库单")
-public class Inventory {
+public class InventoryVo {
     private Long productId;
     private String productName;
     private Double productPrice;
@@ -26,12 +25,17 @@ public class Inventory {
     private Double totalPrice;
     private Date date;
 
-    public Inventory(CenterOutput centerOutput) {
+    //子仓库名称
+    private String subwareName;
+    //操作员ID
+    private Long operatorId;
+
+    public InventoryVo(CenterOutput centerOutput) {
         this.productId = centerOutput.getProductId();
         this.productName = centerOutput.getProductName();
         this.productPrice = centerOutput.getProductPrice();
         this.number = 0;
-        this.remark = centerOutput.getStatus();
+        this.remark = "";
         this.totalPrice = 0.0;
         this.supplierName=null;
         this.totalNum=null;

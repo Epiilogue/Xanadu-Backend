@@ -39,8 +39,8 @@ public class CenterRefundOutputVo implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    @TableField("ouput_num")
-    private Integer ouputNum;
+    @TableField("output_num")
+    private Integer outputNum;
 
     @ApiModelProperty("出库时间")
     @TableField("output_time")

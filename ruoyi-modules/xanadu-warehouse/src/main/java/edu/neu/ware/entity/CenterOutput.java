@@ -45,8 +45,8 @@ public class CenterOutput implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    @TableField("ouput_num")
-    private Integer ouputNum;
+    @TableField("output_num")
+    private Integer outputNum;
 
     @ApiModelProperty("出库类型")
     @TableField("output_type")
@@ -84,5 +84,8 @@ public class CenterOutput implements Serializable {
     @TableField("product_price")
     private Double productPrice;
 
+    @ApiModelProperty("操作人员ID")
+    @TableField("operator_id")
+    private Long operatorId;
 
 }

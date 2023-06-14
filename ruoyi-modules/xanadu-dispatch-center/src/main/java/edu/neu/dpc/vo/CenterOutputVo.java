@@ -48,7 +48,7 @@ public class CenterOutputVo implements Serializable {
 
 
     @ApiModelProperty("出库数量")
-    private Integer ouputNum;
+    private Integer outputNum;
 
     @ApiModelProperty("出库类型")
     private String outputType;

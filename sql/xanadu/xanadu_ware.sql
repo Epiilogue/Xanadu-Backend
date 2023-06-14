@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 14/06/2023 15:39:44
+ Date: 14/06/2023 21:33:11
 */
 
 SET NAMES utf8mb4;
@@ -46,7 +46,8 @@ CREATE TABLE `ware_center_output`  (
   `output_id` bigint(20) NULL DEFAULT NULL COMMENT '退货出库或调拨出库的ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `ouput_num` int(10) NULL DEFAULT NULL COMMENT '出库数量',
+  `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
+  `output_num` int(10) NULL DEFAULT NULL COMMENT '预期出库数量',
   `output_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库类型',
   `output_time` datetime NULL DEFAULT NULL COMMENT '出库时间',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库状态(未出库，已出库)',
@@ -55,8 +56,9 @@ CREATE TABLE `ware_center_output`  (
   `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  `operator_id` bigint(20) NULL DEFAULT NULL COMMENT '操作员ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ware_center_storage_record
