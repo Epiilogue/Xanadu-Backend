@@ -59,9 +59,13 @@ public class CenterInputController {
     }
 
 
-    @PutMapping("/confirm/{id}")
-    @ApiOperation("确认入库,并根据入库的类型更新状态")
-    public AjaxResult confirm(@PathVariable("id") Long id) {
+
+    @PutMapping("/confirm/{id}/{number}")
+    @ApiOperation("确认入库,并根据入库的类型更新状态,输入实际的入库量")
+    public AjaxResult confirm(@PathVariable("id") Long id,@PathVariable("number") Integer number) {
+
+        if (number == null || number <= 0) return AjaxResult.error("入库数量错误");
+
         if (id == null) return AjaxResult.error("id不能为空");
         //入库单不存在
         CenterInput centerInput = centerInputService.getById(id);

@@ -1,6 +1,7 @@
 package edu.neu.ware.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,9 @@ public class CenterDispatchOutputVo implements Serializable {
     private String status;
 
     @ApiModelProperty("分库ID")
-    private Long targetId;
+    @TableField("subware_id")
+    private Long subwareId;
+
 
     @ApiModelProperty("任务号")
     private Long taskId;

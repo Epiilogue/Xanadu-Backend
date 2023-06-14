@@ -14,7 +14,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -60,8 +59,8 @@ public class Product implements Serializable {
     private Double cost;
 
     @ApiModelProperty("供销商ID")
-    @TableField("upplier_id")
-    private Long upplierId;
+    @TableField("supplier_id")
+    private Long supplierId;
 
     @ApiModelProperty("能否退货")
     @TableField("refund_able")

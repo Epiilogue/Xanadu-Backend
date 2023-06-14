@@ -13,6 +13,7 @@ import edu.neu.ware.entity.CenterOutput;
 import edu.neu.ware.entity.CenterStorageRecord;
 import edu.neu.ware.entity.Subware;
 import edu.neu.ware.feign.CCOrderClient;
+import edu.neu.ware.feign.SupplierClient;
 import edu.neu.ware.feign.TaskClient;
 import edu.neu.ware.service.CenterInputService;
 import edu.neu.ware.service.CenterOutputService;
@@ -21,6 +22,7 @@ import edu.neu.ware.service.SubwareService;
 import edu.neu.ware.vo.CenterDispatchOutputVo;
 import edu.neu.ware.vo.CenterInputVo;
 import edu.neu.ware.vo.CenterOutputVo;
+import edu.neu.ware.vo.CenterRefundOutputVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +57,8 @@ public class CenterOutputController {
     @Autowired
     TaskClient taskClient;
 
+    @Autowired
+    SupplierClient supplierClient;
 
     @Autowired
     CCOrderClient ccOrderClient;
@@ -83,17 +84,25 @@ public class CenterOutputController {
     }
 
 
+    /*选择项、商品分类、商品代码、商品名称、供应商、计量单位、退货数量、 日期 */
     @GetMapping("/getReturnOutput")
     @ApiOperation("获取所有的退货出库记录")
     public AjaxResult getReturnOutput() {
         List<CenterOutput> returnOutputList = centerOutputService.list(new QueryWrapper<CenterOutput>().eq("output_type", InputOutputType.RETURN_OUT));
-        //获取到了所有的调度出库的列表
+        //获取到了所有的中心退货出库的列表
         //映射为CenterDispatchOutputVo
-        List<CenterDispatchOutputVo> list = returnOutputList.stream().map(
+        //首先需要远程调用获取对应的供应商信息
+        Map<Long, String> supplierNames = supplierClient.getSupplierNames();
+
+        List<CenterRefundOutputVo> list = returnOutputList.stream().map(
                 returnOutput -> {
-                    CenterDispatchOutputVo centerDispatchOutputVo = new CenterDispatchOutputVo();
-                    BeanUtils.copyProperties(returnOutput, centerDispatchOutputVo);
-                    return centerDispatchOutputVo;
+                    CenterRefundOutputVo centerRefundOutputVo = new CenterRefundOutputVo();
+                    BeanUtils.copyProperties(returnOutput, centerRefundOutputVo);
+                    //设置供应商名字
+                    Long supplierId = returnOutput.getSupplierId();
+                    String supplierName = supplierNames.get(supplierId);
+                    centerRefundOutputVo.setSupplierName(supplierName);
+                    return centerRefundOutputVo;
                 }
         ).collect(Collectors.toList());
         return AjaxResult.success(list);

@@ -34,7 +34,7 @@ public class SupplierController {
     //根据ID查询名字
     @GetMapping("/feign/getSupplierNames")
     @ApiOperation("获取所有供应商的id和名字")
-    public Map<Long, String> getSupplierNameById() {
+    public Map<Long, String> getSupplierNames() {
         HashMap<Long, String> longStringHashMap = new HashMap<>();
         supplierService.list().forEach(
                 s -> longStringHashMap.put(s.getId(), s.getName())

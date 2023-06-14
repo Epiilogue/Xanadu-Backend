@@ -64,7 +64,7 @@ public class CenterOutput implements Serializable {
     @TableField("supplier_id")
     private Long supplierId;
 
-    @ApiModelProperty("分库ID")
+    @ApiModelProperty("分站ID")
     @TableField("substation_id")
     private Long substationId;
 
@@ -76,6 +76,8 @@ public class CenterOutput implements Serializable {
     @TableField("require_time")
     private Date requireTime;
 
-
+    @ApiModelProperty("分库ID")
+    @TableField("subware_id")
+    private Long subwareId;
 
 }
