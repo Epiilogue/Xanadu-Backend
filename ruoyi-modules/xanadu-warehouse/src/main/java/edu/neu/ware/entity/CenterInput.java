@@ -25,6 +25,10 @@ import java.util.Date;
 @TableName("ware_center_input")
 @ApiModel(value = "CenterInput对象", description = "")
 public class CenterInput implements Serializable {
+    //状态已入库，未入库
+
+    public static final String INPUT_STATUS_YES = "已入库";
+    public static final String INPUT_STATUS_NO = "未入库";
 
     private static final long serialVersionUID = 1L;
 

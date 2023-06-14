@@ -43,6 +43,10 @@ public class CenterOutputVo implements Serializable {
     @ApiModelProperty("商品名称")
     private String productName;
 
+    @ApiModelProperty("商品单价")
+    private Double productPrice;
+
+
     @ApiModelProperty("出库数量")
     private Integer ouputNum;
 

@@ -2,6 +2,7 @@ package edu.neu.ware.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.ware.entity.CenterInput;
@@ -13,11 +14,13 @@ import edu.neu.ware.service.CenterStorageRecordService;
 import edu.neu.ware.vo.CenterInputVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,9 +47,21 @@ public class CenterInputController {
     @Autowired
     CCOrderClient ccOrderClient;
 
-
     @Autowired
     CenterStorageRecordService centerStorageRecordService;
+
+    //TODO：入库分为两种，购货入库与退货入库，都需要提供列表方法,前端需要根据以下的字段进行构建
+    //购货入库 ——  购货单号 、商品代 码、商品名称、 入库数量、日期 ，入库状态，供应商ID
+    //退货入库 ——  退货单号，商品分类、 商品代码、商品名称、退货数量、分站ID，分库ID,日期，入库状态
+    @GetMapping("/list/{type}")
+    @ApiOperation("获取入库列表")
+    public AjaxResult getInputList(@ApiParam(name = "type", value = "入库类型") String type) {
+        if (type == null) return AjaxResult.error("入库类型不能为空");
+        if (!type.equals(InputOutputType.PURCHASE) && !type.equals(InputOutputType.RETURN))
+            throw new ServiceException("类型错误");
+        List<CenterInput> centerInputs = centerInputService.list(new QueryWrapper<CenterInput>().eq("input_type", type));
+        return AjaxResult.success(centerInputs);
+    }
 
 
     @PostMapping("/feign/add")
@@ -59,10 +74,9 @@ public class CenterInputController {
     }
 
 
-
     @PutMapping("/confirm/{id}/{number}")
     @ApiOperation("确认入库,并根据入库的类型更新状态,输入实际的入库量")
-    public AjaxResult confirm(@PathVariable("id") Long id,@PathVariable("number") Integer number) {
+    public AjaxResult confirm(@PathVariable("id") Long id, @PathVariable("number") Integer number) {
 
         if (number == null || number <= 0) return AjaxResult.error("入库数量错误");
 
@@ -91,16 +105,21 @@ public class CenterInputController {
         if (centerStorageRecord == null) return AjaxResult.error("入库失败，创建商品失败");
 
         //更新库存，此时需要判断来源，如果是采购的，我们需要锁定库存，如果是退货入库的，我们需要增加可分配库存
-        if(centerInput.getInputType().equals(InputOutputType.PURCHASE)){
-            centerStorageRecord.setLockNum(centerStorageRecord.getLockNum() + centerInput.getInputNum());
-        }else {
-            centerStorageRecord.setAllocateAbleNum(centerStorageRecord.getAllocateAbleNum() + centerInput.getInputNum());
+        if (centerInput.getInputType().equals(InputOutputType.PURCHASE)) {
+            centerStorageRecord.setLockNum(centerStorageRecord.getLockNum() + number);
+        } else {
+            centerStorageRecord.setAllocateAbleNum(centerStorageRecord.getAllocateAbleNum() + number);
         }
-        centerStorageRecord.setTotalNum(centerStorageRecord.getTotalNum() + centerInput.getInputNum());
+        centerStorageRecord.setTotalNum(centerStorageRecord.getTotalNum() + number);
         boolean update = centerStorageRecordService.updateById(centerStorageRecord);
         if (!update) return AjaxResult.error("入库失败，更新库存失败");
 
-        return AjaxResult.success("入库成功");
+        centerInput.setStatus(CenterInput.INPUT_STATUS_YES);
+        centerInput.setInputNum(number);
+        centerInput.setInputTime(new Date());
+
+        centerInputService.updateById(centerInput);
+        return AjaxResult.success("确认入库成功");
     }
 
 

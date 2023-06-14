@@ -1,5 +1,6 @@
 package edu.neu.dbc.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -53,5 +54,8 @@ public class CenterOutputVo implements Serializable {
 
     @ApiModelProperty("供销商ID")
     private Long supplierId;
+
+    @ApiModelProperty("商品单价")
+    private Double productPrice;
 
 }

@@ -62,6 +62,10 @@ public class CenterOutputVo implements Serializable {
     @ApiModelProperty("分库ID")
     private Long subwareId;
 
+    @ApiModelProperty("商品单价")
+    @TableField("product_price")
+    private Double productPrice;
+
 
 
 }

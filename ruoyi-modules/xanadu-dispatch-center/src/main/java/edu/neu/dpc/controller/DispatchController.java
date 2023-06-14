@@ -130,7 +130,7 @@ public class DispatchController {
 
             //远程调用添加出库单，中心仓库添加两个不同的查询页面，对应不同的vo
             CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), dispatch.getTaskId(), dispatch.getProductId(),
-                    dispatch.getProductName(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, null, substationId, subwareId);
+                    dispatch.getProductName(), p.getPrice(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, null, substationId, subwareId);
             Boolean add = centerWareClient.add(centerOutputVo);
             if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
         });
@@ -157,7 +157,7 @@ public class DispatchController {
         AjaxResult unlock = centerWareClient.dispatch(product.getId(), product.getNumber(), "unlock");
         if (unlock.isError()) throw new ServiceException("可分配库存不足");
 
-        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(),
+        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(), product.getPrice(),
                 dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, requireDate, null, substationId, subwareId);
         Boolean add = centerWareClient.add(centerOutputVo);
         if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
@@ -224,8 +224,9 @@ public class DispatchController {
         //更新调度单
         if (!dispatchService.updateById(dispatch)) throw new ServiceException("更新调度单失败");
         //TODO:远程调用修改对应的出库记录
-        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(),
+        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(), null,
                 dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, dispatch.getPlanTime(), null, dispatch.getSubstationId(), subwareId);
+
         AjaxResult updateResult = centerWareClient.update(centerOutputVo);
         if (updateResult.isError()) throw new ServiceException("修改仓库出库调度记录失败:" + updateResult.getMsg());
         return AjaxResult.success("修改成功");

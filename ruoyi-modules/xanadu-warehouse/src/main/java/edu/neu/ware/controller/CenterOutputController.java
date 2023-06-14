@@ -1,6 +1,7 @@
 package edu.neu.ware.controller;
 
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
@@ -19,10 +20,7 @@ import edu.neu.ware.service.CenterInputService;
 import edu.neu.ware.service.CenterOutputService;
 import edu.neu.ware.service.CenterStorageRecordService;
 import edu.neu.ware.service.SubwareService;
-import edu.neu.ware.vo.CenterDispatchOutputVo;
-import edu.neu.ware.vo.CenterInputVo;
-import edu.neu.ware.vo.CenterOutputVo;
-import edu.neu.ware.vo.CenterRefundOutputVo;
+import edu.neu.ware.vo.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,6 +167,44 @@ public class CenterOutputController {
     }
 
 
+    @GetMapping("/printInventoryList")
+    @ApiOperation("打印出库单接口")
+    public AjaxResult printInventoryList(@RequestParam("startTime") Date date) {
+        //获取指定日期的出库记录,需要获取当日所有时间的出库记录,从当日00：00 到当日 23：59
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        Map<Long, String> supplierNames = supplierClient.getSupplierNames();
+
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        Date start = calendar.getTime();
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        Date end = calendar.getTime();
+        //获取所有的出库记录，字段为require_time
+        List<CenterOutput> centerOutputs = centerOutputService.list(new QueryWrapper<CenterOutput>().between("require_time", start, end));
+        //根据商品进行分类统计
+        HashMap<Long, Inventory> longInventoryHashMap = new HashMap<>();
+        centerOutputs.forEach(centerOutput -> {
+            //获取商品ID
+            Inventory inventory = longInventoryHashMap.getOrDefault(centerOutput.getProductId(), new Inventory(centerOutput));
+            String supplierName;
+            if (inventory.getSupplierName() == null) {
+                //说明初始化，此时需要查询总库存量以及供应商的名称
+                supplierName = supplierNames.getOrDefault(centerOutput.getSupplierId(), "未知供应商");
+                inventory.setSupplierName(supplierName);
+                Integer storage = centerStorageRecordService.getById(centerOutput.getProductId()).getTotalNum();
+                inventory.setTotalNum(storage);
+                inventory.setDate(date);
+            }
+            inventory.setNumber(inventory.getNumber() + centerOutput.getOuputNum());
+            inventory.setTotalPrice(inventory.getTotalPrice() + centerOutput.getOuputNum() * centerOutput.getProductPrice());
+        });
+        return AjaxResult.success(longInventoryHashMap.values());
+    }
+
+
+
+
     @PostMapping("/feign/add")
     @ApiOperation("添加出库记录")
     public Boolean add(@RequestBody CenterOutputVo centerOutputVo) {
@@ -192,6 +228,7 @@ public class CenterOutputController {
         //根据查询条件查询出库记录
         CenterOutput centerOutput = centerOutputService.getOne(centerOutputQueryWrapper);
         if (centerOutput == null) return AjaxResult.error("修改失败,未找到该出库记录");
+        centerOutputVo.setProductPrice(centerOutput.getProductPrice());//设置商品价格
         //检查一下子站是否存在
         if (centerOutputVo.getOutputType().equals(InputOutputType.DISPATCH_OUT)) {
             Subware subware = subwareService.getById(centerOutputVo.getSubwareId());

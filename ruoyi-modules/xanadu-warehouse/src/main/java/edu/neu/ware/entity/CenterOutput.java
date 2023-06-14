@@ -14,7 +14,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -79,5 +79,10 @@ public class CenterOutput implements Serializable {
     @ApiModelProperty("分库ID")
     @TableField("subware_id")
     private Long subwareId;
+
+    @ApiModelProperty("商品单价")
+    @TableField("product_price")
+    private Double productPrice;
+
 
 }
