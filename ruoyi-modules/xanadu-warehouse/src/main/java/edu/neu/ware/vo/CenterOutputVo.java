@@ -53,8 +53,15 @@ public class CenterOutputVo implements Serializable {
     @TableField("require_time")
     private Date requireTime;
 
-    @ApiModelProperty("去向ID")
-    private Long targetId;
+    @ApiModelProperty("供应商ID")
+    private Long supplierId;
+
+    @ApiModelProperty("分站ID")
+    private Long substationId;
+
+    @ApiModelProperty("分库ID")
+    private Long subwareId;
+
 
 
 }

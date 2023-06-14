@@ -51,7 +51,7 @@ public class CenterOutputVo implements Serializable {
     @ApiModelProperty("出库状态")
     private String status;
 
-    @ApiModelProperty("目标ID")
-    private Long targetId;
+    @ApiModelProperty("供销商ID")
+    private Long supplierId;
 
 }

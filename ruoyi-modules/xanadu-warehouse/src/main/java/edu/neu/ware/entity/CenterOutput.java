@@ -60,10 +60,13 @@ public class CenterOutput implements Serializable {
     @TableField("status")
     private String status;
 
-    @ApiModelProperty("去向ID")
-    @TableField("target_id")
-    private Long targetId;
+    @ApiModelProperty("供应商ID")
+    @TableField("supplier_id")
+    private Long supplierId;
 
+    @ApiModelProperty("分库ID")
+    @TableField("substation_id")
+    private Long substationId;
 
     @ApiModelProperty("任务单ID")
     @TableField("task_id")

@@ -90,7 +90,7 @@ public class PurchaseRecordController {
         if (!purchaseRecordService.updateById(record)) throw new ServiceException("更新采购单状态失败");
         //生成入库调拨单
         CenterInputVo centerInputVo = new CenterInputVo(null, id, InputOutputType.PURCHASE, record.getProductId(),
-                record.getProductName(), number, record.getProductPrice(), new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId());
+                record.getProductName(), number, record.getProductPrice(), new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId(),null,null);
         //远程调用接口，保存入库调拨单，之后可以根据入库调拨单进行入库操作
         if (!centerWareClient.addInputRecord(centerInputVo)) throw new ServiceException("生成入库调拨单失败");
         return AjaxResult.success("确认采购到货成功");

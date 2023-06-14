@@ -70,9 +70,9 @@ public class CenterInputController {
 
         if (centerInput.getInputType().equals(InputOutputType.PURCHASE)) {
             //拿到sourceId
-            Long sourceId = centerInput.getSourceId();
+            Long inputId = centerInput.getInputId();
             //远程调用获取到缺货单对应的缺货记录ID
-            List<Long> lackIds = purchaseRecordClient.getLackIdsAndUpdate(sourceId);
+            List<Long> lackIds = purchaseRecordClient.getLackIdsAndUpdate(inputId);
             if (lackIds == null || lackIds.size() == 0) return AjaxResult.error("入库错误,入库对应缺货单不存在");
             //更新缺货状态
             Boolean aBoolean = ccOrderClient.updateLackRecordStatusToArrival(centerInput.getInputNum(), lackIds);
