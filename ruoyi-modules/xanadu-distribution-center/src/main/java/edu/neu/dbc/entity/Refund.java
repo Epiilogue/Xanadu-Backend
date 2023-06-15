@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -70,6 +72,10 @@ public class Refund implements Serializable {
     @TableField("deleted")
     @TableLogic
     private Boolean deleted;
+
+    @ApiModelProperty("退货时间")
+    @TableField("refund_time")
+    private Date refundTime;
 
 
 }
