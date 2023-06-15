@@ -3,7 +3,9 @@ package edu.neu.ware.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -21,6 +23,8 @@ import java.util.Date;
 @Setter
 @TableName("ware_sub_storage_record")
 @ApiModel(value = "SubStorageRecord对象", description = "")
+@AllArgsConstructor
+@NoArgsConstructor
 public class SubStorageRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -68,6 +72,10 @@ public class SubStorageRecord implements Serializable {
     @ApiModelProperty("总计产品数量")
     @TableField("total_num")
     private Integer totalNum;
+
+    @ApiModelProperty("锁定数量")
+    @TableField("lock_num")
+    private Integer lockNum;
 
 
 }
