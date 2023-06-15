@@ -100,7 +100,8 @@ public class RefundController {
         //2.查询当前的商品库存数
         Integer storage = wareCenterStorageRecordClient.getStorage(productId).getTotalNum();
         //生成退货记录
-        Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount, storage, 0, InputOutputStatus.NOT_SUBMIT, false,null);
+        Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount,
+                storage, 0, InputOutputStatus.NOT_SUBMIT, false,null);
         //保存至数据库
         boolean saved = refundService.save(refund);
 
