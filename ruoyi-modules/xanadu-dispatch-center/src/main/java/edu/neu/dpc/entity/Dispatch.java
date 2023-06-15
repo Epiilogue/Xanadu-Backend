@@ -70,6 +70,11 @@ public class Dispatch implements Serializable {
     @TableField("status")
     private String status;
 
+    //substationId
+    @ApiModelProperty("分站ID")
+    @TableField("substation_id")
+    private Long substationId;
+
 
     @ApiModelProperty("软删除标记")
     @TableField("deleted")

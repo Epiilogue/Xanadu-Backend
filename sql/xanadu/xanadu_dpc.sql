@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 13/06/2023 11:45:30
+ Date: 14/06/2023 15:39:35
 */
 
 SET NAMES utf8mb4;
@@ -29,9 +29,10 @@ CREATE TABLE `dpc_dispatch`  (
   `product_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `plan_time` datetime NULL DEFAULT NULL COMMENT '计划出库时间',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '调度单对应状态',
-  `product_categart` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品分类',
+  `product_categary` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品分类',
   `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   `deleted` tinyint(1) NULL DEFAULT NULL COMMENT '软删除',
+  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

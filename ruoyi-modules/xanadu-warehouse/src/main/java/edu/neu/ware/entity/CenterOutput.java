@@ -14,7 +14,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -45,8 +45,8 @@ public class CenterOutput implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    @TableField("ouput_num")
-    private Integer ouputNum;
+    @TableField("output_num")
+    private Integer outputNum;
 
     @ApiModelProperty("出库类型")
     @TableField("output_type")
@@ -60,10 +60,13 @@ public class CenterOutput implements Serializable {
     @TableField("status")
     private String status;
 
-    @ApiModelProperty("去向ID")
-    @TableField("target_id")
-    private Long targetId;
+    @ApiModelProperty("供应商ID")
+    @TableField("supplier_id")
+    private Long supplierId;
 
+    @ApiModelProperty("分站ID")
+    @TableField("substation_id")
+    private Long substationId;
 
     @ApiModelProperty("任务单ID")
     @TableField("task_id")
@@ -73,6 +76,16 @@ public class CenterOutput implements Serializable {
     @TableField("require_time")
     private Date requireTime;
 
+    @ApiModelProperty("分库ID")
+    @TableField("subware_id")
+    private Long subwareId;
 
+    @ApiModelProperty("商品单价")
+    @TableField("product_price")
+    private Double productPrice;
+
+    @ApiModelProperty("操作人员ID")
+    @TableField("operator_id")
+    private Long operatorId;
 
 }

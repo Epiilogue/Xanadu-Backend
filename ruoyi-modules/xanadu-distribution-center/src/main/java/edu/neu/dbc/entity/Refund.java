@@ -45,6 +45,11 @@ public class Refund implements Serializable {
     @TableField("product_name")
     private String productName;
 
+    @ApiModelProperty("商品单价")
+    @TableField("product_price")
+    private Double productPrice;
+
+
     @ApiModelProperty("进货数量")
     @TableField("input_num")
     private Integer inputNum;

@@ -44,7 +44,7 @@ public class CenterOutputVo implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    private Integer ouputNum;
+    private Integer outputNum;
 
     @ApiModelProperty("出库类型")
     private String outputType;
@@ -53,8 +53,19 @@ public class CenterOutputVo implements Serializable {
     @TableField("require_time")
     private Date requireTime;
 
-    @ApiModelProperty("去向ID")
-    private Long targetId;
+    @ApiModelProperty("供应商ID")
+    private Long supplierId;
+
+    @ApiModelProperty("分站ID")
+    private Long substationId;
+
+    @ApiModelProperty("分库ID")
+    private Long subwareId;
+
+    @ApiModelProperty("商品单价")
+    @TableField("product_price")
+    private Double productPrice;
+
 
 
 }

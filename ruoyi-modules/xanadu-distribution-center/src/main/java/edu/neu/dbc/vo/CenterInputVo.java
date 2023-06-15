@@ -1,6 +1,7 @@
 package edu.neu.dbc.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,8 +48,14 @@ public class CenterInputVo implements Serializable {
     @ApiModelProperty("入库状态")
     private String status;
 
-    @ApiModelProperty("来源ID")
-    private Long sourceId;
+    @ApiModelProperty("供应商ID")
+    private Long supplierId;
+
+    @ApiModelProperty("分站ID")
+    private Long substationId;
+
+    @ApiModelProperty("分库ID")
+    private Long subwareId;
 
 
 

@@ -25,6 +25,10 @@ import java.util.Date;
 @TableName("ware_center_input")
 @ApiModel(value = "CenterInput对象", description = "")
 public class CenterInput implements Serializable {
+    //状态已入库，未入库
+
+    public static final String INPUT_STATUS_YES = "已入库";
+    public static final String INPUT_STATUS_NO = "未入库";
 
     private static final long serialVersionUID = 1L;
 
@@ -65,9 +69,18 @@ public class CenterInput implements Serializable {
     @TableField("status")
     private String status;
 
-    @ApiModelProperty("来源ID")
-    @TableField("source_id")
-    private Long sourceId;
+    @ApiModelProperty("供应商ID")
+    @TableField("supplier_id")
+    private Long supplierId;
+
+    @ApiModelProperty("分站ID")
+    @TableField("substation_id")
+    private Long substationId;
+
+    @ApiModelProperty("分库ID")
+    @TableField("subware_id")
+    private Long subwareId;
+
 
 
 }

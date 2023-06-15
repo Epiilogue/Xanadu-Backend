@@ -124,13 +124,13 @@ public class DispatchController {
             if (lock == null || lock.isError()) throw new ServiceException("解锁库存失败");
             //生成调度单并插入，状态为已提交
             Dispatch dispatch = new Dispatch(null, subwareId, taskId, p.getProductId(), p.getNumber(), p.getProductName(),
-                    p.getProductCategary(), outDate, Dispatch.NOT_OUTPUT, false);
+                    p.getProductCategary(), outDate, Dispatch.NOT_OUTPUT, substationId, false);
             boolean result = dispatchService.save(dispatch);
             if (!result) throw new ServiceException("保存调度单失败");
 
             //远程调用添加出库单，中心仓库添加两个不同的查询页面，对应不同的vo
             CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), dispatch.getTaskId(), dispatch.getProductId(),
-                    dispatch.getProductName(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, dispatch.getSubwareId());
+                    dispatch.getProductName(), p.getPrice(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, null, substationId, subwareId);
             Boolean add = centerWareClient.add(centerOutputVo);
             if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
         });
@@ -141,20 +141,24 @@ public class DispatchController {
 
     @PutMapping("/dispatchProduct")
     @ApiOperation(value = "调度商品,传入参数为商品id和分库id,要求出库日期", notes = "调度商品")
-    public AjaxResult dispatchProduct(@ApiParam("子库ID") @RequestParam("subwareId") Long subwareId,
+    public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long substationId,
                                       @ApiParam("要求出库日期") @RequestParam("requireDate") Date requireDate,
                                       @ApiParam("商品信息") Product product) {
+        //TODO： 远程查询分库ID
+        Long subwareId = substationId;
         //构造并保存调度单
         Dispatch dispatch = new Dispatch(null, subwareId, null, product.getId(), product.getNumber(), product.getProductName(),
-                product.getProductCategary(), requireDate, Dispatch.NOT_OUTPUT, false);
+                product.getProductCategary(), requireDate, Dispatch.NOT_OUTPUT, substationId, false);
+
+
         boolean success = dispatchService.save(dispatch);
         //尝试修改库存，调度需要从可分配库存中减去对应的数量，添加到已分配库存中，后续从已分配库存中减去对应的数量
         if (!success) throw new RuntimeException("保存调度单失败");
         AjaxResult unlock = centerWareClient.dispatch(product.getId(), product.getNumber(), "unlock");
         if (unlock.isError()) throw new ServiceException("可分配库存不足");
 
-        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(),
-                dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, requireDate, dispatch.getSubwareId());
+        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(), product.getPrice(),
+                dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, requireDate, null, substationId, subwareId);
         Boolean add = centerWareClient.add(centerOutputVo);
         if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
 
@@ -214,11 +218,15 @@ public class DispatchController {
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(prevDispatch.getProductId(), prevDispatch.getProductNum(), dispatch.getProductNum());
         if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
 
+        //TODO：根据新的分站ID拿到新的分库ID
+        Long subwareId = dispatch.getSubwareId();
+
         //更新调度单
         if (!dispatchService.updateById(dispatch)) throw new ServiceException("更新调度单失败");
         //TODO:远程调用修改对应的出库记录
-        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(),
-                dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, dispatch.getPlanTime(), dispatch.getSubwareId());
+        CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(), null,
+                dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, dispatch.getPlanTime(), null, dispatch.getSubstationId(), subwareId);
+
         AjaxResult updateResult = centerWareClient.update(centerOutputVo);
         if (updateResult.isError()) throw new ServiceException("修改仓库出库调度记录失败:" + updateResult.getMsg());
         return AjaxResult.success("修改成功");

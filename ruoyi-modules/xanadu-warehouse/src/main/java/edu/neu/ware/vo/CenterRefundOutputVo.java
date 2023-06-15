@@ -1,30 +1,24 @@
-package edu.neu.ware.entity;
+package edu.neu.ware.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author Gaosong Xu
- * @since 2023-06-04 05:08:31
+ *  商品分类、商品代码、商品名称、供应商、计量单位、分站名称、退货数量、 日期
  */
-@Getter
-@Setter
-@TableName("ware_sub_output")
-@ApiModel(value = "SubOutput对象", description = "")
-public class SubOutput implements Serializable {
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class CenterRefundOutputVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +26,7 @@ public class SubOutput implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty("退货出库或调拨出库的ID")
+    @ApiModelProperty("退货出库单ID")
     @TableField("output_id")
     private Long outputId;
 
@@ -48,17 +42,24 @@ public class SubOutput implements Serializable {
     @TableField("output_num")
     private Integer outputNum;
 
-    @ApiModelProperty("出库类型(退货或者领货)")
-    @TableField("output_type")
-    private String outputType;
-
     @ApiModelProperty("出库时间")
     @TableField("output_time")
     private Date outputTime;
 
-    @ApiModelProperty("出库分站ID")
-    @TableField("subware_id")
-    private Long subwareId;
+    @ApiModelProperty("出库状态")
+    @TableField("status")
+    private String status;
 
+    @ApiModelProperty("供应商ID")
+    @TableField("supplier_id")
+    private Long supplierId;
+
+    @ApiModelProperty("供应商名称")
+    private String supplierName;
+
+
+    @ApiModelProperty("要求出库时间")
+    @TableField("require_time")
+    private Date requireTime;
 
 }

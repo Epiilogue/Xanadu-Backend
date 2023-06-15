@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Gaosong Xu
@@ -66,7 +66,13 @@ public class RefundController {
     private RefundService refundService;
 
 
-    @GetMapping("/listForReturn")
+    @GetMapping("/list")
+    @ApiOperation("查询所有退货安排")
+    public AjaxResult list() {
+        return AjaxResult.success(refundService.list());
+    }
+
+    @GetMapping("/searchForReturn")
     @ApiOperation("根据供应商 、进货日期段 、商品号查询需要进行退货安排的商品 ，查询结果包含以下信息： 查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数")
     public AjaxResult listForReturn(@ApiParam("供应商ID") @RequestParam("supplierId") Long supplierId,
                                     @ApiParam("商品ID") @RequestParam("productId") Long productId,
@@ -94,7 +100,7 @@ public class RefundController {
         //2.查询当前的商品库存数
         Integer storage = wareCenterStorageRecordClient.getStorage(productId);
         //生成退货记录
-        Refund refund = new Refund(null, supplierId, productId, product.getName(), inputCount, storage, 0, InputOutputStatus.NOT_SUBMIT, false);
+        Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount, storage, 0, InputOutputStatus.NOT_SUBMIT, false);
         //保存至数据库
         boolean saved = refundService.save(refund);
 
@@ -117,7 +123,7 @@ public class RefundController {
 
         //生成退货单,远程调用写入退货单，
         CenterOutputVo returnRecord = new CenterOutputVo(refund.getId(), refund.getProductId(), refund.getProductName(), refund.getRefundCount()
-                , InputOutputType.RETURN_OUT, new Date(), InputOutputStatus.NOT_OUTPUT, refund.getSupplierId());
+                , InputOutputType.RETURN_OUT, new Date(), InputOutputStatus.NOT_OUTPUT, refund.getSupplierId(), refund.getProductPrice());
         if (!centerWareClient.addOutputRecord(returnRecord)) throw new ServiceException("退货单提交失败");
         return AjaxResult.success("退货单提交成功");
 
