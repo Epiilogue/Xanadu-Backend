@@ -49,7 +49,15 @@ public class StockoutController {
         return AjaxResult.success(page);
     }
 
-
+    @GetMapping("/listAll")
+    @ApiOperation("获取所有缺货记录")
+    public AjaxResult list() {
+        List<Stockout> list = stockoutService.list();
+        if (list == null || list.size() == 0) {
+            return AjaxResult.error("没有记录");
+        }
+        return AjaxResult.success(list);
+    }
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
     public AjaxResult edit(@RequestBody Stockout stockout) {

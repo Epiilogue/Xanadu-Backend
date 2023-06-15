@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +42,7 @@ public class LackRecordController {
     public AllLackRecordVo getLackRecordById(Product product, Boolean isCheck) {
         List<SingleLackRecordVo> remoteLackRecords = stockoutClient.getLackRecordById(product.getId());
         //查询库存量
-        Integer storage = wareCenterStorageRecordClient.getStorage(product.getId());
+        Integer storage = wareCenterStorageRecordClient.getStorage(product.getId()).getTotalNum();
         assert storage != null;
 
         if (isCheck && storage < product.getSafeStock()) {

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -22,7 +23,7 @@ public interface StockoutClient {
 
     @GetMapping("/cc/stockout/feign/getLackRecord/{productId}")
     @ApiOperation("获取缺货记录,feign远程调用专用，前端不要使用该接口")
-    public List<SingleLackRecordVo> getLackRecordById(Long productId);
+    public List<SingleLackRecordVo> getLackRecordById(@PathVariable(value = "productId", required = true)Long productId);
 
 
     @PostMapping("/cc/stockout/feign/updateLackRecordStatusToPurchased")

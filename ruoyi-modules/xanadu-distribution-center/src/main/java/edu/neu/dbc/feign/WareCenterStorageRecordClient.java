@@ -2,6 +2,7 @@ package edu.neu.dbc.feign;
 
 
 
+import edu.neu.dbc.vo.StorageVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -17,5 +18,5 @@ import java.util.Map;
 @Component
 public interface WareCenterStorageRecordClient {
     @GetMapping("/ware/centerStorageRecord/feign/getStorage/{productId}")
-    public Integer getStorage(@PathVariable("productId") Long productId);
+    public StorageVo getStorage(@PathVariable("productId") Long productId);
 }
