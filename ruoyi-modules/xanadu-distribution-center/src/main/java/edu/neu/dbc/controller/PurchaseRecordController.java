@@ -138,7 +138,8 @@ public class PurchaseRecordController {
         boolean saved = purchaseRecordService.save(purchaseRecord);
         if (!saved) throw new ServiceException("采购单生成失败");
         //TODO：更新所有的缺货记录状态，将其置为已采购，这样缺货检查就不会重复检查
-        Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream().
+        Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream()
+                .filter(singleLackRecordVo -> !singleLackRecordVo.getSource().equals("缺货检查")).
                 map(SingleLackRecordVo::getId).collect(Collectors.toList()));
 
         if (!updateSuccess) throw new ServiceException("更新缺货记录状态失败");

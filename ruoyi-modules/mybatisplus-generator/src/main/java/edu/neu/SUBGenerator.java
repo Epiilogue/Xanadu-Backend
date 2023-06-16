@@ -41,7 +41,7 @@ public class SUBGenerator {
                 //4、策略配置
                 .strategyConfig(builder -> {
                     builder.addInclude("sub_delivery", "sub_finance","sub_receipt",
-                                    "sub_receipt_product","sub_substation","sub_sub_task") // 设置需要生成的数据表名
+                                    "sub_receipt_product","sub_substation","sub_task") // 设置需要生成的数据表名
                             .addTablePrefix("sub_") // 设置过滤表前缀
                             //4.1、Mapper策略配置
                             .mapperBuilder()
