@@ -17,6 +17,7 @@
         <module>xanadu-customer-center</module>
         <module>xanadu-distribution-center</module>
         <module>xanadu-dispatch-center</module>
+        <module>xanadu-substation</module>
 
     </modules>
 

@@ -19,7 +19,6 @@ public class SingleLackRecordVo implements Serializable {
     @ApiModelProperty("缺货订单号")
     private Long orderId;
 
-
     @ApiModelProperty("缺货商品数量")
     private Integer needNumbers;
 

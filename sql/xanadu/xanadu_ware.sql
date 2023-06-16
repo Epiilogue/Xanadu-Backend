@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 14/06/2023 21:33:11
+ Date: 15/06/2023 16:17:20
 */
 
 SET NAMES utf8mb4;
@@ -67,15 +67,15 @@ DROP TABLE IF EXISTS `ware_center_storage_record`;
 CREATE TABLE `ware_center_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `allocate_able_num` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '可分配商品数量',
+  `allocate_able_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '可分配商品数量',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `allocated_num` int(11) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '已分配的商品数量',
-  `refund_num` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '退货的商品数量',
-  `total_num` int(11) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '总计商品数量',
-  `lock_num` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '下单锁定的商品数量',
+  `allocated_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '已分配的商品数量',
+  `refund_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '退货的商品数量',
+  `total_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '总计商品数量',
+  `lock_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '下单锁定的商品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -101,13 +101,16 @@ CREATE TABLE `ware_centerware`  (
 DROP TABLE IF EXISTS `ware_sub_input`;
 CREATE TABLE `ware_sub_input`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '入库记录ID',
-  `input_id` bigint(20) NULL DEFAULT NULL COMMENT '入库单号ID,可能为退货或调拨',
+  `dispatch_id` bigint(20) NULL DEFAULT NULL COMMENT '调拨单ID，如果是退货则不需要该字段',
   `input_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库类型，购货或是退单',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `input_num` int(10) NULL DEFAULT NULL COMMENT '商品数量',
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
-  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '子仓库ID',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
+  `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
+  `suplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
+  `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -135,14 +138,15 @@ CREATE TABLE `ware_sub_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `allocate_able_num` int(10) NULL DEFAULT NULL COMMENT '可分配数量',
+  `allocate_able_num` int(20) NULL DEFAULT NULL COMMENT '可分配数量',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `allocated_num` int(10) NULL DEFAULT NULL COMMENT '已分配数量',
-  `refund_num` int(10) NULL DEFAULT NULL COMMENT '退货产品数量',
-  `total_num` int(10) NULL DEFAULT NULL COMMENT '总计产品数量',
+  `allocated_num` int(20) NULL DEFAULT NULL COMMENT '已分配数量',
+  `refund_num` int(20) NULL DEFAULT NULL COMMENT '退货产品数量',
+  `total_num` int(20) NULL DEFAULT NULL COMMENT '总计产品数量',
+  `lock_num` int(20) NULL DEFAULT NULL COMMENT '锁定的商品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

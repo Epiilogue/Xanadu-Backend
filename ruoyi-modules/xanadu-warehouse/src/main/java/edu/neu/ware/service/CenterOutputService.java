@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface CenterOutputService extends IService<CenterOutput> {
 
+    Integer checkTaskStatus(Long taskId,String status);
 }
