@@ -77,7 +77,7 @@ public class DispatchController {
 
 
     @PutMapping("/dispatchOrder/{id}/{substationId}")
-    @ApiOperation(value = "调度订单,传入参数为订单id和分站id", notes = "调度订单")
+    @ApiOperation(value = "手动调度订单,传入参数为订单id和分站id", notes = "调度订单")
     public AjaxResult dispatchOrder(@ApiParam("订单ID") @PathVariable("id") Long id,
                                     @ApiParam("子站ID") @PathVariable("substationId") Long substationId,
                                     @ApiParam("预计出库日期") @RequestParam("outDate") Date outDate) {

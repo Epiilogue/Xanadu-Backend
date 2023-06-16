@@ -102,8 +102,9 @@ public class OrderController {
     @ApiOperation("根据子站ID查询订单数量")
     @GetMapping("/feign/count/{substationId}")
     public Boolean getOrderCountBySubstationId(@PathVariable Long substationId) {
-        long count = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
-        return count > 0;
+        long newCount = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
+        long refundCount = refundService.count(new QueryWrapper<Refund>().eq("substation_id", substationId));
+        return newCount + refundCount > 0;
     }
 
 
@@ -178,7 +179,6 @@ public class OrderController {
             default:
                 return AjaxResult.error("订单类型错误");
         }
-
     }
 
 
