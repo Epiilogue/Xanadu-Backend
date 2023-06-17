@@ -80,6 +80,11 @@ public class DispatchController {
      */
 
 
+    /**
+     * 在这里需要判断任务的类型，如果是退货、收款任务的话不需要进行商品调度，如果是换货、新订任务的话则需要判断,送货任务完成收款任务后创建
+     * 需要考虑的是付款送货的情况，该情况较为特殊，需要先生成收款任务，收款任务完成后再生成送货任务以及调度任务，送货失败了直接退款即可，不需要生
+     * 成退款任务增加复杂度。
+     */
     @PutMapping("/dispatchOrder/{id}/{substationId}")
     @ApiOperation(value = "手动调度订单,传入参数为订单id和分站id", notes = "调度订单")
     public AjaxResult dispatchOrder(@ApiParam("订单ID") @PathVariable("id") Long id,
@@ -89,62 +94,62 @@ public class DispatchController {
         AjaxResult orderResult = ccOrderClient.getOrder(id);
         //检查返回结果是否有错误
         if (orderResult.isError()) return orderResult;
-
         //获取订单信息
         Object data = orderResult.get("data");
         //转为OrderVo
         OrderVo orderVo = JSON.copyTo(data, OrderVo.class);
-
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
-
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
-        if (remoteSubwareResult==null) throw new ServiceException("获取分库ID失败");
+        if (remoteSubwareResult == null) throw new ServiceException("获取分库ID失败");
         if (remoteSubwareResult.isError()) return remoteSubwareResult;
         Long subwareId = (Long) remoteSubwareResult.get("data");
         //生成任务单
-        Task task = new Task(null, orderVo.getId(), substationId,TaskStatus.SCHEDULED
+        Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.SCHEDULED
                 , false, taskType);
-        boolean success;
-        //1.保存任务
-        success = taskService.save(task);
-        if (!success) throw new ServiceException("保存任务失败");
 
+        //如果是收款任务或者退货任务则直接设置为可分配状态
+        if (taskType.equals(TaskType.PAYMENT)||taskType.equals(TaskType.RETURN)) task.setTaskStatus(TaskStatus.ASSIGNABLE);
+
+        boolean success = taskService.save(task);
+        if (!success) throw new ServiceException("保存任务失败");
         // 拿到对应的记录ID
         Long taskId = task.getId();
         //2.更新订单状态为已调度
         Boolean isRemoteSuccess = ccOrderClient.batchUpdateStatus(OrderStatusConstant.DISPATCHED, Collections.singletonList(orderVo.getId()));
         if (isRemoteSuccess == null || !isRemoteSuccess) throw new ServiceException("更新订单状态失败");
 
-        //3.记录任务单对应的商品列表
-        List<Product> products = orderVo.getProducts();
-        products.forEach(p -> p.setTaskId(taskId));
-        success = productService.saveBatch(products);
-        if (!success) throw new ServiceException("保存商品失败");
+        // 1.收款任务，不需要记录商品列表，直接状态为可分配，不调度
+        if (!taskType.equals(TaskType.PAYMENT)) {
+            List<Product> products = orderVo.getProducts();
+            products.forEach(p -> p.setTaskId(taskId));
+            success = productService.saveBatch(products);
+            if (!success) throw new ServiceException("保存商品失败");
 
+            // 2.退货任务，记录商品列表，不调度，直接可分配
+            if (taskType.equals(TaskType.RETURN)) return AjaxResult.success("调度成功");
 
-        //TODO：在这里需要判断仍无的类型，如果是退货任务的话不需要进行商品调度，如果是换货、新订任务的话则需要
-
-
-        //生成调度出库记录，解锁，添加到已分配区,并生成调度单
-        products.forEach(p -> {
-            //修改库存，将对应的商品库存的加锁量减去商品数量，增加已分配量
-            AjaxResult lock = centerWareClient.dispatch(p.getProductId(), p.getNumber(), "lock");
-            if (lock == null || lock.isError()) throw new ServiceException("解锁库存失败");
-            //生成调度单并插入，状态为已提交
-            Dispatch dispatch = new Dispatch(null, subwareId, taskId, p.getProductId(), p.getNumber(), p.getProductName(),
-                    p.getProductCategary(), outDate, Dispatch.NOT_OUTPUT, substationId, false);
-            boolean result = dispatchService.save(dispatch);
-            if (!result) throw new ServiceException("保存调度单失败");
-
-            //远程调用添加出库单，中心仓库添加两个不同的查询页面，对应不同的vo
-            CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), dispatch.getTaskId(), dispatch.getProductId(),
-                    dispatch.getProductName(), p.getPrice(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, null, substationId, subwareId);
-            Boolean add = centerWareClient.add(centerOutputVo);
-            if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
-        });
-
+            // 3.购买任务，记录列表，调度
+            // 4.换货任务，记录列表，调度
+            //生成调度出库记录，解锁，添加到已分配区,并生成调度单
+            products.forEach(p -> {
+                //修改库存，将对应的商品库存的加锁量减去商品数量，增加已分配量
+                AjaxResult lock = centerWareClient.dispatch(p.getProductId(), p.getNumber(), "lock");
+                if (lock == null || lock.isError()) throw new ServiceException("解锁库存失败");
+                //生成调度单并插入，状态为已提交
+                Dispatch dispatch = new Dispatch(null, subwareId, taskId, p.getProductId(), p.getNumber(), p.getProductName(),
+                        p.getProductCategary(), outDate, Dispatch.NOT_OUTPUT, substationId, false);
+                boolean result = dispatchService.save(dispatch);
+                if (!result) throw new ServiceException("保存调度单失败");
+                //远程调用添加出库单，中心仓库添加两个不同的查询页面，对应不同的vo
+                CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), dispatch.getTaskId(), dispatch.getProductId(),
+                        dispatch.getProductName(), p.getPrice(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, null, substationId, subwareId);
+                Boolean add = centerWareClient.add(centerOutputVo);
+                if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
+            });
+        }
         return AjaxResult.success("调度成功");
+
     }
 
 
@@ -155,7 +160,7 @@ public class DispatchController {
                                       @ApiParam("商品信息") Product product) {
 
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
-        if (remoteSubwareResult==null) throw new ServiceException("获取分库ID失败");
+        if (remoteSubwareResult == null) throw new ServiceException("获取分库ID失败");
         if (remoteSubwareResult.isError()) return remoteSubwareResult;
         Long subwareId = (Long) remoteSubwareResult.get("data");
         //构造并保存调度单

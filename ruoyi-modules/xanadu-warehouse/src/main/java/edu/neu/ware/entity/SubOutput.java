@@ -63,6 +63,4 @@ public class SubOutput implements Serializable {
     @ApiModelProperty("出库分站ID")
     @TableField("subware_id")
     private Long subwareId;
-
-
 }

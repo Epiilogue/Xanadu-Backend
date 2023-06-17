@@ -118,12 +118,13 @@ public class CenterOutputController {
         if (!status.equals(InputOutputStatus.NOT_OUTPUT)) return AjaxResult.error("确认失败，该出库记录已经出库");
         //拿到出库记录的出库数量
         Integer outputNum = centerOutput.getOutputNum();
+        if(number<outputNum) return AjaxResult.error("确认失败，出库数量不能小于出库数量");
         //获取出库类型
         String outputType = centerOutput.getOutputType();
         boolean updateSuccess;
         switch (outputType) {
             case InputOutputType.RETURN_OUT:
-                //TODO: 退货出库，选择可分配数量，退货出库
+                //TODO: 退货出库，选择退货数量进行退货，不应该选择已分配数量，此处逻辑有误，后续需要修改逻辑
                 updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("allocate_able_num=allocate_able_num-" + number).
                         eq("product_id", centerOutput.getProductId()).ge("allocate_able_num", number));
                 if (!updateSuccess) throw new ServiceException("出库失败，实际出库数量大于可分配数量");
@@ -131,7 +132,7 @@ public class CenterOutputController {
             case InputOutputType.DISPATCH_OUT:
                 //如果是调拨出库，需要把原来的分配数量划到可分配数量，然后减去实际出库的可分配数量，如果小于0，返回错误并提示失败
                 updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("allocate_able_num=allocate_able_num+" + outputNum).
-                        setSql("allocate_num=allocate_num-" + outputNum).eq("product_id", centerOutput.getProductId()).ge("allocate_able_num", 0));
+                        setSql("allocated_num=allocated_num-" + outputNum).eq("product_id", centerOutput.getProductId()).ge("allocate_able_num", 0));
                 //实际出库，出库失败则回滚
                 if (!updateSuccess) throw new ServiceException("出库失败，已分配数量不足");
                 updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("allocate_able_num=allocate_able_num-" + number).
@@ -160,7 +161,7 @@ public class CenterOutputController {
         if (!updateSuccess) throw new ServiceException("出库失败，更新总库存量失败");
         centerOutput.setStatus(InputOutputStatus.OUTPUT);
         centerOutput.setOutputTime(new Date());
-        centerOutput.setOutputNum(number);
+        centerOutput.setActualNum(number);
         //TODO：动态获取登录用户作为操作人
         centerOutput.setOperatorId(1L);
         return AjaxResult.success(centerOutputService.updateById(centerOutput));

@@ -52,7 +52,7 @@ public class CenterInput implements Serializable {
     @TableField("product_name")
     private String productName;
 
-    @ApiModelProperty("商品数量")
+    @ApiModelProperty("预计商品数量")
     @TableField("input_num")
     private Integer inputNum;
 
@@ -80,6 +80,10 @@ public class CenterInput implements Serializable {
     @ApiModelProperty("分库ID")
     @TableField("subware_id")
     private Long subwareId;
+    
+    @ApiModelProperty("实际数量")
+    @TableField("actual_num")
+    private Integer actualNum;
 
 
 

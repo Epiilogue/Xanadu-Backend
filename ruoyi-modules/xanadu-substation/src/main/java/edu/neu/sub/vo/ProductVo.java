@@ -17,8 +17,10 @@ public class ProductVo implements Serializable {
     @TableId("id")
     private Long id;
 
-    @ApiModelProperty("对应的订单ID号")
-    private Long orderId;
+
+    @ApiModelProperty("对应的任务ID号")
+    private Long taskId;
+
 
     @ApiModelProperty("商品ID")
     @TableField("product_id")
@@ -40,17 +42,9 @@ public class ProductVo implements Serializable {
     @TableField("product_categary")
     private String productCategary;
 
-    @ApiModelProperty("商品是否缺货")
-    @TableField("islack")
-    private Boolean islack;
-
-    @ApiModelProperty("商品能否退货")
-    @TableField("refund_able")
-    private Boolean refundAble;
-
-    @ApiModelProperty("商品能否换货")
-    @TableField("change_able")
-    private Boolean changeAble;
+    @ApiModelProperty("实际接收数量")
+    @TableField("actual_number")
+    private Integer actualNumber;
 
 
 }

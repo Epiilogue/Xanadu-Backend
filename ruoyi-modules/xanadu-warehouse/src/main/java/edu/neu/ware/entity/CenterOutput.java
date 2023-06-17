@@ -88,4 +88,7 @@ public class CenterOutput implements Serializable {
     @TableField("operator_id")
     private Long operatorId;
 
+    @ApiModelProperty("实际数量")
+    @TableField("actual_num")
+    private Integer actualNum;
 }
