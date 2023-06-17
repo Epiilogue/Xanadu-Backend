@@ -10,6 +10,7 @@ import edu.neu.dpc.entity.Product;
 import edu.neu.dpc.entity.Task;
 import edu.neu.dpc.feign.CCOrderClient;
 import edu.neu.dpc.feign.CenterWareClient;
+import edu.neu.dpc.feign.SubstationClient;
 import edu.neu.dpc.service.DispatchService;
 import edu.neu.dpc.service.ProductService;
 import edu.neu.dpc.service.TaskService;
@@ -59,6 +60,9 @@ public class DispatchController {
     @Autowired
     CenterWareClient centerWareClient;
 
+    @Autowired
+    SubstationClient substationClient;
+
 
     @GetMapping("/check/{id}")
     @ApiOperation(value = "检查订单状态，是否全部都到货，如果都到货则更新为可分配状态，需要锁定库存", notes = "检查订单")
@@ -94,9 +98,10 @@ public class DispatchController {
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
 
-        //TODO:获取子站对应的分库ID
-        Long subwareId = substationId;
-
+        AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
+        if (remoteSubwareResult==null) throw new ServiceException("获取分库ID失败");
+        if (remoteSubwareResult.isError()) return remoteSubwareResult;
+        Long subwareId = (Long) remoteSubwareResult.get("data");
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId,TaskStatus.SCHEDULED
                 , false, taskType);
@@ -148,8 +153,11 @@ public class DispatchController {
     public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long substationId,
                                       @ApiParam("要求出库日期") @RequestParam("requireDate") Date requireDate,
                                       @ApiParam("商品信息") Product product) {
-        //TODO： 远程查询分库ID
-        Long subwareId = substationId;
+
+        AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
+        if (remoteSubwareResult==null) throw new ServiceException("获取分库ID失败");
+        if (remoteSubwareResult.isError()) return remoteSubwareResult;
+        Long subwareId = (Long) remoteSubwareResult.get("data");
         //构造并保存调度单
         Dispatch dispatch = new Dispatch(null, subwareId, null, product.getId(), product.getNumber(), product.getProductName(),
                 product.getProductCategary(), requireDate, Dispatch.NOT_OUTPUT, substationId, false);
@@ -198,7 +206,6 @@ public class DispatchController {
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(dispatch.getProductId(), dispatch.getProductNum(), 0);
         if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
         if (!dispatchService.removeById(dispatch)) throw new ServiceException("更新调度单状态失败");
-        //TODO:远程调用删除掉对应的出库记录
         Boolean delete = centerWareClient.delete(dispatch.getId());
         if (delete == null || !delete) throw new ServiceException("删除仓库出库调度记录失败");
 
@@ -218,12 +225,14 @@ public class DispatchController {
         if (prevDispatch == null) return AjaxResult.error("调度单不存在");
         if (prevDispatch.getTaskId() != null) throw new ServiceException("该调度单已与任务单关联，不允许修改");
 
+
+        AjaxResult remoteSubwareResult = substationClient.getSubwareId(dispatch.getSubstationId());
+        if (remoteSubwareResult.isError()) throw new ServiceException("获取分库ID失败");
+        Long subwareId = (Long) remoteSubwareResult.get("data");
+
         //若是需要修改调度的数量，需要将已分配减去原来的，可分配添加上原来的，已分配添加新增的，可分配减去新增的
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(prevDispatch.getProductId(), prevDispatch.getProductNum(), dispatch.getProductNum());
         if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
-
-        //TODO：根据新的分站ID拿到新的分库ID
-        Long subwareId = dispatch.getSubwareId();
 
         //更新调度单
         if (!dispatchService.updateById(dispatch)) throw new ServiceException("更新调度单失败");
