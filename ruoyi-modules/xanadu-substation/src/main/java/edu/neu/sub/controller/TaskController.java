@@ -200,9 +200,17 @@ public class TaskController {
         return AjaxResult.success("取货成功");
     }
 
-    //接下来需要根据不同的
+    //接下来需要根据不同的类型填写不同的回执单，并产生不同的结果
+    /**
+     * 填写回执单
+     */
+    @PostMapping("/fillPaymentReceipt/{taskId}/{userID}")
+    @ApiOperation(value = "填写收款回执单")
+    public AjaxResult fillPaymentReceipt() {
 
+        return null;
 
+    }
 
 
 

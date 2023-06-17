@@ -158,6 +158,7 @@ public class OrderController {
                 NewOrder newOrder = newOrderService.getById(id);
                 BeanUtils.copyProperties(newOrder, orderVo);
                 orderVo.setReceiverName(newOrder.getReceiverName());
+                orderVo.setPhone(newOrder.getTelephone());
                 //如果是新订单，则获取商品列表后返回
                 List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(productList);

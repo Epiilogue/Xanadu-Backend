@@ -47,6 +47,10 @@ public class Task implements Serializable {
     @TableField("receiver_name")
     private String receiverName;
 
+    @ApiModelProperty("接收人电话")
+    @TableField("phone")
+    private String phone;
+
     @ApiModelProperty("订单ID")
     @TableField("order_id")
     private Long orderId;
