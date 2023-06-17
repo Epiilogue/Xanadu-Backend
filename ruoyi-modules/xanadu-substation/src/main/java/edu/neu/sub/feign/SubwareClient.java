@@ -15,14 +15,14 @@ import java.util.HashMap;
 public interface SubwareClient {
 
 
-    @GetMapping("/ware/subStorageRecord/feign/check")
+    @PostMapping("/ware/subStorageRecord/feign/check")
     @ApiOperation(value = "检查商品是否数量都充足")
-    AjaxResult check(Long subwareId, HashMap<Long, Integer> longIntegerHashMap);
-    @GetMapping("/ware/subStorageRecord/feign/lock")
+    AjaxResult check(@RequestParam("subwareId") Long subwareId,@RequestBody HashMap<Long, Integer> longIntegerHashMap);
+    @PostMapping("/ware/subStorageRecord/feign/lock")
     @ApiOperation(value = "锁定库存")
-    AjaxResult lock(Long subwareId, HashMap<Long, Integer> longIntegerHashMap);
+    AjaxResult lock(@RequestParam("subwareId") Long subwareId,@RequestBody HashMap<Long, Integer> longIntegerHashMap);
 
     @PostMapping("/ware/subStorageRecord/feign/reduce")
     @ApiOperation(value = "减少库存")
-    AjaxResult reduce(@RequestParam Long subwareId, @RequestParam Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap);
+    AjaxResult reduce(@RequestParam("subwareId") Long subwareId, @RequestParam("taskId") Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap);
 }

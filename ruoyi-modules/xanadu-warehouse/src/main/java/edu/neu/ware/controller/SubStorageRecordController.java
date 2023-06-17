@@ -45,7 +45,7 @@ public class SubStorageRecordController {
 
     @GetMapping("/feign/check")
     @ApiOperation(value = "检查商品是否数量都充足")
-    AjaxResult check(Long subwareId, HashMap<Long, Integer> longIntegerHashMap) {
+    AjaxResult check(@RequestParam("subwareId") Long subwareId,@RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         List<Long> idList = new ArrayList<>(longIntegerHashMap.keySet());
         List<SubStorageRecord> list = subStorageRecordService.list(new QueryWrapper<SubStorageRecord>().eq("subware_id", subwareId).in("product_id", idList));
         //拿到所有的记录
@@ -62,9 +62,9 @@ public class SubStorageRecordController {
         return AjaxResult.success(true);
     }
 
-    @GetMapping("/feign/lock")
+    @PostMapping("/feign/lock")
     @ApiOperation(value = "锁定库存")
-    AjaxResult lock(Long subwareId, HashMap<Long, Integer> longIntegerHashMap) {
+    AjaxResult lock(@RequestParam("subwareId") Long subwareId,@RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         for (Map.Entry<Long, Integer> longIntegerEntry : longIntegerHashMap.entrySet()) {
             boolean success = subStorageRecordService.update(new UpdateWrapper<SubStorageRecord>().
                     eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey())
@@ -78,7 +78,7 @@ public class SubStorageRecordController {
 
     @PostMapping("/ware/subStorageRecord/feign/reduce")
     @ApiOperation(value = "减少库存")
-    AjaxResult reduce(@RequestParam Long subwareId, @RequestParam Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
+    AjaxResult reduce(@RequestParam("subwareId") Long subwareId, @RequestParam("taskId") Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         for (Map.Entry<Long, Integer> longIntegerEntry : longIntegerHashMap.entrySet()) {
             //拿到商品名
             String productName = subStorageRecordService.getById(longIntegerEntry.getKey()).getProductName();

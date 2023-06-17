@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -79,31 +80,45 @@ public class RefundController {
                                     @ApiParam("商品ID") @RequestParam("productId") Long productId,
                                     @ApiParam("开始时间") @RequestParam("startTime") Date startTime,
                                     @ApiParam("结束时间") @RequestParam("endTime") Date endTime) {
-
-        if (supplierId == null) return AjaxResult.error("供应商ID为空");
-        Supplier supplier = supplierService.getById(supplierId);
-        if (supplier == null) return AjaxResult.error("供应商不存在");
-
-        if (productId == null) return AjaxResult.error("商品ID为空");
-        Product product = productService.getById(productId);
-        if (product == null) return AjaxResult.error("商品不存在");
         if (startTime == null || endTime == null) return AjaxResult.error("时间范围为空");
         if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
-        //查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数
+        if (supplierId == null && productId == null) return AjaxResult.error("供应商ID或商品ID为空");
 
-        //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
-        QueryWrapper<PurchaseRecord> queryWrapper = new QueryWrapper<PurchaseRecord>().
-                eq("supplier_id", supplierId).eq("product_id", productId).between("create_time", startTime, endTime).
-                or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+        Product product = null;
+        Supplier supplier;
+        QueryWrapper<PurchaseRecord> queryWrapper = null;
+        List<PurchaseRecord> list = new ArrayList<>();
+        if (supplierId == null) {
+            product = productService.getById(productId);
+            if (product == null) return AjaxResult.error("商品不存在");
+            //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
+            queryWrapper = new QueryWrapper<PurchaseRecord>().
+                    eq("product_id", productId).between("create_time", startTime, endTime).
+                    or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+            list = purchaseRecordService.list(queryWrapper);
+        } else if (productId == null) {
+            supplier = supplierService.getById(supplierId);
+            if (supplier == null) return AjaxResult.error("供应商不存在");
+            //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
+            queryWrapper = new QueryWrapper<PurchaseRecord>().
+                    eq("supplier_id", supplierId).between("create_time", startTime, endTime).
+                    or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+            list = purchaseRecordService.list(queryWrapper);
+        }
+        //查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数
         //获取到所有的记录
-        List<PurchaseRecord> list = purchaseRecordService.list(queryWrapper);
+        list = purchaseRecordService.list(queryWrapper);
         //统计所有的进货数量
         Integer inputCount = list.stream().map(PurchaseRecord::getNumber).reduce(0, Integer::sum);
-        //2.查询当前的商品可退货数
-        Integer storage = wareCenterStorageRecordClient.getStorage(productId).getAvailableNum();
+        //2.查询当前的商品库存数
+        Integer storage = wareCenterStorageRecordClient.getStorage(productId).getTotalNum();
         //生成退货记录
+        assert product != null;
         Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount,
-                storage, 0, InputOutputStatus.NOT_SUBMIT, false,null);
+                storage, 0, InputOutputStatus.NOT_SUBMIT, false, null);
+        //保存至数据库
+        //boolean saved = refundService.save(refund);
+        //if (!saved) throw new ServiceException("退货单生成失败");
 
         return AjaxResult.success(refund);
     }
@@ -117,7 +132,7 @@ public class RefundController {
             return AjaxResult.error("退货数量不能大于库存数量");
         //更新原记录，修改退货状态
         refund.setStatus(InputOutputStatus.SUBMITTED);
-        boolean b = refundService.save(refund);
+        boolean b = refundService.updateById(refund);
         if (!b) throw new ServiceException("退货记录更新失败");
 
         //生成退货单,远程调用写入退货单，
