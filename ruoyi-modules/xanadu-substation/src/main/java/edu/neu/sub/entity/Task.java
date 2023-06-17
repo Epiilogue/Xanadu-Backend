@@ -51,6 +51,10 @@ public class Task implements Serializable {
     @TableField("phone")
     private String phone;
 
+    @ApiModelProperty("送货地址")
+    @TableField("delivery_address")
+    private String deliveryAddress;
+
     @ApiModelProperty("订单ID")
     @TableField("order_id")
     private Long orderId;
@@ -71,9 +75,9 @@ public class Task implements Serializable {
     @TableField("deadline")
     private Date deadline;
 
-    @ApiModelProperty("实际完成日期")
-    @TableField("finish_real")
-    private Date finishReal;
+    @ApiModelProperty("任务生成日期")
+    @TableField("create_time")
+    private Date createTime;
 
     @ApiModelProperty("任务类型")
     @TableField("task_type")

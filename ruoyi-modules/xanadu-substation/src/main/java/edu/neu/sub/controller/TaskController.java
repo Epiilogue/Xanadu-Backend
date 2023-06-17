@@ -5,12 +5,14 @@ import com.alibaba.fastjson.JSON;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.base.constant.cc.TaskType;
+import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.OrderClient;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
 import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
+import edu.neu.sub.vo.PaymentReceiptVo;
 import edu.neu.sub.vo.ProductVo;
 import edu.neu.sub.vo.TaskVo;
 import io.swagger.annotations.ApiOperation;
@@ -204,9 +206,21 @@ public class TaskController {
     /**
      * 填写回执单
      */
-    @PostMapping("/fillPaymentReceipt/{taskId}/{userID}")
-    @ApiOperation(value = "填写收款回执单")
-    public AjaxResult fillPaymentReceipt() {
+    @PostMapping("/fillPaymentReceipt")
+    @ApiOperation(value = "填写收款回执单，前端若为收款任务则需要调用该接口，注意收款只有成功与失败")
+    public AjaxResult fillPaymentReceipt(@RequestBody PaymentReceiptVo paymentReceiptVo) {
+
+        //根据ID拿到任务信息
+        Long taskId = paymentReceiptVo.getTaskId();
+        if (taskId == null) return AjaxResult.error("任务ID不能为空");
+        //检查回执状态是否合法
+        Task task = taskService.getById(taskId);
+
+        Receipt receipt = new Receipt();
+        BeanUtils.copyProperties(paymentReceiptVo, receipt);
+        BeanUtils.copyProperties(task, receipt);
+
+
 
         return null;
 

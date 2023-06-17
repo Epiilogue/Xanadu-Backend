@@ -40,6 +40,9 @@ public class TaskVo implements Serializable {
     @ApiModelProperty("接收人电话")
     private String phone;
 
+    @ApiModelProperty("送货地址")
+    private String deliveryAddress;
+
     @ApiModelProperty("订单ID")
     private Long orderId;
 

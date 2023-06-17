@@ -38,28 +38,29 @@ public class Receipt implements Serializable {
     private Long taskId;
 
     @ApiModelProperty("客户姓名")
-    @TableField("name")
-    private String name;
+    @TableField("receiver_name")
+    private String receiverName;
 
     @ApiModelProperty("客户联系电话")
     @TableField("phone")
     private String phone;
 
-    @ApiModelProperty("分站ID")
-    @TableField("substation_id")
-    private Long substationId;
+    @ApiModelProperty("分站id")
+    @TableField("sub_id")
+    private Long subId;
 
     @ApiModelProperty("任务类型")
-    @TableField("type")
-    private String type;
+    @TableField("task_type")
+    private String taskType;
 
     @ApiModelProperty("回执任务状态")
     @TableField("state")
     private String state;
 
-    @ApiModelProperty("配送员ID")
-    @TableField("user_id")
-    private Long userId;
+    @ApiModelProperty("快递员ID")
+    @TableField("courier_id")
+    private Long courierId;
+
 
     @ApiModelProperty("客户满意度")
     @TableField("feedback")
