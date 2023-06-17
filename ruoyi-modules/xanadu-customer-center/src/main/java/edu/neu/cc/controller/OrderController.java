@@ -100,8 +100,9 @@ public class OrderController {
     @ApiOperation("根据子站ID查询订单数量")
     @GetMapping("/feign/count/{substationId}")
     public Boolean getOrderCountBySubstationId(@PathVariable Long substationId) {
-        long count = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
-        return count > 0;
+        long newCount = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
+        long refundCount = refundService.count(new QueryWrapper<Refund>().eq("substation_id", substationId));
+        return newCount + refundCount > 0;
     }
 
 
@@ -156,6 +157,7 @@ public class OrderController {
             case OperationTypeConstant.ORDER:
                 NewOrder newOrder = newOrderService.getById(id);
                 BeanUtils.copyProperties(newOrder, orderVo);
+                orderVo.setReceiverName(newOrder.getReceiverName());
                 //如果是新订单，则获取商品列表后返回
                 List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(productList);
@@ -170,13 +172,13 @@ public class OrderController {
                 NewOrder prevOrder = newOrderService.getById(newOrderId);
                 if (prevOrder == null) return AjaxResult.error("原始订单不存在");
                 BeanUtils.copyProperties(prevOrder, orderVo);
+                orderVo.setReceiverName(prevOrder.getReceiverName());
                 List<Product> refundProducts = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(refundProducts);
                 return AjaxResult.success(orderVo);
             default:
                 return AjaxResult.error("订单类型错误");
         }
-
     }
 
 

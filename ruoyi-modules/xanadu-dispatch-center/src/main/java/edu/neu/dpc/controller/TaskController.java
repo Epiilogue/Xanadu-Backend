@@ -1,18 +1,26 @@
 package edu.neu.dpc.controller;
 
 
+import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.dpc.entity.Task;
 import edu.neu.dpc.feign.CCOrderClient;
 import edu.neu.dpc.service.TaskService;
+import edu.neu.dpc.vo.OrderVo;
+import edu.neu.dpc.vo.TaskVo;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * <p>
@@ -48,11 +56,25 @@ public class TaskController {
         Task task = taskService.getById(taskId);
         if (task != null) {
             task.setTaskStatus(status);
+            Long orderId;
+            Boolean success;
             switch (status) {
                 case TaskStatus.ASSIGNABLE:
                     //远程调用更新订单状态为配送站到货
-                    Long orderId = task.getOrderId();
-                    Boolean success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.SUBSTATION_ARRIVAL, Collections.singletonList(orderId));
+                    orderId = task.getOrderId();
+                    success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.SUBSTATION_ARRIVAL, Collections.singletonList(orderId));
+                    if (!success) return AjaxResult.error("更新订单状态失败,订单不存在");
+                    break;
+                case TaskStatus.ASSIGNED:
+                    //远程调用更新订单状态为已分配
+                    orderId = task.getOrderId();
+                    success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.ALLOCATED, Collections.singletonList(orderId));
+                    if (!success) return AjaxResult.error("更新订单状态失败,订单不存在");
+                    break;
+                case TaskStatus.RECEIVED:
+                    //远程调用更新订单状态为已接收
+                    orderId = task.getOrderId();
+                    success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.RECEIVED, Collections.singletonList(orderId));
                     if (!success) return AjaxResult.error("更新订单状态失败,订单不存在");
                     break;
                 default:
@@ -63,6 +85,36 @@ public class TaskController {
         return AjaxResult.error("更新任务单状态失败,任务不存在");
     }
 
+
+    /**
+     * 任务号、客户姓名、投递地址、商品名称、商品数量、要求完成日期、任务类型、任务状态。
+     * 说明：
+     */
+    @ApiOperation("根据子站ID获取所有的任务列表")
+    @GetMapping("/feign/getTaskBySubstationId/{id}")
+    public AjaxResult getTaskBySubstationId(@PathVariable("id") Long id) {
+        QueryWrapper<Task> taskQueryWrapper = new QueryWrapper<Task>().eq("sub_id", id);
+        //首先需要拿到所有的任务，然后对于每一个任务，都要反查订单信息，拼接为vo返回
+        List<Task> list = taskService.list(taskQueryWrapper);
+        if (list == null || list.size() == 0) return AjaxResult.error("查询子站任务失败");
+        ArrayList<TaskVo> taskVos = new ArrayList<>();
+        list.forEach(t -> {
+            Long orderId = t.getOrderId();
+            AjaxResult orderResult = ccOrderClient.getOrder(orderId);
+            //检查返回结果是否有错误,如果有错误则不生成vo
+            if (orderResult.isError()) return;
+            //获取订单信息
+            Object data = orderResult.get("data");
+            //转为OrderVo
+            OrderVo orderVo = JSON.copyTo(data, OrderVo.class);
+            //拼接为TaskVo
+            TaskVo taskVo = new TaskVo();
+            BeanUtils.copyProperties(orderVo, taskVo);
+            BeanUtils.copyProperties(t, taskVo);
+            taskVos.add(taskVo);
+        });
+        return AjaxResult.success(taskVos);
+    }
 
 }
 

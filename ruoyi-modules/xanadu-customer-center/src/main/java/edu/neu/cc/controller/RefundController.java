@@ -78,7 +78,10 @@ public class RefundController {
         //检查订单状态
         if (!preOrder.getStatus().equals(OrderStatusConstant.COMPLETED))
             return AjaxResult.error("原订单状态不是已完成，不能换货");
-        //检查提交的商品是否都允许换货
+
+        //TODO：检查原来的订单是不是新订类型
+
+        //TODO：拿到原来订单对应的子站ID
 
         Order order = new Order();
         Refund refund = new Refund();
@@ -104,6 +107,7 @@ public class RefundController {
         orderService.save(order);
         refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
+
         refundService.save(refund);
         Long userId = SecurityUtils.getUserId();
         //一开始是空，可以设置默认值
@@ -160,6 +164,8 @@ public class RefundController {
         if (!preOrder.getStatus().equals(OrderStatusConstant.COMPLETED))
             return AjaxResult.error("原订单状态不是已完成，不能退货");
         //检查提交的商品是否都允许退货
+        //TODO：检查原来的订单是不是新订类型
+        //TODO：拿到原来订单对应的子站ID
 
         Order order = new Order();
         Refund refund = new Refund();
