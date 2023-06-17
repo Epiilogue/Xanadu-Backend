@@ -94,8 +94,11 @@ public class DispatchController {
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
 
+        //TODO:获取子站对应的分库ID
+        Long subwareId = substationId;
+
         //生成任务单
-        Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.ASSIGNED
+        Task task = new Task(null, orderVo.getId(), substationId,TaskStatus.SCHEDULED
                 , false, taskType);
         boolean success;
         //1.保存任务
@@ -114,8 +117,9 @@ public class DispatchController {
         success = productService.saveBatch(products);
         if (!success) throw new ServiceException("保存商品失败");
 
-        //TODO:获取子站对应的分库ID
-        Long subwareId = substationId;
+
+        //TODO：在这里需要判断仍无的类型，如果是退货任务的话不需要进行商品调度，如果是换货、新订任务的话则需要
+
 
         //生成调度出库记录，解锁，添加到已分配区,并生成调度单
         products.forEach(p -> {
@@ -223,7 +227,6 @@ public class DispatchController {
 
         //更新调度单
         if (!dispatchService.updateById(dispatch)) throw new ServiceException("更新调度单失败");
-        //TODO:远程调用修改对应的出库记录
         CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(), null,
                 dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, dispatch.getPlanTime(), null, dispatch.getSubstationId(), subwareId);
 

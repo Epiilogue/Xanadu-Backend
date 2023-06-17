@@ -3,6 +3,8 @@ package edu.neu.sub.service;
 import edu.neu.sub.entity.Task;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 任务单 服务类
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface TaskService extends IService<Task> {
 
+    List<Task> getTasksByCourierId(Long courierId);
 }

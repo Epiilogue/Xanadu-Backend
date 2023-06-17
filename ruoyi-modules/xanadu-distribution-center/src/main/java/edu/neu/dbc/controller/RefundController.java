@@ -78,6 +78,7 @@ public class RefundController {
                                     @ApiParam("商品ID") @RequestParam("productId") Long productId,
                                     @ApiParam("开始时间") @RequestParam("startTime") Date startTime,
                                     @ApiParam("结束时间") @RequestParam("endTime") Date endTime) {
+
         if (supplierId == null) return AjaxResult.error("供应商ID为空");
         Supplier supplier = supplierService.getById(supplierId);
         if (supplier == null) return AjaxResult.error("供应商不存在");
@@ -97,15 +98,11 @@ public class RefundController {
         List<PurchaseRecord> list = purchaseRecordService.list(queryWrapper);
         //统计所有的进货数量
         Integer inputCount = list.stream().map(PurchaseRecord::getNumber).reduce(0, Integer::sum);
-        //2.查询当前的商品库存数
-        Integer storage = wareCenterStorageRecordClient.getStorage(productId).getTotalNum();
+        //2.查询当前的商品可退货数
+        Integer storage = wareCenterStorageRecordClient.getStorage(productId).getAvailableNum();
         //生成退货记录
         Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount,
                 storage, 0, InputOutputStatus.NOT_SUBMIT, false,null);
-        //保存至数据库
-        boolean saved = refundService.save(refund);
-
-        if (!saved) throw new ServiceException("退货单生成失败");
 
         return AjaxResult.success(refund);
     }
@@ -119,7 +116,7 @@ public class RefundController {
             return AjaxResult.error("退货数量不能大于库存数量");
         //更新原记录，修改退货状态
         refund.setStatus(InputOutputStatus.SUBMITTED);
-        boolean b = refundService.updateById(refund);
+        boolean b = refundService.save(refund);
         if (!b) throw new ServiceException("退货记录更新失败");
 
         //生成退货单,远程调用写入退货单，
