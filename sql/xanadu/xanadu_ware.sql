@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 15/06/2023 16:17:20
+ Date: 17/06/2023 22:08:03
 */
 
 SET NAMES utf8mb4;
@@ -27,13 +27,14 @@ CREATE TABLE `ware_center_input`  (
   `input_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库类型，购货或是退单',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `input_num` int(10) NULL DEFAULT NULL COMMENT '商品数量',
+  `input_num` int(10) NULL DEFAULT NULL COMMENT '计划入库数量',
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库单状态(未入库、已入库)',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `suplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  `actual_num` int(20) NULL DEFAULT NULL COMMENT '实际入库数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -57,6 +58,7 @@ CREATE TABLE `ware_center_output`  (
   `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
   `operator_id` bigint(20) NULL DEFAULT NULL COMMENT '操作员ID',
+  `actual_num` bigint(20) NULL DEFAULT NULL COMMENT '实际出库数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -105,7 +107,7 @@ CREATE TABLE `ware_sub_input`  (
   `input_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库类型，购货或是退单',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `input_num` int(10) NULL DEFAULT NULL COMMENT '商品数量',
+  `input_num` int(10) NULL DEFAULT NULL COMMENT ' 预计数量',
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
@@ -146,7 +148,6 @@ CREATE TABLE `ware_sub_storage_record`  (
   `allocated_num` int(20) NULL DEFAULT NULL COMMENT '已分配数量',
   `refund_num` int(20) NULL DEFAULT NULL COMMENT '退货产品数量',
   `total_num` int(20) NULL DEFAULT NULL COMMENT '总计产品数量',
-  `lock_num` int(20) NULL DEFAULT NULL COMMENT '锁定的商品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

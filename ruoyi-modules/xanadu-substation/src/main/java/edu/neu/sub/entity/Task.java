@@ -7,6 +7,9 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
+import edu.neu.sub.vo.ProductVo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -82,7 +85,14 @@ public class Task implements Serializable {
     private String productsJson;
 
     @ApiModelProperty("分站id")
+    @TableField("sub_id")
     private Long subId;
+
+
+    @ApiModelProperty("商品列表")
+    @TableField(exist = false)
+    private List<ProductVo> products;
+
 
 
 
