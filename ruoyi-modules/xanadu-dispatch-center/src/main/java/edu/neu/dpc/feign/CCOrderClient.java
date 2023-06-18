@@ -22,4 +22,8 @@ public interface CCOrderClient {
     @PostMapping("/cc/order/feign/batchUpdateStatus")
     public Boolean batchUpdateStatus(@RequestParam("status") String status, @RequestBody List<Long> orderIdList);
 
+    @PostMapping("/cc/order/feign/updateOrderSubstationId/{substationId}/{orderId}")
+    public  Boolean updateOrderSubstationId(@PathVariable("substationId") Long substationId, @PathVariable("orderId") Long orderId);
+
+
 }

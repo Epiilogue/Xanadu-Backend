@@ -182,6 +182,14 @@ public class OrderController {
         }
     }
 
+    @PostMapping("/cc/order/feign/updateOrderSubstationId/{substationId}/{orderId}")
+    public Boolean updateOrderSubstationId(@PathVariable("substationId") Long substationId, @PathVariable("orderId") Long orderId) {
+        NewOrder newOrder = newOrderService.getById(orderId);
+        if (newOrder == null) return false;
+        newOrder.setSubstationId(substationId);
+        return newOrderService.updateById(newOrder);
+    }
+
 
 }
 

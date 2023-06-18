@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.TaskStatus;
+import edu.neu.base.constant.cc.TaskType;
 import edu.neu.dpc.entity.Task;
 import edu.neu.dpc.feign.CCOrderClient;
 import edu.neu.dpc.service.TaskService;
@@ -56,33 +57,35 @@ public class TaskController {
         Task task = taskService.getById(taskId);
         if (task != null) {
             task.setTaskStatus(status);
-            Long orderId;
-            Boolean success;
+            Long orderId = task.getOrderId();
+            ;
+            Boolean success = false;
             switch (status) {
                 case TaskStatus.ASSIGNABLE:
                     //远程调用更新订单状态为配送站到货
-                    orderId = task.getOrderId();
                     success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.SUBSTATION_ARRIVAL, Collections.singletonList(orderId));
-                    if (!success) return AjaxResult.error("更新订单状态失败,订单不存在");
                     break;
                 case TaskStatus.ASSIGNED:
-                    //远程调用更新订单状态为已分配
-                    orderId = task.getOrderId();
                     success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.ALLOCATED, Collections.singletonList(orderId));
-                    if (!success) return AjaxResult.error("更新订单状态失败,订单不存在");
                     break;
                 case TaskStatus.RECEIVED:
-                    //远程调用更新订单状态为已接收
-                    orderId = task.getOrderId();
                     success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.RECEIVED, Collections.singletonList(orderId));
-                    if (!success) return AjaxResult.error("更新订单状态失败,订单不存在");
+                    break;
+                case TaskStatus.FAILED:
+                    success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.FAILED, Collections.singletonList(orderId));
+                    break;
+                case TaskStatus.COMPLETED:
+                    //需要判断订单类型，如果是收款订单就没有必要更新订单状态了
+                    if (task.getTaskType().equals(TaskType.PAYMENT)) break;
+                    success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.FINISHED, Collections.singletonList(orderId));
                     break;
                 default:
-                    break;
+                    return AjaxResult.error("更新任务单状态失败,未知任务单状态");
             }
+            if (!success) return AjaxResult.error("更新远程订单状态失败");
             taskService.updateById(task);
         }
-        return AjaxResult.error("更新任务单状态失败,任务不存在");
+        return AjaxResult.success("更新任务单状态成功");
     }
 
 
@@ -106,7 +109,7 @@ public class TaskController {
             //获取订单信息
             Object data = orderResult.get("data");
             //转为OrderVo
-            OrderVo orderVo = JSON.copyTo(data, OrderVo.class);
+            OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
             //拼接为TaskVo
             TaskVo taskVo = new TaskVo();
             BeanUtils.copyProperties(orderVo, taskVo);
@@ -115,6 +118,9 @@ public class TaskController {
         });
         return AjaxResult.success(taskVos);
     }
+
+
+
 
 }
 

@@ -2,14 +2,16 @@ package edu.neu.sub.controller;
 
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.ReceiptStatus;
 import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.base.constant.cc.TaskType;
 import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.Task;
-import edu.neu.sub.feign.OrderClient;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
+import edu.neu.sub.service.ReceiptService;
 import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import edu.neu.sub.vo.PaymentReceiptVo;
@@ -20,9 +22,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -49,6 +51,8 @@ public class TaskController {
 
     @Autowired
     SubwareClient subwareClient;
+    @Autowired
+    ReceiptService receiptService;
 
 
     @GetMapping("/list/{subId}")
@@ -160,9 +164,9 @@ public class TaskController {
         return AjaxResult.success(tasks);
     }
 
-    //对于不同的任务类型，快递员可以执行不同的操作
+    //对于不同的任务类型，需要执行不同的操作，比如付款单，需要付款，退货单不需要取货可以直接录入回执，送货换货就需要取货
     @GetMapping("/takeProducts/{taskId}")
-    @ApiOperation(value = "快递员取货，根据任务类型执行不同的操作")
+    @ApiOperation(value = "取货，根据任务类型执行不同的操作，前端需要")
     public AjaxResult takeProducts(@PathVariable("taskId") Long taskId) {
         Task task = taskService.getById(taskId);
         if (task == null) return AjaxResult.error("任务不存在");
@@ -203,29 +207,75 @@ public class TaskController {
     }
 
     //接下来需要根据不同的类型填写不同的回执单，并产生不同的结果
+
     /**
-     * 填写回执单
+     * 回执录入
      */
     @PostMapping("/fillPaymentReceipt")
     @ApiOperation(value = "填写收款回执单，前端若为收款任务则需要调用该接口，注意收款只有成功与失败")
     public AjaxResult fillPaymentReceipt(@RequestBody PaymentReceiptVo paymentReceiptVo) {
-
         //根据ID拿到任务信息
         Long taskId = paymentReceiptVo.getTaskId();
         if (taskId == null) return AjaxResult.error("任务ID不能为空");
         //检查回执状态是否合法
         Task task = taskService.getById(taskId);
-
+        if (task == null) return AjaxResult.error("回执任务不存在");
+        //检查任务类型是不是首款类型并且任务状态是不是已分配
+        if (!TaskType.PAYMENT.equals(task.getTaskType()) || !TaskStatus.ASSIGNED.equals(task.getTaskStatus()))
+            return AjaxResult.error("当前任务状态无法填写回执单");
         Receipt receipt = new Receipt();
         BeanUtils.copyProperties(paymentReceiptVo, receipt);
         BeanUtils.copyProperties(task, receipt);
+        receipt.setId(null);
+        receipt.setTaskId(taskId);
+        receipt.setCreateTime(new Date());
+        receipt.setPlanReceipt(task.getTotalAmount());
+        //检查回执任务状态，只允许是已完成或者失败
+        if (!ReceiptStatus.COMPLETED.equals(receipt.getState()) && !ReceiptStatus.FAILED.equals(receipt.getState()))
+            return AjaxResult.error("回执状态不合法");
+        if (receipt.getState().equals(ReceiptStatus.COMPLETED)) receipt.setActualReceipt(receipt.getPlanReceipt());
+        else receipt.setActualReceipt(0.0);
+        //检查客户满意度是否在0-10的合法范围内
+        if (receipt.getFeedback() < 0 || receipt.getFeedback() > 10)
+            return AjaxResult.error("客户满意度不合法");
+        //签收时间必须要在当前时间之前
+        if (receipt.getSignTime().after(new Date())) return AjaxResult.error("签收时间不合法");
+        //检查同类型同任务号的回执单是否存在
+        QueryWrapper<Receipt> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("task_id", taskId).eq("task_type", TaskType.PAYMENT);
+        Receipt existReceipt = receiptService.getOne(queryWrapper);
+        if (existReceipt != null) return AjaxResult.error("回执单已存在");
+        //根据收款回执单的最终结果执行不同的操作，如果是失败的单子，就将订单状态以及所有的本地或者远程任务状态更新为失败
+        boolean success;
+        switch (receipt.getState()) {
+            case ReceiptStatus.FAILED:
+                task.setTaskStatus(TaskStatus.FAILED);
+                //更新本地任务状态
+                success = taskService.updateById(task);
+                if (!success) throw new RuntimeException("更新本地任务状态失败");
+                //更新远程任务状态
+                AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), TaskStatus.FAILED);
+                if (ajaxResult == null) throw new RuntimeException("更新远程任务状态失败");
+                if (ajaxResult.isError()) throw new RuntimeException(ajaxResult.getMsg());
+                break;
+            case ReceiptStatus.COMPLETED:
+                //1.更新本地任务状态
+                task.setTaskStatus(TaskStatus.COMPLETED);
+                success = taskService.updateById(task);
+                if (!success) throw new RuntimeException("更新本地任务状态失败");
+                //2.更新远程任务状态
+                AjaxResult ajaxResult1 = taskClient.updateTaskStatus(task.getId(), TaskStatus.COMPLETED);
+                if (ajaxResult1 == null) throw new RuntimeException("更新远程任务状态失败");
+                //3.创建新的任务，任务为送货任务，需要进行远程调用传入订单ID
+               AjaxResult createResult=taskClient.createDeliveryTask(task.getOrderId(), task.getSubId(),substationService.getById(task.getSubId()).getSubwareId());
 
+                break;
+        }
 
 
         return null;
 
     }
-
 
 
 }

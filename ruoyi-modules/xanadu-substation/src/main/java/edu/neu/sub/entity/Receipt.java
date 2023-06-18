@@ -64,15 +64,15 @@ public class Receipt implements Serializable {
 
     @ApiModelProperty("客户满意度")
     @TableField("feedback")
-    private String feedback;
+    private Integer feedback;
 
     @ApiModelProperty("备注")
     @TableField("remark")
     private String remark;
 
     @ApiModelProperty("送货/退货地址")
-    @TableField("address")
-    private String address;
+    @TableField("delivery_address")
+    private String deliveryAddress;
 
     @ApiModelProperty("签收时间")
     @TableField("sign_time")
@@ -88,11 +88,11 @@ public class Receipt implements Serializable {
 
     @ApiModelProperty("计划金额")
     @TableField("plan_receipt")
-    private BigDecimal planReceipt;
+    private Double planReceipt;
 
     @ApiModelProperty("实际金额")
     @TableField("actual_receipt")
-    private Integer actualReceipt;
+    private Double actualReceipt;
 
     @ApiModelProperty("实际数量")
     @TableField("actual_number")

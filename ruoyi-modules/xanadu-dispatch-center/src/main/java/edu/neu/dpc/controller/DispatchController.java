@@ -63,6 +63,8 @@ public class DispatchController {
     @Autowired
     SubstationClient substationClient;
 
+    Map<Long, Date> map = new HashMap<>();
+
 
     @GetMapping("/check/{id}")
     @ApiOperation(value = "检查订单状态，是否全部都到货，如果都到货则更新为可分配状态，需要锁定库存", notes = "检查订单")
@@ -97,7 +99,7 @@ public class DispatchController {
         //获取订单信息
         Object data = orderResult.get("data");
         //转为OrderVo
-        OrderVo orderVo = JSON.copyTo(data, OrderVo.class);
+        OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
@@ -109,7 +111,8 @@ public class DispatchController {
                 , false, taskType);
 
         //如果是收款任务或者退货任务则直接设置为可分配状态
-        if (taskType.equals(TaskType.PAYMENT)||taskType.equals(TaskType.RETURN)) task.setTaskStatus(TaskStatus.ASSIGNABLE);
+        if (taskType.equals(TaskType.PAYMENT) || taskType.equals(TaskType.RETURN))
+            task.setTaskStatus(TaskStatus.ASSIGNABLE);
 
         boolean success = taskService.save(task);
         if (!success) throw new ServiceException("保存任务失败");
@@ -117,7 +120,12 @@ public class DispatchController {
         Long taskId = task.getId();
         //2.更新订单状态为已调度
         Boolean isRemoteSuccess = ccOrderClient.batchUpdateStatus(OrderStatusConstant.DISPATCHED, Collections.singletonList(orderVo.getId()));
+        //更新订单分站ID
+        ccOrderClient.updateOrderSubstationId(substationId, orderVo.getId());
         if (isRemoteSuccess == null || !isRemoteSuccess) throw new ServiceException("更新订单状态失败");
+
+        //如果是收款任务，我们需要保存一下预计出库日期，在后续创建送货单时使用
+        if (taskType.equals(TaskType.PAYMENT)) map.put(id, outDate);
 
         // 1.收款任务，不需要记录商品列表，直接状态为可分配，不调度
         if (!taskType.equals(TaskType.PAYMENT)) {
@@ -149,7 +157,55 @@ public class DispatchController {
             });
         }
         return AjaxResult.success("调度成功");
+    }
 
+
+    @PostMapping("/feign/createDeliveryTask")
+    @ApiOperation(value = "创建送货任务单,需要调度商品以及保存相关的商品信息")
+    public AjaxResult createDeliveryTask(@ApiParam("订单ID") @RequestParam("orderId") Long orderId,
+                                         @ApiParam("分站ID") @RequestParam("substationId") Long substationId,
+                                         @RequestParam("subwareId") Long subwareId) {
+        //拉取订单信息，生成任务单
+        AjaxResult orderResult = ccOrderClient.getOrder(orderId);
+        //检查返回结果是否有错误
+        if (orderResult.isError()) return orderResult;
+        //获取订单信息
+        Object data = orderResult.get("data");
+        //转为OrderVo
+        OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
+        //生成任务单
+        Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.SCHEDULED
+                , false, TaskType.DELIVERY);
+        boolean success = taskService.save(task);
+        if (!success) throw new ServiceException("生成送货任务失败");
+        // 拿到对应的记录ID
+        Long taskId = task.getId();
+        List<Product> products = orderVo.getProducts();
+        products.forEach(p -> p.setTaskId(taskId));
+        success = productService.saveBatch(products);
+        if (!success) throw new ServiceException("保存商品失败");
+
+        //取出之前保存的预计出库日期
+        Date outDate = map.getOrDefault(orderId, new Date());
+        map.remove(orderId);
+
+        //保存每一个商品并生成调度记录
+        products.forEach(p -> {
+            //修改库存，将对应的商品库存的加锁量减去商品数量，增加已分配量
+            AjaxResult lock = centerWareClient.dispatch(p.getProductId(), p.getNumber(), "lock");
+            if (lock == null || lock.isError()) throw new ServiceException("解锁库存失败");
+            //生成调度单并插入，状态为已提交
+            Dispatch dispatch = new Dispatch(null, subwareId, taskId, p.getProductId(), p.getNumber(), p.getProductName(),
+                    p.getProductCategary(), outDate, Dispatch.NOT_OUTPUT, substationId, false);
+            boolean result = dispatchService.save(dispatch);
+            if (!result) throw new ServiceException("保存调度单失败");
+            //远程调用添加出库单，中心仓库添加两个不同的查询页面，对应不同的vo
+            CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), dispatch.getTaskId(), dispatch.getProductId(),
+                    dispatch.getProductName(), p.getPrice(), dispatch.getProductNum(), InputOutputType.DISPATCH_OUT, outDate, null, substationId, subwareId);
+            Boolean add = centerWareClient.add(centerOutputVo);
+            if (add == null || !add) throw new ServiceException("添加出库调度记录失败");
+        });
+        return AjaxResult.success("创建送货任务单并调度成功");
     }
 
 
