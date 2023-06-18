@@ -10,3 +10,4 @@ public class PurchaseRecordStatusConstant {
     public static final String ARRIVED = "已到货";
     public static final String IN_STORAGE = "已入库";
 }
+

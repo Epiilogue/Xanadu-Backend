@@ -56,5 +56,9 @@ public class Product implements Serializable {
     @TableField("actual_number")
     private Integer actualNumber;
 
+    @ApiModelProperty("商品能否退货")
+    @TableField(exist = false)
+    private Boolean refundAble;
+
 
 }

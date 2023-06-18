@@ -16,6 +16,7 @@ import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import edu.neu.sub.vo.PaymentReceiptVo;
 import edu.neu.sub.vo.ProductVo;
+import edu.neu.sub.vo.ReceiptVo;
 import edu.neu.sub.vo.TaskVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
@@ -131,7 +132,7 @@ public class TaskController {
                 Long subwareId = substationService.getById(subId).getSubwareId();
                 //映射成map，key为商品ID，value为商品数量
                 HashMap<Long, Integer> longIntegerHashMap = new HashMap<>();
-                for (ProductVo product : products) longIntegerHashMap.put(product.getId(), product.getNumber());
+                for (ProductVo product : products) longIntegerHashMap.put(product.getProductId(), product.getNumber());
                 AjaxResult check = subwareClient.check(subwareId, longIntegerHashMap);
                 if (check == null) throw new RuntimeException("检查库存失败");
                 if (check.isError()) throw new RuntimeException(check.getMsg());
@@ -188,7 +189,8 @@ public class TaskController {
                 Long subwareId = substationService.getById(task.getSubId()).getSubwareId();
                 //3.映射成map，key为商品ID，value为商品数量,
                 HashMap<Long, Integer> longIntegerHashMap = new HashMap<>();
-                for (ProductVo productVo : productVos) longIntegerHashMap.put(productVo.getId(), productVo.getNumber());
+                for (ProductVo productVo : productVos)
+                    longIntegerHashMap.put(productVo.getProductId(), productVo.getNumber());
                 //4.减去库存,生成出库记录
                 AjaxResult reduceResult = subwareClient.reduce(subwareId, task.getId(), longIntegerHashMap);
                 if (reduceResult == null) throw new RuntimeException("出库失败");
@@ -267,14 +269,98 @@ public class TaskController {
                 AjaxResult ajaxResult1 = taskClient.updateTaskStatus(task.getId(), TaskStatus.COMPLETED);
                 if (ajaxResult1 == null) throw new RuntimeException("更新远程任务状态失败");
                 //3.创建新的任务，任务为送货任务，需要进行远程调用传入订单ID
-               AjaxResult createResult=taskClient.createDeliveryTask(task.getOrderId(), task.getSubId(),substationService.getById(task.getSubId()).getSubwareId());
+                AjaxResult createResult = taskClient.createDeliveryTask(task.getOrderId(), task.getSubId(), substationService.getById(task.getSubId()).getSubwareId());
+                if (createResult == null) throw new RuntimeException("创建送货任务失败");
+                if (createResult.isError()) throw new RuntimeException(createResult.getMsg());
+                break;
+        }
+        return AjaxResult.success("收款回执单填写成功");
+    }
+
+
+    //TODO：填写其他回执单，对于其他回执单，都需要携带有实际退货或者签收的商品数量
+    // 对于货到付款来说，对于未完成的商品，我们会要求输入退货数量，但是此时无法输入不可退货的商品，以及超过可退货数量的商品
+    // 对于 退货以及送货来说，实际金额为退款金额，对于换货来说不收钱，对于送货来说实际金额为收款金额
+    @PostMapping("/fillReceipt")
+    @ApiOperation(value = "填写回执单，可能是退货，换货，送货的回执单填写，如果选择部分完成，需要填写每一个商品数量，前端记得回传之前拿到的商品信息")
+    public AjaxResult fillReceipt(@RequestBody ReceiptVo receiptVo) {
+        //根据ID拿到任务信息
+        Long taskId = receiptVo.getTaskId();
+        if (taskId == null) return AjaxResult.error("任务ID不能为空");
+        //检查回执状态是否合法
+        Task task = taskService.getById(taskId);
+        if (task == null) return AjaxResult.error("回执任务不存在");
+        switch (task.getTaskType()) {
+            case TaskType.DELIVERY:
+            case TaskType.PAYMENT_DELIVERY:
+            case TaskType.EXCHANGE:
+                //检查任务状态是不是已领货
+                if (!TaskStatus.RECEIVED.equals(task.getTaskStatus()))
+                    return AjaxResult.error("当前任务状态无法填写回执单");
+                break;
+            case TaskType.RETURN:
+                //检查任务状态是不是已分配
+                if (!TaskStatus.ASSIGNED.equals(task.getTaskStatus()))
+                    return AjaxResult.error("当前任务状态无法填写回执单");
+                break;
+            default:
+                return AjaxResult.error("当前任务类型无法填写回执单");
+        }
+        Receipt receipt = new Receipt();
+        BeanUtils.copyProperties(receiptVo, receipt);
+        BeanUtils.copyProperties(task, receipt);
+        receipt.setId(null);
+        receipt.setTaskId(taskId);
+        receipt.setCreateTime(new Date());
+        receipt.setPlanReceipt(task.getTotalAmount());
+        receipt.setPlanNum(task.getNumbers());
+        //检查回执任务状态，只允许是已完成或者失败或者部分完成
+        if (!ReceiptStatus.COMPLETED.equals(receipt.getState()) &&
+                !ReceiptStatus.FAILED.equals(receipt.getState()) &&
+                !ReceiptStatus.PARTIAL_COMPLETED.equals(receipt.getState()))
+            return AjaxResult.error("回执状态不合法");
+        //检查客户满意度是否在0-10的合法范围内
+        if (receipt.getFeedback() < 0 || receipt.getFeedback() > 10)
+            return AjaxResult.error("客户满意度不合法");
+        //签收时间必须要在当前时间之前
+        if (receipt.getSignTime().after(new Date())) return AjaxResult.error("签收时间不合法");
+        //检查同类型同任务号的回执单是否存在
+        QueryWrapper<Receipt> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("task_id", taskId).eq("task_type", task.getTaskType());
+        Receipt existReceipt = receiptService.getOne(queryWrapper);
+        if (existReceipt != null) return AjaxResult.error("回执单已存在");
+
+        //对于每一个状态我们都需要考虑多种订单类型： 送货，退货，换货，送货+收款
+        //完成校验后，需要根据携带的商品信息，以及最终的回执状态，
+        switch (receiptVo.getState()){
+            case ReceiptStatus.COMPLETED:
+                //检查任务状态，如果是换货或者送货任务完成，不涉及钱，那么实际收款为0，实际数量为计划数量
+                if(TaskType.EXCHANGE.equals(task.getTaskType())||TaskType.DELIVERY.equals(task.getTaskType())) receipt.setActualReceipt(0.0);//实际收款或者退款为0
+                else receipt.setActualReceipt(receipt.getPlanReceipt());//实际收款为计划收款
+                receipt.setActualNumber(receipt.getPlanNum());//实际数量为计划数量
+                //更新本地任务状态以及远程任务状态
+                break;
+            case ReceiptStatus.FAILED:
+                //1. 送货失败退所有钱，实际收货数量为0
+                //2. 退货失败了，实际退款为0，实际数量为0
+                //3. 换货失败了，客户的商品都不满足换货条件，实际款项为0，实际商品数量计划数量，因为要把自己带过去的商品退回来
+                //4. 送货+收款失败了，实际收款为0，实际数量为0
+                if(task.getTaskType().equals(TaskType.DELIVERY)) receipt.setActualReceipt(receipt.getPlanReceipt());//实际退款金额为总额度
+                else receipt.setActualReceipt(0.0);//实际收款或者退款为0
+                //如果是换货失败那么商品将要全部回去
+                if(task.getTaskType().equals(TaskType.EXCHANGE)) receipt.setActualNumber(receipt.getPlanNum());//实际数量为计划数量
+                else receipt.setActualNumber(0);//实际数量为0
+                break;
+            case ReceiptStatus.PARTIAL_COMPLETED:
+
 
                 break;
+            default:
+                return AjaxResult.error("回执状态不合法");
         }
 
 
         return null;
-
     }
 
 
