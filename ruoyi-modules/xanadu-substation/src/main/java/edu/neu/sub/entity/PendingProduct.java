@@ -4,14 +4,16 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -55,6 +57,10 @@ public class PendingProduct implements Serializable {
     @ApiModelProperty("来源")
     @TableField("source")
     private String source;
+
+    @ApiModelProperty("子库ID")
+    @TableField("subware_id")
+    private Long subwareId;
 
 
 }

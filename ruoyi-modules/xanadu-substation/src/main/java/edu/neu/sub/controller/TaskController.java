@@ -297,6 +297,8 @@ public class TaskController {
         //检查回执状态是否合法
         Task task = taskService.getById(taskId);
         if (task == null) return AjaxResult.error("回执任务不存在");
+        Long subwareId = substationService.getById(task.getSubId()).getSubwareId();
+
         switch (task.getTaskType()) {
             case TaskType.DELIVERY:
             case TaskType.PAYMENT_DELIVERY:
@@ -360,7 +362,7 @@ public class TaskController {
         boolean b = receiptService.updateById(receipt);
         if (!b) throw new ServiceException("更新回执单失败");
         //4.自动生成待处理商品信息单，保存到数据库，等待操作人员入库或者退货处理
-        boolean isSuccess = pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType());
+        boolean isSuccess = pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType(), subwareId);
         if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
         //5.更新远程状态
         AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), receipt.getState());

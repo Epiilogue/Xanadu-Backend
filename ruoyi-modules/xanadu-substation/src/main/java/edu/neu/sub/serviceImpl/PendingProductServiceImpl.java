@@ -28,14 +28,14 @@ import java.util.List;
 public class PendingProductServiceImpl extends ServiceImpl<PendingProductMapper, PendingProduct> implements PendingProductService {
 
     @Override
-    public boolean convertAndSave(Long taskId, List<ProductVo> products, String completed, String taskType) {
+    public boolean convertAndSave(Long taskId, List<ProductVo> products, String completed, String taskType,Long subwareId) {
         //先转化成ReceiptProduct对象
         List<PendingProduct> pendingProducts = new ArrayList<>();
         HashMap<Long, ProductVo> longProductVoHashMap = new HashMap<>();
         products.forEach(p -> longProductVoHashMap.put(p.getProductId(), p));
 
         products.forEach(p -> {
-            PendingProduct pendingProduct = new PendingProduct(null, taskId, p.getProductId(), p.getProductName(), p.getPrice(), p.getActualNumber(), p.getReason());
+            PendingProduct pendingProduct = new PendingProduct(null, taskId, p.getProductId(), p.getProductName(), p.getPrice(), p.getActualNumber(), p.getReason(),subwareId);
             pendingProducts.add(pendingProduct);
         });
         switch (completed) {
