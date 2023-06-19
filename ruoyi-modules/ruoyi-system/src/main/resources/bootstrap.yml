@@ -1,9 +1,13 @@
 # Tomcat
 server:
   port: 9201
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 # Spring
-spring: 
+spring:
   application:
     # 应用名称
     name: ruoyi-system

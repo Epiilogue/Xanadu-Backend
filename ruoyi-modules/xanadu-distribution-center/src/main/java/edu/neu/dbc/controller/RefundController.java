@@ -19,6 +19,7 @@ import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.RefundService;
 import edu.neu.dbc.service.SupplierService;
 import edu.neu.dbc.vo.CenterOutputVo;
+import edu.neu.dbc.vo.StorageVo;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -111,11 +112,11 @@ public class RefundController {
         //统计所有的进货数量
         Integer inputCount = list.stream().map(PurchaseRecord::getNumber).reduce(0, Integer::sum);
         //2.查询当前的商品库存数
-        Integer storage = wareCenterStorageRecordClient.getStorage(productId).getTotalNum();
+        StorageVo storage = wareCenterStorageRecordClient.getStorage(productId);
         //生成退货记录
         assert product != null;
         Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount,
-                storage, 0, InputOutputStatus.NOT_SUBMIT, false, null);
+                storage.getTotalNum(), 0, InputOutputStatus.NOT_SUBMIT, false, null);
         //保存至数据库
         //boolean saved = refundService.save(refund);
         //if (!saved) throw new ServiceException("退货单生成失败");
