@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication(scanBasePackages = {"edu.neu", "com.ruoyi.common.security.handler"})
 @EnableFeignClients(basePackages = {"edu.neu.sub.feign"})
-@MapperScan("edu.neu.cc.mapper")
+@MapperScan("edu.neu.sub.mapper")
 @EnableTransactionManagement
 @EnableDiscoveryClient
 public class SubstationApplication {

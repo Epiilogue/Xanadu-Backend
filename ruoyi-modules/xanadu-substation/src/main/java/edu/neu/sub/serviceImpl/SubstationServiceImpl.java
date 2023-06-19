@@ -4,7 +4,10 @@ import edu.neu.sub.entity.Substation;
 import edu.neu.sub.mapper.SubstationMapper;
 import edu.neu.sub.service.SubstationService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SubstationServiceImpl extends ServiceImpl<SubstationMapper, Substation> implements SubstationService {
 
+    @Autowired
+    SubstationMapper substationMapper;
+
+
+    @Override
+    public List<Long> getCourierBySubstationId(Long subId) {
+        return substationMapper.getCourierBySubstationId(subId);
+    }
 }

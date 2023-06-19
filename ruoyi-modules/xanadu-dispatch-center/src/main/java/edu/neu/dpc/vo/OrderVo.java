@@ -48,7 +48,10 @@ public class OrderVo implements Serializable {
     private String status;
 
     @ApiModelProperty("客户姓名")
-    private String customerName;
+    private String receiverName;
+
+    @ApiModelProperty("接收人电话")
+    private String phone;
 
     @ApiModelProperty("送货地址")
     private String deliveryAddress;

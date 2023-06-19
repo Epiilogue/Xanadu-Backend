@@ -38,40 +38,41 @@ public class Receipt implements Serializable {
     private Long taskId;
 
     @ApiModelProperty("客户姓名")
-    @TableField("name")
-    private String name;
+    @TableField("receiver_name")
+    private String receiverName;
 
     @ApiModelProperty("客户联系电话")
     @TableField("phone")
     private String phone;
 
-    @ApiModelProperty("分站ID")
-    @TableField("substation_id")
-    private Long substationId;
+    @ApiModelProperty("分站id")
+    @TableField("sub_id")
+    private Long subId;
 
     @ApiModelProperty("任务类型")
-    @TableField("type")
-    private String type;
+    @TableField("task_type")
+    private String taskType;
 
     @ApiModelProperty("回执任务状态")
     @TableField("state")
     private String state;
 
-    @ApiModelProperty("配送员ID")
-    @TableField("user_id")
-    private Long userId;
+    @ApiModelProperty("快递员ID")
+    @TableField("courier_id")
+    private Long courierId;
+
 
     @ApiModelProperty("客户满意度")
     @TableField("feedback")
-    private String feedback;
+    private Integer feedback;
 
     @ApiModelProperty("备注")
     @TableField("remark")
     private String remark;
 
     @ApiModelProperty("送货/退货地址")
-    @TableField("address")
-    private String address;
+    @TableField("delivery_address")
+    private String deliveryAddress;
 
     @ApiModelProperty("签收时间")
     @TableField("sign_time")
@@ -87,11 +88,11 @@ public class Receipt implements Serializable {
 
     @ApiModelProperty("计划金额")
     @TableField("plan_receipt")
-    private BigDecimal planReceipt;
+    private Double planReceipt;
 
     @ApiModelProperty("实际金额")
     @TableField("actual_receipt")
-    private Integer actualReceipt;
+    private Double actualReceipt;
 
     @ApiModelProperty("实际数量")
     @TableField("actual_number")

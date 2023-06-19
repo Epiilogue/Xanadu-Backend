@@ -99,11 +99,7 @@ public class PurchaseRecordController {
 
     @PostMapping("/generatePurchaseOrder")
     @ApiOperation("生成采购单")
-    public AjaxResult generatePurchaseOrder(@ApiParam("之前得到的单条记录") @RequestBody AllLackRecordVo allLackRecordVo,
-                                            @ApiParam("供销商ID") Long supplierId) {
-        if (supplierId == null) return AjaxResult.error("供销商ID为空");
-        Supplier supplier = supplierService.getById(supplierId);
-        if (supplier == null) return AjaxResult.error("供销商不存在");
+    public AjaxResult generatePurchaseOrder(@ApiParam("之前得到的单条记录") @RequestBody AllLackRecordVo allLackRecordVo) {
         if (allLackRecordVo == null) return AjaxResult.error("请选择需要采购的商品");
         if (allLackRecordVo.getSingleLackRecordVos().size() == 0 || allLackRecordVo.getNeedCount() == 0)
             return AjaxResult.error("缺货记录为空");
@@ -114,34 +110,28 @@ public class PurchaseRecordController {
             return AjaxResult.error("进货数量不能小于缺货数量");
         if (allLackRecordVo.getInputCount() + allLackRecordVo.getNowCount() > product.getMaxCount())
             return AjaxResult.error("进货数量加上当前库存数量不能大于该商品最大库存量");
-
         StringBuilder stringBuilder = new StringBuilder();
         //获取所有缺货记录ID，拼接为字符串保存至数据库
         allLackRecordVo.getSingleLackRecordVos().stream().
                 map(SingleLackRecordVo::getId).collect(Collectors.toList()).forEach(id -> stringBuilder.append(id).append(","));
-
-
         //完成校验后，生成采购单
         PurchaseRecord purchaseRecord = new PurchaseRecord();
         purchaseRecord.setNumber(allLackRecordVo.getInputCount());
         purchaseRecord.setProductId(product.getId());
         purchaseRecord.setProductName(product.getName());
         purchaseRecord.setProductPrice(product.getPrice());
-        purchaseRecord.setSupplierId(supplierId);
+        purchaseRecord.setSupplierId(product.getSupplierId());
         purchaseRecord.setNumber(allLackRecordVo.getInputCount());
         purchaseRecord.setLackIds(stringBuilder.toString());
-
         //设置采购单状态
         purchaseRecord.setStatus(PurchaseRecordStatusConstant.PURCHASED);
         purchaseRecord.setTotalCost(allLackRecordVo.getInputCount() * product.getPrice());
         //插入数据库
         boolean saved = purchaseRecordService.save(purchaseRecord);
         if (!saved) throw new ServiceException("采购单生成失败");
-        //TODO：更新所有的缺货记录状态，将其置为已采购，这样缺货检查就不会重复检查
-        Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream()
-                .filter(singleLackRecordVo -> !singleLackRecordVo.getSource().equals("缺货检查")).
+        Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream().
+                filter(s->!s.getSource().equals("缺货检查")).
                 map(SingleLackRecordVo::getId).collect(Collectors.toList()));
-
         if (!updateSuccess) throw new ServiceException("更新缺货记录状态失败");
 
         return AjaxResult.success("采购单生成成功");

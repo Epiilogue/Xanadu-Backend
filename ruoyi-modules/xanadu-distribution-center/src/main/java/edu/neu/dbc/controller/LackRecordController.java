@@ -12,11 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
@@ -48,6 +44,7 @@ public class LackRecordController {
         if (isCheck && storage < product.getSafeStock()) {
             Integer lackNumber = product.getSafeStock() - storage;
             SingleLackRecordVo checkSingleLackRecordVo = new SingleLackRecordVo();
+            checkSingleLackRecordVo.setId(-1L);
             checkSingleLackRecordVo.setSource("缺货检查");
             checkSingleLackRecordVo.setCreateTime(new Date());
             checkSingleLackRecordVo.setNeedNumbers(lackNumber);
@@ -73,8 +70,8 @@ public class LackRecordController {
     @GetMapping("/getLackRecord/{productId}/{isCheck}")
     @ApiOperation("获取缺货记录,需要指定是否需要检查安全库存")
     public AjaxResult getLackRecord(
-            @ApiParam("商品ID") Long productId,
-            @ApiParam(value = "是否需要检查安全库存", defaultValue = "true") Boolean isCheck) {
+            @ApiParam("商品ID") @PathVariable("productId") Long productId,
+            @ApiParam(value = "是否需要检查安全库存", defaultValue = "true") @PathVariable("isCheck") Boolean isCheck) {
         if (productId == null) return AjaxResult.error("商品ID不能为空");
         Product product = productService.getById(productId);
         if (product == null) return AjaxResult.error("商品不存在");
@@ -95,7 +92,5 @@ public class LackRecordController {
         if (allLackRecordVos.size() == 0) return AjaxResult.error("没有缺货记录");
         return AjaxResult.success(allLackRecordVos);
     }
-
-
 }
 

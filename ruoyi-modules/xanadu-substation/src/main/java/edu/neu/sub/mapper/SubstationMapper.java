@@ -4,6 +4,8 @@ import edu.neu.sub.entity.Substation;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * <p>
  * 分站 Mapper 接口
@@ -15,4 +17,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface SubstationMapper extends BaseMapper<Substation> {
 
+    List<Long> getCourierBySubstationId(Long subId);
 }

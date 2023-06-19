@@ -1,10 +1,14 @@
 package edu.neu.sub.serviceImpl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.sub.entity.Task;
 import edu.neu.sub.mapper.TaskMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.neu.sub.service.TaskService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +21,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements TaskService {
 
+    @Override
+    public List<Task> getTasksByCourierId(Long courierId) {
+        QueryWrapper<Task> eq = new QueryWrapper<Task>().eq("courier_id", courierId).eq("status", TaskStatus.ASSIGNED);
+        return this.list(eq);
+    }
 }

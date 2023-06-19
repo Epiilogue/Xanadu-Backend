@@ -76,6 +76,4 @@ public class Refund implements Serializable {
     @ApiModelProperty("退货时间")
     @TableField("refund_time")
     private Date refundTime;
-
-
 }

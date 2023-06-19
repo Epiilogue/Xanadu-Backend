@@ -58,7 +58,6 @@ public class StockoutController {
         }
         return AjaxResult.success(list);
     }
-
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
     public AjaxResult edit(@RequestBody Stockout stockout) {
@@ -149,7 +148,7 @@ public class StockoutController {
     @PostMapping("/feign/updateLackRecordStatusToPurchased")
     @ApiOperation("更新缺货记录状态,feign远程调用专用，前端不要使用该接口,传递的参数id列表")
     public Boolean updateLackRecordStatusToPurchased(@RequestBody List<Long> ids) {
-        if (ids.size() == 0) return true;
+        if(ids.size() == 0) return true;
         UpdateWrapper<Stockout> set = new UpdateWrapper<Stockout>().in("id", ids).set("status", StockoutConstant.PURCHASED);
         return stockoutService.update(set);
     }

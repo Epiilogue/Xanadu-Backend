@@ -73,9 +73,6 @@ public class SubStorageRecord implements Serializable {
     @TableField("total_num")
     private Integer totalNum;
 
-    @ApiModelProperty("锁定数量")
-    @TableField("lock_num")
-    private Integer lockNum;
 
 
 }

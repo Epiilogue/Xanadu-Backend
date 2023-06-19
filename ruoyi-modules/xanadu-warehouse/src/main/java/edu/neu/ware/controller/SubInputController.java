@@ -116,7 +116,7 @@ public class SubInputController {
         SubStorageRecord subStorageRecord;
         if (record == null) {
             subStorageRecord = new SubStorageRecord(null, centerOutput.getSubwareId(), centerOutput.getProductId(), 0, centerOutput.getProductName(),
-                    centerOutput.getProductPrice(), null, null, 0, 0, 0, 0);
+                    centerOutput.getProductPrice(), null, null, 0, 0, 0);
             //插入数据库
             boolean save = subStorageRecordService.save(subStorageRecord);
             if (!save) throw new ServiceException("插入商品库存失败");

@@ -115,7 +115,7 @@ public class CenterInputController {
         if (!update) return AjaxResult.error("入库失败，更新库存失败");
 
         centerInput.setStatus(CenterInput.INPUT_STATUS_YES);
-        centerInput.setInputNum(number);
+        centerInput.setActualNum(number);
         centerInput.setInputTime(new Date());
 
         centerInputService.updateById(centerInput);

@@ -51,7 +51,7 @@ public class SubInput implements Serializable {
     @TableField("product_name")
     private String productName;
 
-    @ApiModelProperty("商品数量")
+    @ApiModelProperty("预计商品数量")
     @TableField("input_num")
     private Integer inputNum;
 
@@ -75,6 +75,5 @@ public class SubInput implements Serializable {
     @ApiModelProperty("任务ID")
     @TableField("task_id")
     private Long taskId;
-
 
 }

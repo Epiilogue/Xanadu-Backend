@@ -89,5 +89,15 @@ public class SubstationController {
         substationService.removeById(id);
         return AjaxResult.success("删除成功");
     }
+
+
+    @GetMapping("/feign/getSubwareId/{id}")
+    @ApiOperation(value = "获取分站的仓库ID")
+    public AjaxResult getSubwareId(@PathVariable("id") Long id) {
+        Substation substation = substationService.getById(id);
+        if (substation == null) return AjaxResult.error("分站不存在");
+        return AjaxResult.success(substation.getSubwareId());
+    }
+    
 }
 

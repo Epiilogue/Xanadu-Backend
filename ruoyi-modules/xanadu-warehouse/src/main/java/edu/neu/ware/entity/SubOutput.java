@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -24,15 +26,17 @@ import java.util.Date;
 @Setter
 @TableName("ware_sub_output")
 @ApiModel(value = "SubOutput对象", description = "")
+@AllArgsConstructor
+@NoArgsConstructor
 public class SubOutput implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("中心仓库出库记录ID")
+    @ApiModelProperty("分仓库出库记录ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty("退货出库或调拨出库的ID")
+    @ApiModelProperty("退货出库或任务ID")
     @TableField("output_id")
     private Long outputId;
 
@@ -59,6 +63,4 @@ public class SubOutput implements Serializable {
     @ApiModelProperty("出库分站ID")
     @TableField("subware_id")
     private Long subwareId;
-
-
 }
