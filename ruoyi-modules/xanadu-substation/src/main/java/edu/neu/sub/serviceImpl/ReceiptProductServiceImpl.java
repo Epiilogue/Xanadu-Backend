@@ -30,7 +30,7 @@ public class ReceiptProductServiceImpl extends ServiceImpl<ReceiptProductMapper,
     ReceiptProductMapper receiptProductMapper;
 
     @Override
-    public boolean convertAndSave(Long receiptId, List<ProductVo> products, String completed, String taskType) {
+    public List<ReceiptProduct> convertAndSave(Long receiptId, List<ProductVo> products, String completed, String taskType) {
         //先转化成ReceiptProduct对象
         List<ReceiptProduct> receiptProducts = new ArrayList<>();
         products.forEach(p -> {
@@ -132,9 +132,13 @@ public class ReceiptProductServiceImpl extends ServiceImpl<ReceiptProductMapper,
                 }
                 break;
             default:
-                return false;
+                return null;
         }
-        return this.saveBatch(receiptProducts);
-
+        boolean b = this.saveBatch(receiptProducts);
+        if (b) {
+            return receiptProducts;
+        } else {
+            return null;
+        }
     }
 }

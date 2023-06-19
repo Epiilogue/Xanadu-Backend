@@ -242,8 +242,8 @@ public class TaskController {
         //检查回执任务状态，只允许是已完成或者失败
         if (!ReceiptStatus.COMPLETED.equals(receipt.getState()) && !ReceiptStatus.FAILED.equals(receipt.getState()))
             return AjaxResult.error("回执状态不合法");
-        if (receipt.getState().equals(ReceiptStatus.COMPLETED)) receipt.setActualReceipt(receipt.getPlanReceipt());
-        else receipt.setActualReceipt(0.0);
+        if (receipt.getState().equals(ReceiptStatus.COMPLETED)) receipt.setInputMoney(receipt.getPlanReceipt());
+        else receipt.setInputMoney(0.0);
         //检查客户满意度是否在0-10的合法范围内
         if (receipt.getFeedback() < 0 || receipt.getFeedback() > 10)
             return AjaxResult.error("客户满意度不合法");
@@ -344,57 +344,28 @@ public class TaskController {
         queryWrapper.eq("task_id", taskId).eq("task_type", task.getTaskType());
         Receipt existReceipt = receiptService.getOne(queryWrapper);
         if (existReceipt != null) return AjaxResult.error("回执单已存在");
-
-        //我们无法信任前端传递的数据信息，需要自己计算
-        //对于每一个状态我们都需要考虑多种订单类型： 送货，退货，换货，送货+收款
-        //完成校验后，需要根据携带的商品信息，以及最终的回执状态，
-        switch (receiptVo.getState()) {
-            case ReceiptStatus.COMPLETED:
-                //检查任务状态，如果是换货或者送货任务完成，不涉及钱，那么实际收款为0，实际数量为计划数量
-                if (TaskType.EXCHANGE.equals(task.getTaskType()) || TaskType.DELIVERY.equals(task.getTaskType()))
-                    receipt.setActualReceipt(0.0);//实际收款或者退款为0
-                else receipt.setActualReceipt(receipt.getPlanReceipt());//实际收款为计划收款
-                receipt.setActualNumber(receipt.getPlanNum());//实际数量为计划数量
-                //1.保存数据库，拿到id
-                boolean save = receiptService.save(receipt);
-                if (!save) return AjaxResult.error("保存回执单失败");
-                Long receiptId = receipt.getId();
-                //2.更新本地状态
-                task.setTaskStatus(TaskStatus.COMPLETED);
-                task.setReceiptId(receiptId);
-                //3.保存商品信息，对于不同的类型我们应当保存不同的商品信息
-                boolean isSuccess = receiptProductService.convertAndSave(receiptId, products, ReceiptStatus.COMPLETED, task.getTaskType());
-                if (!isSuccess) throw new ServiceException("保存商品信息失败");
-                //4.自动生成待处理商品信息单，保存到数据库，等待操作人员入库或者退货处理
-                isSuccess = pendingProductService.convertAndSave(taskId, products, ReceiptStatus.COMPLETED, task.getTaskType());
-                if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
-                //5.更新远程状态
-                AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), TaskStatus.COMPLETED);
-                if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
-                break;
-            case ReceiptStatus.FAILED:
-                //1. 送货失败退所有钱，实际收货数量为0
-                //2. 退货失败了，实际退款为0，实际数量为0
-                //3. 换货失败了，客户的商品都不满足换货条件，实际款项为0，实际商品数量计划数量，因为要把自己带过去的商品退回来
-                //4. 送货+收款失败了，实际收款为0，实际数量为0
-                if (task.getTaskType().equals(TaskType.DELIVERY))
-                    receipt.setActualReceipt(receipt.getPlanReceipt());//实际退款金额为总额度
-                else receipt.setActualReceipt(0.0);//实际收款或者退款为0
-                //如果是换货失败那么商品将要全部回去
-                if (task.getTaskType().equals(TaskType.EXCHANGE))
-                    receipt.setActualNumber(receipt.getPlanNum());//实际数量为计划数量
-                else receipt.setActualNumber(0);//实际数量为0
-                break;
-            case ReceiptStatus.PARTIAL_COMPLETED:
-
-
-                break;
-            default:
-                return AjaxResult.error("回执状态不合法");
-        }
-
-
-        return null;
+        boolean save = receiptService.save(receipt);
+        if (!save) return AjaxResult.error("保存回执单失败");
+        Long receiptId = receipt.getId();
+        //2.更新本地状态
+        task.setTaskStatus(TaskStatus.COMPLETED);
+        task.setReceiptId(receiptId);
+        //3.保存商品信息，对于不同的类型我们应当保存不同的商品信息
+        List<ReceiptProduct> receiptProducts = receiptProductService.convertAndSave(receiptId, products, receipt.getState(), task.getTaskType());
+        if (receiptProducts == null) throw new ServiceException("保存商品信息失败");
+        receipt.setSignNum(receiptProducts.stream().mapToInt(ReceiptProduct::getSignNum).sum());
+        receipt.setRefundNum(receiptProducts.stream().mapToInt(ReceiptProduct::getReturnNum).sum());
+        receipt.setInputMoney(receiptProducts.stream().mapToDouble(ReceiptProduct::getInputMoney).sum());
+        receipt.setOutputMoney(receiptProducts.stream().mapToDouble(ReceiptProduct::getOutputMoney).sum());
+        boolean b = receiptService.updateById(receipt);
+        if (!b) throw new ServiceException("更新回执单失败");
+        //4.自动生成待处理商品信息单，保存到数据库，等待操作人员入库或者退货处理
+        boolean isSuccess = pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType());
+        if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
+        //5.更新远程状态
+        AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), receipt.getState());
+        if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
+        return AjaxResult.success("回执单填写成功");
     }
 
 

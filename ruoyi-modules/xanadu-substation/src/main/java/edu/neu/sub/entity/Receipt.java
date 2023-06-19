@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -90,17 +92,36 @@ public class Receipt implements Serializable {
     @TableField("plan_receipt")
     private Double planReceipt;
 
-    @ApiModelProperty("实际金额")
-    @TableField("actual_receipt")
-    private Double actualReceipt;
+    @ApiModelProperty("签收数量")
+    @TableField("sign_num")
+    private Integer signNum;
 
-    @ApiModelProperty("实际数量")
-    @TableField("actual_number")
-    private Integer actualNumber;
+
+    @ApiModelProperty("退回数量")
+    @TableField("refund_num")
+    private Integer refundNum;
+
+    @ApiModelProperty("实际总收款")
+    @TableField("input_money")
+    private Double inputMoney;
+
+    @ApiModelProperty("实际总退款")
+    @TableField("output_money")
+    private Double outputMoney;
+
 
     @ApiModelProperty("发票号")
     @TableField("invoice_number")
     private Long invoiceNumber;
 
 
+    public Receipt() {
+        //所有double,integer类型初始化为0,除了id
+        this.planNum = 0;
+        this.planReceipt = 0.0;
+        this.signNum = 0;
+        this.refundNum = 0;
+        this.inputMoney = 0.0;
+        this.outputMoney = 0.0;
+    }
 }

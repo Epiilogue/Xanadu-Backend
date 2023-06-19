@@ -16,5 +16,5 @@ import java.util.List;
  */
 public interface ReceiptProductService extends IService<ReceiptProduct> {
 
-    boolean convertAndSave(Long receiptId, List<ProductVo> products, String completed,String taskType);
+    List<ReceiptProduct> convertAndSave(Long receiptId, List<ProductVo> products, String completed,String taskType);
 }

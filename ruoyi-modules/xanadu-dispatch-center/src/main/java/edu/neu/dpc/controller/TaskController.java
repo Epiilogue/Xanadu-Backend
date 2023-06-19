@@ -78,6 +78,9 @@ public class TaskController {
                     if (task.getTaskType().equals(TaskType.PAYMENT)) break;
                     success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.FINISHED, Collections.singletonList(orderId));
                     break;
+                case TaskStatus.PARTIAL_COMPLETED:
+                    success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.PARTIAL_COMPLETED, Collections.singletonList(orderId));
+                    break;
                 default:
                     return AjaxResult.error("更新任务单状态失败,未知任务单状态");
             }
@@ -117,8 +120,6 @@ public class TaskController {
         });
         return AjaxResult.success(taskVos);
     }
-
-
 
 
 }
