@@ -58,7 +58,6 @@ public class TaskController {
         if (task != null) {
             task.setTaskStatus(status);
             Long orderId = task.getOrderId();
-            ;
             Boolean success = false;
             switch (status) {
                 case TaskStatus.ASSIGNABLE:

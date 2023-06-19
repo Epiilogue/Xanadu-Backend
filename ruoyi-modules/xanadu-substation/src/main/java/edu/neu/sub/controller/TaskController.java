@@ -3,6 +3,7 @@ package edu.neu.sub.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.ReceiptStatus;
 import edu.neu.base.constant.cc.TaskStatus;
@@ -12,6 +13,8 @@ import edu.neu.sub.entity.ReceiptProduct;
 import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
+import edu.neu.sub.mapper.ReceiptProductMapper;
+import edu.neu.sub.service.ReceiptProductService;
 import edu.neu.sub.service.ReceiptService;
 import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
@@ -55,6 +58,9 @@ public class TaskController {
     SubwareClient subwareClient;
     @Autowired
     ReceiptService receiptService;
+
+    @Autowired
+    ReceiptProductService receiptProductService;
 
 
     @GetMapping("/list/{subId}")
@@ -353,10 +359,20 @@ public class TaskController {
                 boolean save = receiptService.save(receipt);
                 if (!save) return AjaxResult.error("保存回执单失败");
                 Long receiptId = receipt.getId();
-                //2.更新远程状态
+                //2.更新本地状态
                 task.setTaskStatus(TaskStatus.COMPLETED);
+                task.setReceiptId(receiptId);
 
-                //3.保存商品信息
+                //3.保存商品信息，对于不同的类型我们应当保存不同的商品信息
+                boolean isSuccess=receiptProductService.convertAndSave(receiptId, products,ReceiptStatus.COMPLETED);
+                if(!isSuccess)throw new ServiceException("保存商品信息失败");
+
+                //4.更新远程状态
+                AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), TaskStatus.COMPLETED);
+                if (ajaxResult==null||ajaxResult.isError())throw new ServiceException("更新远程任务状态失败");
+
+                //4.自动生成退货单并保存到数据库列表中
+
 
                 break;
             case ReceiptStatus.FAILED:
