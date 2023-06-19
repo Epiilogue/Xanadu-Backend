@@ -2,7 +2,9 @@ package edu.neu.sub.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -54,5 +56,12 @@ public class ReceiptProduct implements Serializable {
     @TableField("return_num")
     private Integer returnNum;
 
+    @ApiModelProperty("入账")
+    @TableField("input_money")
+    private Double inputMoney;
+
+    @ApiModelProperty("出账")
+    @TableField("output_money")
+    private Double outputMoney;
 
 }

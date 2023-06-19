@@ -2,6 +2,9 @@ package edu.neu.sub.service;
 
 import edu.neu.sub.entity.ReceiptProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.neu.sub.vo.ProductVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ReceiptProductService extends IService<ReceiptProduct> {
 
+    boolean convertAndSave(Long receiptId, List<ProductVo> products, String completed,String taskType);
 }

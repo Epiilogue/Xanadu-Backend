@@ -14,10 +14,7 @@ import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
 import edu.neu.sub.mapper.ReceiptProductMapper;
-import edu.neu.sub.service.ReceiptProductService;
-import edu.neu.sub.service.ReceiptService;
-import edu.neu.sub.service.SubstationService;
-import edu.neu.sub.service.TaskService;
+import edu.neu.sub.service.*;
 import edu.neu.sub.vo.PaymentReceiptVo;
 import edu.neu.sub.vo.ProductVo;
 import edu.neu.sub.vo.ReceiptVo;
@@ -61,6 +58,9 @@ public class TaskController {
 
     @Autowired
     ReceiptProductService receiptProductService;
+
+    @Autowired
+    PendingProductService pendingProductService;
 
 
     @GetMapping("/list/{subId}")
@@ -362,18 +362,15 @@ public class TaskController {
                 //2.更新本地状态
                 task.setTaskStatus(TaskStatus.COMPLETED);
                 task.setReceiptId(receiptId);
-
                 //3.保存商品信息，对于不同的类型我们应当保存不同的商品信息
-                boolean isSuccess=receiptProductService.convertAndSave(receiptId, products,ReceiptStatus.COMPLETED);
-                if(!isSuccess)throw new ServiceException("保存商品信息失败");
-
-                //4.更新远程状态
+                boolean isSuccess = receiptProductService.convertAndSave(receiptId, products, ReceiptStatus.COMPLETED, task.getTaskType());
+                if (!isSuccess) throw new ServiceException("保存商品信息失败");
+                //4.自动生成待处理商品信息单，保存到数据库，等待操作人员入库或者退货处理
+                isSuccess = pendingProductService.convertAndSave(taskId, products, ReceiptStatus.COMPLETED, task.getTaskType());
+                if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
+                //5.更新远程状态
                 AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), TaskStatus.COMPLETED);
-                if (ajaxResult==null||ajaxResult.isError())throw new ServiceException("更新远程任务状态失败");
-
-                //4.自动生成退货单并保存到数据库列表中
-
-
+                if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
                 break;
             case ReceiptStatus.FAILED:
                 //1. 送货失败退所有钱，实际收货数量为0

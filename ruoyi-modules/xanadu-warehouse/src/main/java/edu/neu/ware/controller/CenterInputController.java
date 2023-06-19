@@ -55,7 +55,7 @@ public class CenterInputController {
     //退货入库 ——  退货单号，商品分类、 商品代码、商品名称、退货数量、分站ID，分库ID,日期，入库状态
     @GetMapping("/list/{type}")
     @ApiOperation("获取入库列表")
-    public AjaxResult getInputList(@ApiParam(name = "type", value = "入库类型") String type) {
+    public AjaxResult getInputList(@ApiParam(name = "type", value = "入库类型")@PathVariable("type") String type) {
         if (type == null) return AjaxResult.error("入库类型不能为空");
         if (!type.equals(InputOutputType.PURCHASE) && !type.equals(InputOutputType.RETURN))
             throw new ServiceException("类型错误");

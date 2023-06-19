@@ -7,8 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * <p>
@@ -22,6 +21,9 @@ import lombok.Setter;
 @Setter
 @TableName("sub_pending_product")
 @ApiModel(value = "PendingProduct对象", description = "")
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class PendingProduct implements Serializable {
 
     private static final long serialVersionUID = 1L;
