@@ -3,6 +3,7 @@ package edu.neu.sub.controller;
 
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.sub.entity.PendingProduct;
+import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.service.PendingProductService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class PendingProductController {
 
     @Autowired
     private PendingProductService pendingProductService;
+
+    @Autowired
+    private SubwareClient subwareClient;
 
     @GetMapping("/list")
     @ApiOperation("获取所有的待操作商品列表")
@@ -43,7 +47,9 @@ public class PendingProductController {
         if (!b) return AjaxResult.error("更新记录失败");
         //生成退货出库记录，状态为未出库,出库类型未退货出库，需要增加退货数量
         Long subwareId = pendingProduct.getSubwareId();
-        //TODO:远程调用提交给对应的分库，让其进行退货出库登记
+        //TODO:远程调用提交给对应的分库，让其进行退货出库登记,然后可以查询到，输入正确的出库数量就可以出库了
+
+
 
         return AjaxResult.success("退货成功");
     }
@@ -62,7 +68,8 @@ public class PendingProductController {
         if (!b) return AjaxResult.error("更新记录失败");
         //生成子站入库记录，状态为未入库，入库类型为退货入库
         Long subwareId = pendingProduct.getSubwareId();
-        //TODO：远程调用提交给对应的分库，让其进行退货入库登记
+        //TODO：远程调用提交给对应的分库，让其进行退货入库登记,后续可使用消息队列优化
+
 
         return AjaxResult.success("重新入库成功");
     }

@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 19/06/2023 16:12:58
+ Date: 20/06/2023 11:55:43
 */
 
 SET NAMES utf8mb4;
@@ -61,6 +61,7 @@ CREATE TABLE `sub_pending_product`  (
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
   `deal_number` int(20) NULL DEFAULT NULL COMMENT '待处理数量',
   `source` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '来源',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

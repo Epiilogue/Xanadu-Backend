@@ -4,6 +4,7 @@ package edu.neu.ware.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.InputOutputStatus;
 import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.ware.entity.SubOutput;
 import edu.neu.ware.entity.SubStorageRecord;
@@ -45,7 +46,7 @@ public class SubStorageRecordController {
 
     @GetMapping("/feign/check")
     @ApiOperation(value = "检查商品是否数量都充足")
-    AjaxResult check(@RequestParam("subwareId") Long subwareId,@RequestBody HashMap<Long, Integer> longIntegerHashMap) {
+    AjaxResult check(@RequestParam("subwareId") Long subwareId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         List<Long> idList = new ArrayList<>(longIntegerHashMap.keySet());
         List<SubStorageRecord> list = subStorageRecordService.list(new QueryWrapper<SubStorageRecord>().eq("subware_id", subwareId).in("product_id", idList));
         //拿到所有的记录
@@ -64,7 +65,7 @@ public class SubStorageRecordController {
 
     @PostMapping("/feign/lock")
     @ApiOperation(value = "锁定库存")
-    AjaxResult lock(@RequestParam("subwareId") Long subwareId,@RequestBody HashMap<Long, Integer> longIntegerHashMap) {
+    AjaxResult lock(@RequestParam("subwareId") Long subwareId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         for (Map.Entry<Long, Integer> longIntegerEntry : longIntegerHashMap.entrySet()) {
             boolean success = subStorageRecordService.update(new UpdateWrapper<SubStorageRecord>().
                     eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey())
@@ -88,7 +89,8 @@ public class SubStorageRecordController {
                     setSql("total_num=total_num-" + longIntegerEntry.getValue()));
             if (!success) throw new RuntimeException("分配商品库存失败");
             //生成出库单
-            SubOutput subOutput = new SubOutput(null, taskId, longIntegerEntry.getKey(), productName, longIntegerEntry.getValue(), InputOutputType.PICK_OUT, new Date(), subwareId);
+            SubOutput subOutput = new SubOutput(null, taskId, longIntegerEntry.getKey(), productName, longIntegerEntry.getValue(),
+                    InputOutputType.PICK_OUT, new Date(), subwareId, false, InputOutputStatus.OUTPUT, longIntegerEntry.getValue());
             boolean save = subOutputService.save(subOutput);
             if (!save) throw new RuntimeException("生成出库记录失败");
         }
