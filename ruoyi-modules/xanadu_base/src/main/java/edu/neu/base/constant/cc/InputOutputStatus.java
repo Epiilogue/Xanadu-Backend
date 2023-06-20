@@ -14,4 +14,7 @@ public class InputOutputStatus {
     public static final String OUTPUT = "已出库";
 
     public static final String SUB_INPUT = "分库已入库";
+
+    public static final String CENTER_INPUT = "中心仓库已入库";
+
 }

@@ -6,8 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -20,10 +19,11 @@ import java.util.Date;
  * @author Gaosong Xu
  * @since 2023-06-04 05:08:31
  */
-@Getter
-@Setter
+@Data
 @TableName("ware_center_input")
 @ApiModel(value = "CenterInput对象", description = "")
+@AllArgsConstructor
+@NoArgsConstructor
 public class CenterInput implements Serializable {
     //状态已入库，未入库
 
