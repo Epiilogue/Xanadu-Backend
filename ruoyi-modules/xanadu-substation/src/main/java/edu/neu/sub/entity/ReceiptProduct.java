@@ -2,11 +2,12 @@ package edu.neu.sub.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * <p>
@@ -19,6 +20,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("sub_receipt_product")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ApiModel(value = "ReceiptProduct对象", description = "订单商品的签收情况")
 public class ReceiptProduct implements Serializable {
 
@@ -52,5 +56,12 @@ public class ReceiptProduct implements Serializable {
     @TableField("return_num")
     private Integer returnNum;
 
+    @ApiModelProperty("入账")
+    @TableField("input_money")
+    private Double inputMoney;
+
+    @ApiModelProperty("出账")
+    @TableField("output_money")
+    private Double outputMoney;
 
 }

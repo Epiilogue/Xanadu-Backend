@@ -55,6 +55,9 @@ public class CenterInputVo implements Serializable {
     @ApiModelProperty("分库ID")
     private Long subwareId;
 
+    @ApiModelProperty("实际数量")
+    private Integer actualNum;
+
 
 
 }

@@ -76,10 +76,11 @@ public class SubInputController {
 
 
     @GetMapping("/listRefund/{subwareId}")
-    @ApiOperation("查询子库的所有退货登记的单子，后续需要从分站登记查找单子，目前先不做")
+    @ApiOperation("查询子库的所有重新入库的单子")
     public AjaxResult listRefund(@PathVariable("subwareId") Long subwareId) {
-        //TODO
-        return null;
+        QueryWrapper<CenterOutput> queryWrapper = new QueryWrapper<CenterOutput>().eq("subware_id", subwareId).eq("input_type", InputOutputType.RESTORE);
+        //拿到了列表后，需要回显
+        return AjaxResult.success(centerOutputService.list(queryWrapper));
     }
 
     @PostMapping("/confirmDispatch/{id}")
@@ -105,9 +106,8 @@ public class SubInputController {
         if (outCount + notOutCount == 0) {
             //更新任务单状态，并且同时更新订单的状态
             AjaxResult ajaxResult = taskClient.updateTaskStatus(centerOutput.getTaskId(), TaskStatus.ASSIGNABLE);
-            if (ajaxResult.isError()) {
+            if (ajaxResult.isError())
                 throw new ServiceException(ajaxResult.getMsg());
-            }
         }
         //更新商品库存，需要注意子站可能没有该商品需要插入
         //检查是否存在该商品
@@ -130,6 +130,12 @@ public class SubInputController {
         if (!updateSuccess) throw new ServiceException("更新商品库存失败");
         return AjaxResult.success("商品调拨入库成功");
     }
+
+
+
+
+
+
 
 
 }

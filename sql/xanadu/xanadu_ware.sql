@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 17/06/2023 22:08:03
+ Date: 20/06/2023 14:40:12
 */
 
 SET NAMES utf8mb4;
@@ -111,7 +111,7 @@ CREATE TABLE `ware_sub_input`  (
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
-  `suplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
+  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
   `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
@@ -121,14 +121,17 @@ CREATE TABLE `ware_sub_input`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `ware_sub_output`;
 CREATE TABLE `ware_sub_output`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '中心仓库出库记录ID',
-  `output_id` bigint(20) NULL DEFAULT NULL COMMENT '退货出库或调拨出库的ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分库出库记录ID',
+  `output_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `ouput_num` int(10) NULL DEFAULT NULL COMMENT '出库数量',
   `output_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库类型(退货或者领货)',
   `output_time` datetime NULL DEFAULT NULL COMMENT '出库时间',
   `subware_id` bigint(10) NULL DEFAULT NULL COMMENT '出库分站ID',
+  `deleted` tinyint(1) NULL DEFAULT NULL COMMENT '软删除标记',
+  `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '状态',
+  `actual_num` int(20) NULL DEFAULT NULL COMMENT '实际的出库数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

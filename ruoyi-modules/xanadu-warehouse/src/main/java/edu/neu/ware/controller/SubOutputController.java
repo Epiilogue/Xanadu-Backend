@@ -1,17 +1,32 @@
 package edu.neu.ware.controller;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.InputOutputStatus;
+import edu.neu.base.constant.cc.InputOutputType;
+import edu.neu.ware.entity.SubOutput;
+import edu.neu.ware.entity.SubStorageRecord;
+import edu.neu.ware.service.CenterStorageRecordService;
+import edu.neu.ware.service.SubOutputService;
+import edu.neu.ware.service.SubStorageRecordService;
+import edu.neu.ware.vo.PendingProductVo;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Gaosong Xu
  * @since 2023-06-02 03:42:21
- *
+ * <p>
  * 主要提供的是分库的出库记录查看
  * 具体逻辑为：分站填写回执，登记退货，分库可查看退货记录
  * 分库可以选择退货，然后填写商品数量，如果商品数量小于退货数量，则剩余商品重新入库，作为可分配商品信息
@@ -20,6 +35,74 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/ware/subOutput")
 public class SubOutputController {
 
+    @Autowired
+    SubOutputService subOutputService;
+    @Autowired
+    SubStorageRecordService subStorageRecordService;
+
+    @GetMapping("/list/{type}")
+    @ApiOperation("分库出库记录查看,需要选择出库类型是 领货出库 或者是 退货出库,此处需要做成两个不同的字段表格，一个头是配送出库数量，一个是退货数量")
+    public AjaxResult list(@PathVariable(value = "type", required = false) String type) {
+        if (type == null)
+            return AjaxResult.success(subOutputService.list());
+        QueryWrapper<SubOutput> outputTypeQuery = new QueryWrapper<SubOutput>().eq("output_type", type);
+        return AjaxResult.success(subOutputService.list(outputTypeQuery));
+    }
+
+
+    @PostMapping("/feign/refund")
+    @ApiOperation("分库退货,由分站登记处选择退货出库，直接出库就行，不需要选择数量增加复杂度")
+    public AjaxResult refund(@RequestBody PendingProductVo p) {
+        SubOutput subOutput = new SubOutput(null, p.getTaskId(), p.getProductId(), p.getProductName(), p.getDealNumber(), InputOutputType.RETURN_OUT,
+                new Date(), p.getSubwareId(), false, InputOutputStatus.NOT_OUTPUT, 0);
+        QueryWrapper<SubStorageRecord> eq = new QueryWrapper<SubStorageRecord>().eq("product_id", p.getProductId()).eq("subware_id", p.getSubwareId());
+        SubStorageRecord one = subStorageRecordService.getOne(eq);
+        if (one == null) return AjaxResult.error("仓库不存在该商品记录");
+        one.setRefundNum(one.getRefundNum() + p.getDealNumber());
+        one.setTotalNum(one.getTotalNum() + p.getDealNumber());
+        if (!subStorageRecordService.updateById(one)) throw new ServiceException("更新仓库商品记录失败");
+        if (subOutputService.save(subOutput)) return AjaxResult.success("提交退货登记成功");
+        throw new ServiceException("提交退货登记失败");
+    }
+
+    @DeleteMapping("delete/{id}")
+    @ApiOperation("删除退货记录,软删除")
+    public AjaxResult delete(@PathVariable("id") Long id) {
+        //先判断一下是否存在并且是未出库的记录
+        SubOutput subOutput = subOutputService.getById(id);
+        if (subOutput == null) return AjaxResult.error("不存在该记录");
+        if (Objects.equals(subOutput.getStatus(), InputOutputStatus.NOT_OUTPUT))
+            return AjaxResult.error("该记录未出库，无法删除");
+        if (subOutputService.removeById(id)) return AjaxResult.success("删除成功");
+        return AjaxResult.error("删除失败");
+    }
+
+    @PutMapping("/confirm/{id}/{number}")
+    @ApiOperation("分库确认退货出库，需要填写退货数量")
+    public AjaxResult confirm(@PathVariable("id") Long id, @PathVariable("number") Integer number) {
+        //去掉之前的记录数量，避免数据的不一致性，不能去掉当前的数量
+        //1.拿到记录，判断合法性
+        SubOutput subOutput = subOutputService.getById(id);
+        if (subOutput == null) return AjaxResult.error("不存在该记录");
+        if (Objects.equals(subOutput.getStatus(), InputOutputStatus.OUTPUT)) return AjaxResult.error("该记录已经出库");
+        //2.拿到原来的记录数量
+        Integer prevNum = subOutput.getOutputNum();
+        //3.更新出库记录状态
+        subOutput.setStatus(InputOutputStatus.OUTPUT);
+        subOutput.setActualNum(number);
+        boolean b = subOutputService.updateById(subOutput);
+        if (!b) throw new ServiceException("更新出库记录失败");
+        //4.更新仓库存储记录，需要减掉数据
+        QueryWrapper<SubStorageRecord> eq = new QueryWrapper<SubStorageRecord>().eq("product_id", subOutput.getProductId()).eq("subware_id", subOutput.getSubwareId());
+        SubStorageRecord one = subStorageRecordService.getOne(eq);
+        if (one == null) throw new ServiceException("仓库不存在该商品记录");
+        //5.减去退货数量，减去总数量
+        one.setRefundNum(one.getRefundNum() - prevNum);
+        one.setTotalNum(one.getTotalNum() - prevNum);
+        boolean res = subStorageRecordService.updateById(one);
+        if (!res) throw new ServiceException("更新仓库商品记录失败");
+        return AjaxResult.success("确认退货出库成功");
+    }
 
 
 }

@@ -15,5 +15,7 @@ public class InputOutputType {
 
     //领货出库
     public static final String PICK_OUT = "领货出库";
+    public static final String RESTORE = "重新入库";
+
 
 }
