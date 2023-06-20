@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 20/06/2023 11:55:34
+ Date: 20/06/2023 14:40:12
 */
 
 SET NAMES utf8mb4;
@@ -111,7 +111,7 @@ CREATE TABLE `ware_sub_input`  (
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
-  `suplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
+  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
   `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;

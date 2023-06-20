@@ -31,4 +31,9 @@ public interface SubwareClient {
     @PostMapping("/ware/subOutput/feign/refund")
     @ApiOperation("分库退货,由分站登记处选择退货出库，直接出库就行，不需要选择数量增加复杂度")
     public AjaxResult refund(@RequestBody PendingProductVo p);
+
+    @PostMapping("/ware/subStorageRecord/feign/restore")
+    @ApiOperation("分库退货,由分站登记处选择退货出库，直接出库就行，不需要选择数量增加复杂度")
+    AjaxResult restore(@RequestBody PendingProductVo pendingProductVo);
+
 }

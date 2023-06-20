@@ -69,8 +69,8 @@ public class SubInput implements Serializable {
     private Double productPrice;
 
     @ApiModelProperty("供应商ID")
-    @TableField("suplier_id")
-    private Long suplierId;
+    @TableField("supplier_id")
+    private Long supplierId;
 
     @ApiModelProperty("任务ID")
     @TableField("task_id")

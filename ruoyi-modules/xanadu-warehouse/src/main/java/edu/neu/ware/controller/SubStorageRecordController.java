@@ -3,13 +3,18 @@ package edu.neu.ware.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.InputOutputStatus;
 import edu.neu.base.constant.cc.InputOutputType;
+import edu.neu.ware.entity.SubInput;
 import edu.neu.ware.entity.SubOutput;
 import edu.neu.ware.entity.SubStorageRecord;
+import edu.neu.ware.feign.SupplierClient;
+import edu.neu.ware.service.SubInputService;
 import edu.neu.ware.service.SubOutputService;
 import edu.neu.ware.service.SubStorageRecordService;
+import edu.neu.ware.vo.PendingProductVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +41,10 @@ public class SubStorageRecordController {
 
     @Autowired
     SubOutputService subOutputService;
+
+    @Autowired
+    SubInputService subInputService;
+
 
     @GetMapping("/list")
     @ApiOperation(value = "分站记录查看")
@@ -95,6 +104,29 @@ public class SubStorageRecordController {
             if (!save) throw new RuntimeException("生成出库记录失败");
         }
         return AjaxResult.success(true);
+    }
+
+    @PostMapping("/feign/restore")
+    @ApiOperation("分库退货,由分站登记处选择重新入库，直接出库就行，不需要选择数量增加复杂度")
+    AjaxResult restore(@RequestBody PendingProductVo p) {
+        //1.找到对应的记录，判断合法性
+        QueryWrapper<SubStorageRecord> eq = new QueryWrapper<SubStorageRecord>().eq("product_id", p.getProductId()).
+                eq("subware_id", p.getSubwareId());
+        SubStorageRecord one = subStorageRecordService.getOne(eq);
+        if (one == null) throw new ServiceException("仓库不存在该商品记录");
+        //2.增加对应的记录的可分配量和总数量
+        one.setAllocateAbleNum(one.getAllocateAbleNum() + p.getDealNumber());
+        one.setTotalNum(one.getTotalNum() + p.getDealNumber());
+        //3.写回更新记录
+        boolean update = subStorageRecordService.updateById(one);
+        if (!update) throw new ServiceException("更新记录失败");
+        //4.生成入库记录完成入库操作
+        SubInput subInput = new SubInput(null, null, InputOutputType.RESTORE, p.getProductId(), p.getProductName(), p.getDealNumber(),
+                new Date(), p.getSubwareId(), p.getProductPrice(), null, p.getTaskId());
+        boolean saved = subInputService.save(subInput);
+        if (!saved) throw new ServiceException("生成入库记录失败");
+        //5.返回成功
+        return AjaxResult.success("重新入库成功");
     }
 
 }

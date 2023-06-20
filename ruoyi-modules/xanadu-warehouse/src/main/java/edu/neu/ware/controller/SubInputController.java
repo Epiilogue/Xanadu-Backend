@@ -76,10 +76,11 @@ public class SubInputController {
 
 
     @GetMapping("/listRefund/{subwareId}")
-    @ApiOperation("查询子库的所有退货登记的单子，后续需要从分站登记查找单子，目前先不做")
+    @ApiOperation("查询子库的所有重新入库的单子")
     public AjaxResult listRefund(@PathVariable("subwareId") Long subwareId) {
-        //TODO
-        return null;
+        QueryWrapper<CenterOutput> queryWrapper = new QueryWrapper<CenterOutput>().eq("subware_id", subwareId).eq("input_type", InputOutputType.RESTORE);
+        //拿到了列表后，需要回显
+        return AjaxResult.success(centerOutputService.list(queryWrapper));
     }
 
     @PostMapping("/confirmDispatch/{id}")
