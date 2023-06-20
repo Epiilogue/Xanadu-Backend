@@ -1,13 +1,19 @@
 package edu.neu.cc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.cc.entity.Customer;
+import edu.neu.cc.entity.Order;
 import edu.neu.cc.service.CustomerService;
+import edu.neu.cc.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -24,6 +30,9 @@ public class CustomerController {
     //提供后端增删改查接口
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private OrderService orderService;
 
     /**
      * 创建新用户
@@ -50,6 +59,11 @@ public class CustomerController {
         //校验用户信息是否合法
         if (id == null) {
             return AjaxResult.error("用户id不能为空");
+        }
+        //判断是否订购过商品
+        List<Order> orderList = orderService.list(new QueryWrapper<Order>().eq("customer_id", id));
+        if (orderList != null && orderList.size() != 0){
+            return AjaxResult.error("该用户有订购记录，不可删除");
         }
         boolean result = customerService.removeById(id);
         if (!result) {
@@ -100,9 +114,17 @@ public class CustomerController {
      * 用户列表查询
      * */
     @GetMapping("/list/{page}/{size}")
-    public AjaxResult list(@PathVariable("page") Long page, @PathVariable("size") Long size) {
+    public AjaxResult searchList(@PathVariable("page") Long page, @PathVariable("size") Long size,@RequestParam Map<String, String> query) {
+        //设置查询条件
+        String name=query.get("name");
+        String telephone=query.get("telephone");
+        String identityCard=query.get("identityCard");
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.like(name!=null,"name",name)
+                .like(telephone!=null,"telephone",telephone)
+                .like(identityCard!=null,"identity_card",identityCard);
         //分页查询客户信息
-        Page<Customer> customerPage = customerService.page(new Page<>(page, size));
+        Page<Customer> customerPage = customerService.page(new Page<>(page, size),queryWrapper);
         if (customerPage == null) {
             return AjaxResult.error("查询用户列表失败");
         }
