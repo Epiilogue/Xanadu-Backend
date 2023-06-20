@@ -101,8 +101,9 @@ public class Task implements Serializable {
     @TableField(exist = false)
     private List<ProductVo> products;
 
-
-
+    @ApiModelProperty("签收单ID")
+    @TableField("receipt_id")
+    private Long receiptId;
 
 
 }

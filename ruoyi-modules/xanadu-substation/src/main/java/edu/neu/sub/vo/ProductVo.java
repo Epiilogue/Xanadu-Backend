@@ -36,7 +36,7 @@ public class ProductVo implements Serializable {
     @ApiModelProperty("商品大类")
     private String productCategary;
 
-    @ApiModelProperty("实际接收数量")
+    @ApiModelProperty("实际接收或者实际退货数量，该字段对于送货来说是签收，对于退货来说是退货数量")
     private Integer actualNumber;
 
     @ApiModelProperty("商品能否退货")

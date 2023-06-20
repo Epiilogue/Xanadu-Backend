@@ -62,4 +62,7 @@ public class CenterRefundOutputVo implements Serializable {
     @TableField("require_time")
     private Date requireTime;
 
+    @ApiModelProperty("实际数量")
+    private Integer actualNum;
+
 }

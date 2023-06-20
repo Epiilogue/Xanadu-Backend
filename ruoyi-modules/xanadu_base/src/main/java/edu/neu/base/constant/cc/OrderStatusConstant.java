@@ -2,7 +2,7 @@ package edu.neu.base.constant.cc;
 
 /**
  * 订单的状态常量，使用String类型明文存储
- * 无效、可分配、缺货、已完成,已调度，中心库房出库，配送站到货，已分配，已领货，已完成，失败
+ * 无效、可分配、缺货、已完成,已调度，中心库房出库，配送站到货，已分配，已领货，已完成，失败,部分完成
  */
 public class OrderStatusConstant {
     //可分配
@@ -28,5 +28,7 @@ public class OrderStatusConstant {
     public static final String FINISHED = "已完成";
     //失败
     public static final String FAILED = "失败";
+    //部分完成
+    public static final String PARTIAL_COMPLETED = "部分完成";
 
 }

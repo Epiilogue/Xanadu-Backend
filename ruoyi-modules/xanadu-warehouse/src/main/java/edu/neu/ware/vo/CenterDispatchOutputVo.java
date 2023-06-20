@@ -52,4 +52,8 @@ public class CenterDispatchOutputVo implements Serializable {
 
     @ApiModelProperty("出库日期")
     private Date outputTime;
+    
+    @ApiModelProperty("实际数量")
+    @TableField("actual_num")
+    private Integer actualNum;
 }

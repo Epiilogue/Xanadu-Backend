@@ -1,9 +1,6 @@
 package edu.neu.ware.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,7 +13,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -63,4 +60,19 @@ public class SubOutput implements Serializable {
     @ApiModelProperty("出库分站ID")
     @TableField("subware_id")
     private Long subwareId;
+
+    @ApiModelProperty("软删除")
+    @TableField("deleted")
+    @TableLogic
+    private Boolean deleted;
+
+    @ApiModelProperty("出库状态,未出库，已出库")
+    @TableField("status")
+    private String status;
+
+
+    @ApiModelProperty("实际的出库数量")
+    @TableField("actual_num")
+    private Integer actualNum;
+
 }

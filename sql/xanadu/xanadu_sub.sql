@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 17/06/2023 22:08:09
+ Date: 20/06/2023 11:55:43
 */
 
 SET NAMES utf8mb4;
@@ -50,27 +50,45 @@ CREATE TABLE `sub_finance`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '商品收款' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Table structure for sub_pending_product
+-- ----------------------------
+DROP TABLE IF EXISTS `sub_pending_product`;
+CREATE TABLE `sub_pending_product`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
+  `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
+  `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
+  `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
+  `deal_number` int(20) NULL DEFAULT NULL COMMENT '待处理数量',
+  `source` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '来源',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for sub_receipt
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_receipt`;
 CREATE TABLE `sub_receipt`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回执录入日期',
   `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '客户姓名',
+  `receiver_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '接收人姓名',
   `phone` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '客户联系电话',
-  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
-  `type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务类型',
+  `sub_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  `task_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务类型',
   `state` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '回执任务状态',
-  `user_id` bigint(20) NULL DEFAULT NULL COMMENT '配送员ID',
-  `feedback` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '客户满意度',
+  `courier_id` bigint(20) NULL DEFAULT NULL COMMENT '配送员ID',
+  `feedback` int(12) NULL DEFAULT NULL COMMENT '客户满意度',
   `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '送货/退货地址',
+  `delivery_address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '送货/退货地址',
   `sign_time` datetime NULL DEFAULT NULL COMMENT '签收时间',
   `create_time` datetime NULL DEFAULT NULL COMMENT '回执录入日期',
   `plan_num` int(20) NULL DEFAULT NULL COMMENT '计划商品数量',
-  `plan_receipt` decimal(20, 2) NULL DEFAULT NULL COMMENT '计划金额',
-  `actual_receipt` int(20) NULL DEFAULT NULL COMMENT '实际金额',
-  `actual_number` int(20) NULL DEFAULT NULL COMMENT '实际数量',
+  `plan_receipt` double(20, 2) NULL DEFAULT NULL COMMENT '计划金额',
+  `sign_num` int(20) NULL DEFAULT NULL COMMENT '总签收数量',
+  `refund_num` int(20) NULL DEFAULT NULL COMMENT '总退回数量',
+  `input_money` double(20, 2) NULL DEFAULT NULL COMMENT '总收款',
+  `output_money` double(20, 2) NULL DEFAULT NULL COMMENT '总退款',
   `invoice_number` bigint(20) NULL DEFAULT NULL COMMENT '发票号',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '回执单' ROW_FORMAT = DYNAMIC;
@@ -86,7 +104,9 @@ CREATE TABLE `sub_receipt_product`  (
   `price` double(10, 2) NULL DEFAULT NULL COMMENT '单价',
   `all_num` int(20) NULL DEFAULT NULL COMMENT '总数量',
   `sign_num` int(20) NULL DEFAULT NULL COMMENT '签收数量',
-  `return_num` int(20) NULL DEFAULT NULL COMMENT '退货数量'
+  `return_num` int(20) NULL DEFAULT NULL COMMENT '退货数量',
+  `input_money` double(20, 2) NULL DEFAULT NULL COMMENT '收来的钱',
+  `output_money` double(20, 2) NULL DEFAULT NULL COMMENT '退款的钱'
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '订单商品的签收情况' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -111,12 +131,14 @@ CREATE TABLE `sub_task`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '任务单ID',
   `customer_id` bigint(20) NOT NULL COMMENT '客户ID',
   `customer_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '收件人姓名',
+  `phone` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '收件人电话',
+  `delivery_address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '送货地址',
   `order_id` bigint(20) NOT NULL COMMENT '订单ID',
   `courier_id` bigint(20) NULL DEFAULT NULL COMMENT '快递员ID',
   `numbers` int(20) NOT NULL COMMENT '商品总数',
   `total_amount` double(20, 2) NOT NULL COMMENT '商品总价',
   `deadline` datetime NOT NULL COMMENT '要求完成日期',
-  `finish_real` datetime NULL DEFAULT NULL COMMENT '实际完成日期',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '生成日期',
   `task_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务类型',
   `task_status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务状态',
   `products_json` varchar(2048) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品列表json字符串',

@@ -63,9 +63,9 @@ public class CenterOutputVo implements Serializable {
     private Long subwareId;
 
     @ApiModelProperty("商品单价")
-    @TableField("product_price")
     private Double productPrice;
 
-
+    @ApiModelProperty("实际数量")
+    private Integer actualNum;
 
 }
