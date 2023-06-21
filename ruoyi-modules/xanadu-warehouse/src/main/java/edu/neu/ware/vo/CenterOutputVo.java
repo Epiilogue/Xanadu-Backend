@@ -1,12 +1,12 @@
 package edu.neu.ware.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -23,6 +23,8 @@ import java.util.Date;
 @Getter
 @Setter
 @TableName("ware_center_output")
+@AllArgsConstructor
+@NoArgsConstructor
 @ApiModel(value = "CenterOutput对象", description = "")
 public class CenterOutputVo implements Serializable {
 
@@ -32,6 +34,9 @@ public class CenterOutputVo implements Serializable {
     @ApiModelProperty("退货出库或调拨出库的ID")
     private Long outputId;
 
+    @ApiModelProperty("任务单ID")
+    private Long taskId;
+
     @ApiModelProperty("商品ID")
     private Long productId;
 
@@ -39,18 +44,28 @@ public class CenterOutputVo implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    private Integer ouputNum;
+    private Integer outputNum;
 
     @ApiModelProperty("出库类型")
     private String outputType;
 
-    @ApiModelProperty("出库时间")
-    private Date outputTime;
+    @ApiModelProperty("要求出库时间")
+    @TableField("require_time")
+    private Date requireTime;
 
-    @ApiModelProperty("出库状态")
-    private String status;
+    @ApiModelProperty("供应商ID")
+    private Long supplierId;
 
-    @ApiModelProperty("目标ID")
-    private Long targetId;
+    @ApiModelProperty("分站ID")
+    private Long substationId;
+
+    @ApiModelProperty("分库ID")
+    private Long subwareId;
+
+    @ApiModelProperty("商品单价")
+    private Double productPrice;
+
+    @ApiModelProperty("实际数量")
+    private Integer actualNum;
 
 }

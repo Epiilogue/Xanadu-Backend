@@ -84,8 +84,7 @@ spring:
             - StripPrefix=1
         # 客服中心服务
         - id: xanadu-cc
-#          uri: lb://xanadu-cc
-          uri: lb://xanadu-customer-center
+          uri: lb://xanadu-cc
           predicates:
             - Path=/cc/**
         # 配送中心服务

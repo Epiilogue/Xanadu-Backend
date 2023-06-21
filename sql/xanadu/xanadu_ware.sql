@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 08/06/2023 15:32:44
+ Date: 20/06/2023 14:40:12
 */
 
 SET NAMES utf8mb4;
@@ -23,15 +23,18 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `ware_center_input`;
 CREATE TABLE `ware_center_input`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '入库记录ID',
-  `input_id` bigint(20) NULL DEFAULT NULL COMMENT '对应的追溯单号',
+  `input_id` bigint(20) NULL DEFAULT NULL COMMENT '对应的追溯单号,购货单或者退货单',
   `input_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库类型，购货或是退单',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `input_num` int(10) NULL DEFAULT NULL COMMENT '商品数量',
+  `input_num` int(10) NULL DEFAULT NULL COMMENT '计划入库数量',
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库单状态(未入库、已入库)',
-  `source_id` bigint(20) NULL DEFAULT NULL COMMENT '源id，可以为分站ID或者是供应商ID',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
+  `suplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
+  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  `actual_num` int(20) NULL DEFAULT NULL COMMENT '实际入库数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -44,13 +47,20 @@ CREATE TABLE `ware_center_output`  (
   `output_id` bigint(20) NULL DEFAULT NULL COMMENT '退货出库或调拨出库的ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `ouput_num` int(10) NULL DEFAULT NULL COMMENT '出库数量',
+  `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
+  `output_num` int(10) NULL DEFAULT NULL COMMENT '预期出库数量',
   `output_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库类型',
   `output_time` datetime NULL DEFAULT NULL COMMENT '出库时间',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库状态(未出库，已出库)',
-  `target_id` bigint(20) NULL DEFAULT NULL COMMENT '源ID，可以为供应商ID或者分站ID',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
+  `require_time` datetime NULL DEFAULT NULL COMMENT '预计出库时间',
+  `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
+  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
+  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  `operator_id` bigint(20) NULL DEFAULT NULL COMMENT '操作员ID',
+  `actual_num` bigint(20) NULL DEFAULT NULL COMMENT '实际出库数量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ware_center_storage_record
@@ -59,15 +69,15 @@ DROP TABLE IF EXISTS `ware_center_storage_record`;
 CREATE TABLE `ware_center_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `allocate_able_num` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '可分配商品数量',
+  `allocate_able_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '可分配商品数量',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `allocated_num` int(11) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '已分配的商品数量',
-  `refund_num` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '退货的商品数量',
-  `total_num` int(11) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '总计商品数量',
-  `lock_num` int(10) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '下单锁定的商品数量',
+  `allocated_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '已分配的商品数量',
+  `refund_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '退货的商品数量',
+  `total_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '总计商品数量',
+  `lock_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '下单锁定的商品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -93,13 +103,16 @@ CREATE TABLE `ware_centerware`  (
 DROP TABLE IF EXISTS `ware_sub_input`;
 CREATE TABLE `ware_sub_input`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '入库记录ID',
-  `input_id` bigint(20) NULL DEFAULT NULL COMMENT '入库单号ID,可能为退货或调拨',
+  `dispatch_id` bigint(20) NULL DEFAULT NULL COMMENT '调拨单ID，如果是退货则不需要该字段',
   `input_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '入库类型，购货或是退单',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `input_num` int(10) NULL DEFAULT NULL COMMENT '商品数量',
+  `input_num` int(10) NULL DEFAULT NULL COMMENT ' 预计数量',
   `input_time` datetime NULL DEFAULT NULL COMMENT '入库日期',
-  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '子仓库ID',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
+  `product_price` double(10, 2) NULL DEFAULT NULL COMMENT '商品价格',
+  `supplier_id` bigint(20) NULL DEFAULT NULL COMMENT '供应商ID',
+  `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -108,14 +121,17 @@ CREATE TABLE `ware_sub_input`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `ware_sub_output`;
 CREATE TABLE `ware_sub_output`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '中心仓库出库记录ID',
-  `output_id` bigint(20) NULL DEFAULT NULL COMMENT '退货出库或调拨出库的ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分库出库记录ID',
+  `output_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `ouput_num` int(10) NULL DEFAULT NULL COMMENT '出库数量',
   `output_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库类型(退货或者领货)',
   `output_time` datetime NULL DEFAULT NULL COMMENT '出库时间',
   `subware_id` bigint(10) NULL DEFAULT NULL COMMENT '出库分站ID',
+  `deleted` tinyint(1) NULL DEFAULT NULL COMMENT '软删除标记',
+  `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '状态',
+  `actual_num` int(20) NULL DEFAULT NULL COMMENT '实际的出库数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -127,14 +143,14 @@ CREATE TABLE `ware_sub_storage_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
-  `allocate_able_num` int(10) NULL DEFAULT NULL COMMENT '可分配数量',
+  `allocate_able_num` int(20) NULL DEFAULT NULL COMMENT '可分配数量',
   `product_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `allocated_num` int(10) NULL DEFAULT NULL COMMENT '已分配数量',
-  `refund_num` int(10) NULL DEFAULT NULL COMMENT '退货产品数量',
-  `total_num` int(10) NULL DEFAULT NULL COMMENT '总计产品数量',
+  `allocated_num` int(20) NULL DEFAULT NULL COMMENT '已分配数量',
+  `refund_num` int(20) NULL DEFAULT NULL COMMENT '退货产品数量',
+  `total_num` int(20) NULL DEFAULT NULL COMMENT '总计产品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

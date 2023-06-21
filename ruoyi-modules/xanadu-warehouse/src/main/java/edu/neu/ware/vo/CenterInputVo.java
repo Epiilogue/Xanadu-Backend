@@ -21,7 +21,7 @@ public class CenterInputVo implements Serializable {
     @ApiModelProperty("入库记录ID")
     private Long id;
 
-    @ApiModelProperty("入库单号ID")
+    @ApiModelProperty("入库单号ID,可能为购货单或者是退货单")
     private Long inputId;
 
     @ApiModelProperty("入库类型，购货或是退单")
@@ -46,8 +46,17 @@ public class CenterInputVo implements Serializable {
     @ApiModelProperty("入库状态")
     private String status;
 
-    @ApiModelProperty("来源ID")
-    private Long sourceId;
+    @ApiModelProperty("供应商ID")
+    private Long supplierId;
+
+    @ApiModelProperty("分站ID")
+    private Long substationId;
+
+    @ApiModelProperty("分库ID")
+    private Long subwareId;
+
+    @ApiModelProperty("实际数量")
+    private Integer actualNum;
 
 
 

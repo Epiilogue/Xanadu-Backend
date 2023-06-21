@@ -1,19 +1,19 @@
 server:
-  port: 8015
+  port: 8008
   servlet:
     context-path: /
 
 spring:
   application:
-    name: xanadu-ware
+    name: xanadu-dpc
   profiles:
-    # 环境配置
+      # 环境配置
     active: dev
   autoconfigure:
-    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+        exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
   mvc:
     pathmatch:
-      matching-strategy: ant_path_matcher
+        matching-strategy: ant_path_matcher
   cloud:
     nacos:
       discovery:
@@ -50,7 +50,7 @@ spring:
         master:
           username: root
           password: 123456
-          url: jdbc:mysql://localhost:3306/xanadu_ware?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
+          url: jdbc:mysql://localhost:3306/xanadu_dpc?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
           driver-class-name: com.mysql.cj.jdbc.Driver
           # 从库数据源
           # slave:
@@ -60,8 +60,8 @@ spring:
           # driver-class-name:
 
 mybatis-plus:
-  type-aliases-package: edu.neu.ware.entity
-  mapper-locations: classpath*:/mapper/*.xml
+  type-aliases-package: edu.neu.dpc.entity
+  mapper-locations: classpath*:/mapper/**/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
@@ -69,8 +69,8 @@ mybatis-plus:
       id-type: auto
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
-      logic-delete-field: deleted # 逻辑删除字段(默认为 deleted)
+      logic-delete-field: deleted
 logging:
   level:
-    edu.neu.ware:
+    edu.neu.dpc:
       info

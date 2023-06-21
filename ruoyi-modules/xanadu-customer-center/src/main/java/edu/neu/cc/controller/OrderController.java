@@ -1,8 +1,10 @@
 package edu.neu.cc.controller;
 
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.common.core.constant.HttpStatus;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -19,7 +21,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Gaosong Xu
@@ -49,12 +53,25 @@ public class OrderController {
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
     @GetMapping(value={"/list/{customerId}","/list"})
     @CrossOrigin
-    public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId) {
+    public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId,@RequestParam Map<String, String> query) {
+        //设置查询条件
+        Date startTime= DateUtil.parse(query.get("beginTime")); //起始时间
+        Date endTime= DateUtil.parse(query.get("endTime"));    //结束时间
+        String customerName= (String) query.get("customerName");
+        String orderType= (String) query.get("orderType");
+        Long page= Long.parseLong(query.get("page")) ;
+        Long size= Long.parseLong(query.get("limit"));
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.like(customerName!=null,"customer_name",customerName)
+                .ge(startTime!=null,"create_time",startTime)
+                .le(endTime!=null,"create_time",endTime)
+                .eq(orderType!=null && orderType!="全部","order_type",orderType);
         if (customerId == null) {
-            return AjaxResult.success(orderService.list());
+            return AjaxResult.success(orderService.page(new Page<>(page, size),queryWrapper));
         } else {
-            List<Order> orderList = orderService.list(new QueryWrapper<Order>().eq("customer_id", customerId));
-            if (orderList == null || orderList.size() == 0) return AjaxResult.error("该客户没有订单");
+            queryWrapper.eq("customer_id", customerId);
+            Page<Order> orderList =orderService.page(new Page<>(page, size),queryWrapper);
+            if (orderList.getRecords() == null || orderList.getRecords().size() == 0) return AjaxResult.error("没有满足条件的订单");
             return AjaxResult.success(orderList);
         }
     }
@@ -66,6 +83,7 @@ public class OrderController {
             @ApiParam(name = "orderType", value = "订单类型") @PathVariable String orderType) {
         //根据不同的订单信息回显不同的数据
         AjaxResult ajaxResult = new AjaxResult(HttpStatus.SUCCESS, "查询成功");
+
         if (OperationTypeConstant.ORDER.equals(orderType)) {
             //回显neworder信息以及对应的商品信息
             NewOrder newOrder = newOrderService.getById(orderId);
@@ -103,8 +121,9 @@ public class OrderController {
     @ApiOperation("根据子站ID查询订单数量")
     @GetMapping("/feign/count/{substationId}")
     public Boolean getOrderCountBySubstationId(@PathVariable Long substationId) {
-        long count = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
-        return count > 0;
+        long newCount = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
+        long refundCount = refundService.count(new QueryWrapper<Refund>().eq("substation_id", substationId));
+        return newCount + refundCount > 0;
     }
 
 
@@ -159,6 +178,8 @@ public class OrderController {
             case OperationTypeConstant.ORDER:
                 NewOrder newOrder = newOrderService.getById(id);
                 BeanUtils.copyProperties(newOrder, orderVo);
+                orderVo.setReceiverName(newOrder.getReceiverName());
+                orderVo.setPhone(newOrder.getTelephone());
                 //如果是新订单，则获取商品列表后返回
                 List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(productList);
@@ -173,13 +194,21 @@ public class OrderController {
                 NewOrder prevOrder = newOrderService.getById(newOrderId);
                 if (prevOrder == null) return AjaxResult.error("原始订单不存在");
                 BeanUtils.copyProperties(prevOrder, orderVo);
+                orderVo.setReceiverName(prevOrder.getReceiverName());
                 List<Product> refundProducts = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(refundProducts);
                 return AjaxResult.success(orderVo);
             default:
                 return AjaxResult.error("订单类型错误");
         }
+    }
 
+    @PostMapping("/cc/order/feign/updateOrderSubstationId/{substationId}/{orderId}")
+    public Boolean updateOrderSubstationId(@PathVariable("substationId") Long substationId, @PathVariable("orderId") Long orderId) {
+        NewOrder newOrder = newOrderService.getById(orderId);
+        if (newOrder == null) return false;
+        newOrder.setSubstationId(substationId);
+        return newOrderService.updateById(newOrder);
     }
 
 

@@ -1,12 +1,11 @@
 package edu.neu.ware.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -14,7 +13,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Gaosong Xu
@@ -24,15 +23,17 @@ import java.util.Date;
 @Setter
 @TableName("ware_sub_output")
 @ApiModel(value = "SubOutput对象", description = "")
+@AllArgsConstructor
+@NoArgsConstructor
 public class SubOutput implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("中心仓库出库记录ID")
+    @ApiModelProperty("分仓库出库记录ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty("退货出库或调拨出库的ID")
+    @ApiModelProperty("退货出库或任务ID")
     @TableField("output_id")
     private Long outputId;
 
@@ -45,8 +46,8 @@ public class SubOutput implements Serializable {
     private String productName;
 
     @ApiModelProperty("出库数量")
-    @TableField("ouput_num")
-    private Integer ouputNum;
+    @TableField("output_num")
+    private Integer outputNum;
 
     @ApiModelProperty("出库类型(退货或者领货)")
     @TableField("output_type")
@@ -60,5 +61,18 @@ public class SubOutput implements Serializable {
     @TableField("subware_id")
     private Long subwareId;
 
+    @ApiModelProperty("软删除")
+    @TableField("deleted")
+    @TableLogic
+    private Boolean deleted;
+
+    @ApiModelProperty("出库状态,未出库，已出库")
+    @TableField("status")
+    private String status;
+
+
+    @ApiModelProperty("实际的出库数量")
+    @TableField("actual_num")
+    private Integer actualNum;
 
 }
