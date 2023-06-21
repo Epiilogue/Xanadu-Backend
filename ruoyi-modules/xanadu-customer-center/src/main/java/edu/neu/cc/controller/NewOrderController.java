@@ -98,16 +98,17 @@ public class NewOrderController {
 
         }
 
+        Long userId = SecurityUtils.getUserId();
+        //一开始是空，可以设置默认值
+        //TODO: 由gateway设置用户ID，若未登陆则提示错误
+        if (userId == null) userId = 1L;
+
+        order.setUserId(userId);
         order.setOrderType(OperationTypeConstant.ORDER);
         //插入订单数据库
         orderService.save(order);
         newOrder.setId(order.getId());
         newOrderService.save(newOrder);
-
-        Long userId = SecurityUtils.getUserId();
-        //一开始是空，可以设置默认值
-        //TODO: 由gateway设置用户ID，若未登陆则提示错误
-        if (userId == null) userId = 1L;
 
         //插入对应的数据表，保存相关记录
         if (productRecordsVo.getIsLack()) {
@@ -129,6 +130,11 @@ public class NewOrderController {
                     //插入缺货记录
                     stockoutService.save(stockout);
                 }
+            });
+        }else {
+            products.forEach(product -> {
+                product.setOrderId(order.getId());
+                if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
             });
         }
         //生成操作记录,记录订单创建操作

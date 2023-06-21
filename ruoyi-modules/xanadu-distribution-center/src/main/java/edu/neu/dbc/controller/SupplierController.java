@@ -1,6 +1,8 @@
 package edu.neu.dbc.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Supplier;
 import edu.neu.dbc.service.SupplierService;
@@ -13,7 +15,7 @@ import java.util.Map;
 
 /**
  * <p>
- * 前端控制器
+ *  前端控制器
  * </p>
  *
  * @author Gaosong Xu
@@ -34,6 +36,20 @@ public class SupplierController {
     @ApiOperation("查询所有供应商")
     public AjaxResult list() {
         return AjaxResult.success(supplierService.list());
+    }
+
+    @GetMapping("/list/{pageNum}/{pageSize}")
+    @ApiOperation("分页查询供应商")
+    public AjaxResult pageList(@PathVariable Long pageNum, @PathVariable Long pageSize) {
+        return AjaxResult.success(supplierService.page(new Page<>(pageNum,pageSize)));
+    }
+
+    @GetMapping("/query/{pageNum}/{pageSize}")
+    @ApiOperation("根据姓名、地址查询供应商")
+    public AjaxResult query(@PathVariable Long pageNum, @PathVariable Long pageSize,@RequestParam(value = "name" ,required=false) String name,@RequestParam(value = "address" ,required=false) String address) {
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.like(name!=null,"name",name).like(address!=null,"address",address);
+        return AjaxResult.success(supplierService.page(new Page<>(pageNum,pageSize),queryWrapper));
     }
 
     @PostMapping("/add")
