@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -98,6 +99,17 @@ public class SubstationController {
         if (substation == null) return AjaxResult.error("分站不存在");
         return AjaxResult.success(substation.getSubwareId());
     }
-    
+
+    @GetMapping("/feign/getSubstationId/{subwareId}")
+    @ApiOperation(value = "获取分站的ID")
+    public AjaxResult getSubstationId(@PathVariable("subwareId") Long subwareId) {
+        QueryWrapper<Substation> eq = new QueryWrapper<Substation>().eq("subware_id", subwareId);
+        List<Substation> list = substationService.list(eq);
+        if (list == null || list.size() == 0) return AjaxResult.error("分库ID对应的分站不存在");
+        if (list.size() > 1) return AjaxResult.error("分库ID对应的分站不唯一");
+        Substation substation = list.get(0);
+        return AjaxResult.success(substation.getId());
+    }
+
 }
 

@@ -6,11 +6,15 @@ import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.InputOutputStatus;
 import edu.neu.base.constant.cc.InputOutputType;
+import edu.neu.ware.entity.CenterInput;
 import edu.neu.ware.entity.SubOutput;
 import edu.neu.ware.entity.SubStorageRecord;
+import edu.neu.ware.feign.SubstationClient;
+import edu.neu.ware.service.CenterInputService;
 import edu.neu.ware.service.CenterStorageRecordService;
 import edu.neu.ware.service.SubOutputService;
 import edu.neu.ware.service.SubStorageRecordService;
+import edu.neu.ware.vo.CenterInputVo;
 import edu.neu.ware.vo.PendingProductVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,10 @@ public class SubOutputController {
     SubOutputService subOutputService;
     @Autowired
     SubStorageRecordService subStorageRecordService;
+    @Autowired
+    CenterInputService centerInputService;
+    @Autowired
+    SubstationClient substationClient;
 
     @GetMapping("/list/{type}")
     @ApiOperation("分库出库记录查看,需要选择出库类型是 领货出库 或者是 退货出库,此处需要做成两个不同的字段表格，一个头是配送出库数量，一个是退货数量")
@@ -96,11 +104,21 @@ public class SubOutputController {
         QueryWrapper<SubStorageRecord> eq = new QueryWrapper<SubStorageRecord>().eq("product_id", subOutput.getProductId()).eq("subware_id", subOutput.getSubwareId());
         SubStorageRecord one = subStorageRecordService.getOne(eq);
         if (one == null) throw new ServiceException("仓库不存在该商品记录");
-        //5.减去退货数量，减去总数量
+        //5.减去退货数量，减去登记数量
         one.setRefundNum(one.getRefundNum() - prevNum);
         one.setTotalNum(one.getTotalNum() - prevNum);
         boolean res = subStorageRecordService.updateById(one);
         if (!res) throw new ServiceException("更新仓库商品记录失败");
+
+        //需要拿到分站ID，这个可以根据分库来查询
+        AjaxResult substationIdRes = substationClient.getSubstationId(subOutput.getSubwareId());
+        if (substationIdRes == null || substationIdRes.isError()) throw new ServiceException("查询分站信息失败");
+        Long substationId = (Long) substationIdRes.get("data");
+        //需要给中心仓库添加记录,传入的追踪记录ID是自己的id
+        CenterInput centerInput = new CenterInput(null, subOutput.getId(), InputOutputType.RETURN, subOutput.getProductId(), subOutput.getProductName(), subOutput.getActualNum(), null,
+                null, InputOutputStatus.NOT_INPUT, null, substationId, subOutput.getSubwareId(), 0);
+        boolean save = centerInputService.save(centerInput);
+        if (!save) throw new ServiceException("提交中心仓库退货记录失败");
         return AjaxResult.success("确认退货出库成功");
     }
 
