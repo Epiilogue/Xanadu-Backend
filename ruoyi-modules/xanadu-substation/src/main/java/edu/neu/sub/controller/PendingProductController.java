@@ -70,8 +70,6 @@ public class PendingProductController {
         boolean b = pendingProductService.updateById(pendingProduct);
         if (!b) return AjaxResult.error("更新记录失败");
         //生成子站入库记录，状态为未入库，入库类型为退货入库
-        Long subwareId = pendingProduct.getSubwareId();
-        //TODO：远程调用提交给对应的分库，直接保存到数据库中并添加记录，然后生成入库记录，返回成功
         PendingProductVo pendingProductVo = new PendingProductVo();
         BeanUtils.copyProperties(pendingProduct, pendingProductVo);
         pendingProductVo.setDealNumber(number);

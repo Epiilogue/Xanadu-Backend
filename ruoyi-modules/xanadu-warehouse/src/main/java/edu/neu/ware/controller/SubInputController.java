@@ -9,6 +9,7 @@ import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.ware.entity.CenterOutput;
 import edu.neu.ware.entity.SubInput;
+import edu.neu.ware.entity.SubOutput;
 import edu.neu.ware.entity.SubStorageRecord;
 import edu.neu.ware.feign.TaskClient;
 import edu.neu.ware.service.CenterOutputService;
@@ -78,9 +79,9 @@ public class SubInputController {
     @GetMapping("/listRefund/{subwareId}")
     @ApiOperation("查询子库的所有重新入库的单子")
     public AjaxResult listRefund(@PathVariable("subwareId") Long subwareId) {
-        QueryWrapper<CenterOutput> queryWrapper = new QueryWrapper<CenterOutput>().eq("subware_id", subwareId).eq("input_type", InputOutputType.RESTORE);
+        QueryWrapper<SubInput> queryWrapper = new QueryWrapper<SubInput>().eq("subware_id", subwareId).eq("input_type", InputOutputType.RESTORE);
         //拿到了列表后，需要回显
-        return AjaxResult.success(centerOutputService.list(queryWrapper));
+        return AjaxResult.success(subInputService.list(queryWrapper));
     }
 
     @PostMapping("/confirmDispatch/{id}")
@@ -111,9 +112,13 @@ public class SubInputController {
         }
         //更新商品库存，需要注意子站可能没有该商品需要插入
         //检查是否存在该商品
-        SubStorageRecord record = subStorageRecordService.getById(centerOutput.getProductId());
+        QueryWrapper<SubStorageRecord> eq = new QueryWrapper<SubStorageRecord>().eq("product_id", centerOutput.getProductId()).eq("subware_id", centerOutput.getSubwareId());
+        SubStorageRecord record = subStorageRecordService.getOne(eq);
+
         Long recordId = null;
         SubStorageRecord subStorageRecord;
+
+        //如果无法查询到该商品记录，说明该商品没有入库过，需要插入
         if (record == null) {
             subStorageRecord = new SubStorageRecord(null, centerOutput.getSubwareId(), centerOutput.getProductId(), 0, centerOutput.getProductName(),
                     centerOutput.getProductPrice(), null, null, 0, 0, 0);
@@ -122,6 +127,7 @@ public class SubInputController {
             if (!save) throw new ServiceException("插入商品库存失败");
             recordId = subStorageRecord.getId();
         }
+
         subStorageRecord = subStorageRecordService.getById(recordId);
         //更新商品库存，增加可分配数量
         subStorageRecord.setTotalNum(subStorageRecord.getTotalNum() + centerOutput.getOutputNum());
