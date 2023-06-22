@@ -176,6 +176,7 @@ public class CenterStorageRecordController {
         StorageVo storageVo = new StorageVo();
         storageVo.setTotalNum(centerStorageRecord.getTotalNum());
         storageVo.setLockedNum(centerStorageRecord.getLockNum());
+        storageVo.setReturnedNum(centerStorageRecord.getRefundNum());
         storageVo.setAvailableNum(centerStorageRecord.getAllocateAbleNum());
         storageVo.setAllocatedNum(centerStorageRecord.getAllocatedNum());
         return storageVo;
