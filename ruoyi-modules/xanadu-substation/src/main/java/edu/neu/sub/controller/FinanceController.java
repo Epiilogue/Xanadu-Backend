@@ -58,17 +58,19 @@ public class FinanceController {
     ReceiptProductService receiptProductService;
 
     /**
-     * 前端需要传回分站ID，商品种类ID，商品种类名称，时间段
+     * 前端需要传回分站ID，商品种类ID，商品种类名称，时间段,支持远程调用
      */
     @GetMapping("/getPaymentByCategoryAndTime/{substationId}")
     public AjaxResult getPaymentByCategoryAndTime(@PathVariable("substationId") Long substationId, @RequestParam("categaryId") Integer categaryId, @RequestParam("categaryName") String categaryName,
                                                   @RequestParam("startTime") String startTime,
-                                                  @RequestParam("endTime") String endTime) {
+                                                  @RequestParam("endTime") String endTime,
+                                                  @RequestParam(value = "productName", required = false) String productName) {
+
+
         if (startTime == null || endTime == null) return AjaxResult.error("时间段不能为空");
         AjaxResult goodIdsRes = categaryClient.getGoods(categaryId);
         if (goodIdsRes == null) return AjaxResult.error("获取商品ID列表失败");
         if (goodIdsRes.isError()) return AjaxResult.error(goodIdsRes.getMsg());
-
         //忽略警告
         @SuppressWarnings("unchecked")
         List<Long> goodIds = (List) goodIdsRes.get("data");
@@ -85,6 +87,8 @@ public class FinanceController {
             QueryWrapper<ReceiptProduct> receiptProductQueryWrapper = new QueryWrapper<ReceiptProduct>().eq("receipt_id", receipt.getId());
             List<ReceiptProduct> receiptProductList = receiptProductService.list(receiptProductQueryWrapper);
             receiptProductList = receiptProductList.stream().filter(receiptProduct -> goodIds.contains(receiptProduct.getProductId())).collect(Collectors.toList());
+            if (productName != null)
+                receiptProductList = receiptProductList.stream().filter(receiptProduct -> receiptProduct.getProductName().contains(productName)).collect(Collectors.toList());
             //将过滤后的商品信息放入收据中
             receipt.setReceiptProducts(receiptProductList);
         }
@@ -104,6 +108,15 @@ public class FinanceController {
             //不用管收款的事情，收款由送货数据负责更新完成
         });
         return AjaxResult.success(productFinanceMap.values());
+    }
+
+
+    @GetMapping("/feign/getPaymentByCategoryAndTime/{substationId}")
+    public AjaxResult getPaymentFromRemote(@PathVariable("substationId") Long substationId, @RequestParam("categaryId") Integer categaryId, @RequestParam("categaryName") String categaryName,
+                                           @RequestParam("startTime") String startTime,
+                                           @RequestParam("endTime") String endTime,
+                                           @RequestParam(value = "productName", required = false) String productName) {
+        return this.getPaymentByCategoryAndTime(substationId, categaryId, categaryName, startTime, endTime, productName);
     }
 }
 
