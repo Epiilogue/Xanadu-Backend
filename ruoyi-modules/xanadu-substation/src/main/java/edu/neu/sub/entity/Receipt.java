@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -113,6 +114,10 @@ public class Receipt implements Serializable {
     @ApiModelProperty("发票号")
     @TableField("invoice_number")
     private Long invoiceNumber;
+
+    @ApiModelProperty("关联商品")
+    @TableField(exist = false)
+    private List<ReceiptProduct> receiptProducts;
 
 
     public Receipt() {
