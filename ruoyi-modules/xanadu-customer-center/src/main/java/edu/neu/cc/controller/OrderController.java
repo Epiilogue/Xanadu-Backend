@@ -12,6 +12,7 @@ import edu.neu.base.constant.cc.StockoutConstant;
 import edu.neu.cc.entity.*;
 import edu.neu.cc.service.*;
 import edu.neu.cc.vo.OrderVo;
+import edu.neu.cc.vo.ProductVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,7 +20,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Gaosong Xu
@@ -188,6 +190,30 @@ public class OrderController {
         if (newOrder == null) return false;
         newOrder.setSubstationId(substationId);
         return newOrderService.updateById(newOrder);
+    }
+
+
+    @GetMapping("/feign/listTopProduct/{number}")
+    public AjaxResult listTopProducts(@RequestParam("startTime") Date startTime,
+                                      @RequestParam("endTime") Date endTime,
+                                      @RequestParam("number") Integer number) {
+        //查询一段时间范围内订购数量最多的前number个商品，返回商品列表，里面需要有商品数量
+        //直接去找范围内的新订单，然后找到里面所有的订单ID，然后取商品表查找，最后统计以productVo列表返回
+        List<NewOrder> newOrders = newOrderService.list(new QueryWrapper<NewOrder>().between("create_time", startTime, endTime));
+        List<Long> orderIds = newOrders.stream().map(NewOrder::getId).collect(Collectors.toList());
+        Map<Long, ProductVo> longProductVoHashMap = new HashMap<>();
+        List<Product> products = productService.list(new QueryWrapper<Product>().in("order_id", orderIds));
+        products.forEach(product -> {
+            ProductVo productVo = new ProductVo();
+            BeanUtils.copyProperties(product, productVo);
+            if (longProductVoHashMap.containsKey(product.getProductId())) {
+                ProductVo tmp = longProductVoHashMap.get(product.getProductId());
+                tmp.setNumber(tmp.getNumber() + product.getNumber());
+            } else {
+                longProductVoHashMap.put(product.getProductId(), productVo);
+            }
+        });
+        return AjaxResult.success(longProductVoHashMap.values().stream().sorted(Comparator.comparing(ProductVo::getNumber).reversed()).limit(number).collect(Collectors.toList()));
     }
 
 
