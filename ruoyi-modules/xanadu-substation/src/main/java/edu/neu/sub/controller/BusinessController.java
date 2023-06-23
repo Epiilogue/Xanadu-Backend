@@ -10,14 +10,14 @@ import edu.neu.sub.feign.OrderClient;
 import edu.neu.sub.service.ReceiptService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 提供业务报表分析的所有数据信息
@@ -57,7 +57,10 @@ public class BusinessController {
     public AjaxResult getSubstationDeliveryAnalysis(@PathVariable("substationId") Long substationId,
                                                     @RequestParam("startTime") Date startTime,
                                                     @RequestParam("endTime") Date endTime) {
-
+        //检查时间是否合法
+        if (startTime == null || endTime == null) return AjaxResult.error("时间不能为空");
+        if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
+        if (substationId == null) return AjaxResult.error("分站ID不能为空");
         @Data
         class Record {
             Integer payTask;
@@ -74,6 +77,7 @@ public class BusinessController {
         //1.根据时间段以及分站ID拿到所有的收据信息
         QueryWrapper<Receipt> queryWrapper = new QueryWrapper<Receipt>().eq("sub_id", substationId).between("create_time", startTime, endTime);
         List<Receipt> list = receiptService.list(queryWrapper);
+        if (list == null || list.size() == 0) return AjaxResult.error("该分站在该时间段内没有完成任务");
         //统计每个任务量出现的次数
         record.payTask = list.stream().filter(receipt -> receipt.getTaskType().equals(TaskType.PAYMENT)).toArray().length;
         record.deliveryTask = list.stream().filter(receipt -> receipt.getTaskType().equals(TaskType.DELIVERY)).toArray().length;
@@ -85,6 +89,35 @@ public class BusinessController {
         record.refundNumber = list.stream().filter(r -> !r.getTaskType().equals(TaskType.PAYMENT)).mapToInt(Receipt::getRefundNum).sum();
         record.refundAmount = list.stream().filter(r -> !r.getTaskType().equals(TaskType.PAYMENT)).mapToDouble(Receipt::getOutputMoney).sum();
         return AjaxResult.success(record);
+    }
+
+    /**
+     * 客户满意度分析，需要给出平均分，以及每个分段的数量0-10，输入信息分站ID，时间段（不输默认全部）
+     */
+    @GetMapping("/getCustomerSatisfactionAnalysis/{substationId}")
+    public AjaxResult getCustomerSatisfactionAnalysis(@PathVariable("substationId") Long substationId,
+                                                      @RequestParam("startTime") Date startTime,
+                                                      @RequestParam("endTime") Date endTime) {
+        //检查时间是否合法
+        if (startTime == null || endTime == null) return AjaxResult.error("时间不能为空");
+        if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
+        if (substationId == null) return AjaxResult.error("分站ID不能为空");
+        QueryWrapper<Receipt> queryWrapper = new QueryWrapper<Receipt>().eq("sub_id", substationId).between("create_time", startTime, endTime);
+        List<Receipt> list = receiptService.list(queryWrapper);
+        if (list == null || list.size() == 0) return AjaxResult.error("该分站在该时间段内没有完成任务");
+        int[] arr = new int[11];
+        //1.拿到所有的满意度，然后添加到map中
+        list.stream().map(Receipt::getFeedback).forEach(satisfaction -> {
+            if (satisfaction == null) return;
+            arr[satisfaction]++;
+        });
+        //计算平均数
+        OptionalDouble average = list.stream().mapToInt(Receipt::getFeedback).average();
+        Double avg = average.isPresent() ? average.getAsDouble() : 0;
+        Map<String, Object> map = new HashMap<>();
+        map.put("avg", avg);
+        map.put("arr", arr);//0-10的数量
+        return AjaxResult.success(map);
     }
 
 
