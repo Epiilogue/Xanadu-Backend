@@ -5,7 +5,9 @@ import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.sub.entity.PendingProduct;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.service.PendingProductService;
+import edu.neu.sub.vo.PendingProductVo;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,10 +49,11 @@ public class PendingProductController {
         if (!b) return AjaxResult.error("更新记录失败");
         //生成退货出库记录，状态为未出库,出库类型未退货出库，需要增加退货数量
         Long subwareId = pendingProduct.getSubwareId();
-        //TODO:远程调用提交给对应的分库，让其进行退货出库登记,然后可以查询到，输入正确的出库数量就可以出库了
-
-
-
+        PendingProductVo pendingProductVo = new PendingProductVo();
+        BeanUtils.copyProperties(pendingProduct, pendingProductVo);
+        pendingProductVo.setDealNumber(number);
+        AjaxResult res = subwareClient.refund(pendingProductVo);
+        if(res==null||res.isError())throw new RuntimeException("退货入库登记失败");
         return AjaxResult.success("退货成功");
     }
 
@@ -67,10 +70,11 @@ public class PendingProductController {
         boolean b = pendingProductService.updateById(pendingProduct);
         if (!b) return AjaxResult.error("更新记录失败");
         //生成子站入库记录，状态为未入库，入库类型为退货入库
-        Long subwareId = pendingProduct.getSubwareId();
-        //TODO：远程调用提交给对应的分库，让其进行退货入库登记,后续可使用消息队列优化
-
-
+        PendingProductVo pendingProductVo = new PendingProductVo();
+        BeanUtils.copyProperties(pendingProduct, pendingProductVo);
+        pendingProductVo.setDealNumber(number);
+        AjaxResult res = subwareClient.restore(pendingProductVo);
+        if(res==null||res.isError())throw new RuntimeException("重新入库失败");
         return AjaxResult.success("重新入库成功");
     }
 

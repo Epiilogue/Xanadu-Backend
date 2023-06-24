@@ -22,6 +22,8 @@ public class StorageVo implements Serializable {
     @ApiModelProperty("已分配库存量")
     private Integer allocatedNum;
 
+    @ApiModelProperty("已退货库存量")
+    private Integer returnedNum;
     @ApiModelProperty("总库存量")
     private Integer totalNum;
 
