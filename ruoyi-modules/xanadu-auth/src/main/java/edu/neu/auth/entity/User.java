@@ -27,11 +27,11 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Long userId;
 
     @ApiModelProperty("用户名")
     @TableField("username")
-    private String username;
+    private String userName;
 
     @ApiModelProperty("密码")
     @TableField("password")
@@ -39,11 +39,11 @@ public class User implements Serializable {
 
     @ApiModelProperty("昵称")
     @TableField("nickname")
-    private String nickname;
+    private String nickName;
 
     @ApiModelProperty("头像")
     @TableField("headimage")
-    private String headimage;
+    private String headImage;
 
     @ApiModelProperty("手机号")
     @TableField("phone")
@@ -61,5 +61,7 @@ public class User implements Serializable {
     @TableField("auth")
     private String auth;
 
-
+    @ApiModelProperty("创建时间")
+    @TableField("createtime")
+    private String createTime;
 }

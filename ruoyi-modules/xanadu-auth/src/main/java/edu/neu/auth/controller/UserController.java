@@ -28,6 +28,7 @@ public class UserController {
     
     @PostMapping("/add")
     @ApiOperation(value = "添加用户", notes = "添加用户")
+    @CrossOrigin
     public AjaxResult addUser(@RequestBody User user) {
 
         boolean res = userService.save(user);
@@ -40,6 +41,7 @@ public class UserController {
 
     @PostMapping("/update")
     @ApiOperation(value = "修改用户", notes = "修改用户")
+    @CrossOrigin
     public AjaxResult updateUser(@RequestBody User user) {
 
         boolean res = userService.updateById(user);
@@ -51,6 +53,7 @@ public class UserController {
 
     @GetMapping("/delete/{id}")
     @ApiOperation(value = "删除用户", notes = "删除用户")
+    @CrossOrigin
     public AjaxResult deleteUser(@PathVariable Long id) {
         User user = userService.getById(id);
         if (user == null) {
@@ -67,6 +70,7 @@ public class UserController {
 
     @GetMapping("/get/{id}")
     @ApiOperation(value = "获取用户", notes = "获取用户")
+    @CrossOrigin
     public AjaxResult getUser(@PathVariable Long id) {
         User user = userService.getById(id);
         if (user == null) {
@@ -77,6 +81,7 @@ public class UserController {
 
     @GetMapping("/listAll")
     @ApiOperation(value = "获取所有用户", notes = "获取所有用户")
+    @CrossOrigin
     public AjaxResult getAllUser() {
         List<User> userList = userService.list();
         if (userList == null) {
