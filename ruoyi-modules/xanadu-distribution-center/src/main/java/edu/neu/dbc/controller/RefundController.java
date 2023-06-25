@@ -19,15 +19,16 @@ import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.RefundService;
 import edu.neu.dbc.service.SupplierService;
 import edu.neu.dbc.vo.CenterOutputVo;
+import edu.neu.dbc.vo.StorageVo;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static com.ruoyi.common.core.utils.PageUtils.startPage;
 
 /**
  * <p>
@@ -74,15 +75,33 @@ public class RefundController {
         return AjaxResult.success(refundService.list());
     }
 
+    @PostMapping("/update")
+    @ApiOperation(value = "修改退货信息", notes = "修改退货信息")
+    @CrossOrigin
+    public AjaxResult updateInvoice(@RequestBody Refund refund) {
+        boolean res = refundService.updateById(refund);
+        if (!res) {
+            return AjaxResult.error("修改退货信息失败");
+        }
+        return AjaxResult.success("修改成功", refund);
+    }
+
+
     @GetMapping("/searchForReturn")
     @ApiOperation("根据供应商 、进货日期段 、商品号查询需要进行退货安排的商品 ，查询结果包含以下信息： 查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数")
     public AjaxResult listForReturn(@ApiParam("供应商ID") @RequestParam("supplierId") Long supplierId,
                                     @ApiParam("商品ID") @RequestParam("productId") Long productId,
                                     @ApiParam("开始时间") @RequestParam("startTime") Date startTime,
                                     @ApiParam("结束时间") @RequestParam("endTime") Date endTime) {
-        if (startTime == null || endTime == null) return AjaxResult.error("时间范围为空");
-        if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
-        if (supplierId == null && productId == null) return AjaxResult.error("供应商ID或商品ID为空");
+        if (startTime == null || endTime == null) {
+            return AjaxResult.error("时间范围为空");
+        }
+        if (startTime.after(endTime)) {
+            return AjaxResult.error("开始时间不能大于结束时间");
+        }
+        if (supplierId == null && productId == null) {
+            return AjaxResult.error("供应商ID或商品ID为空");
+        }
 
         Product product;
         Supplier supplier;

@@ -3,6 +3,8 @@ package edu.neu.invoice.service;
 import edu.neu.invoice.entity.Invoices;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 分站发票管理 服务类

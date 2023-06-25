@@ -34,21 +34,28 @@ public class Invoices implements Serializable {
     @TableField("number")
     private String number;
 
-    @ApiModelProperty("开始号码")
-    @TableField("start")
-    private String start;
-
-    @ApiModelProperty("结束号码")
-    @TableField("end")
-    private String end;
-
     @ApiModelProperty("批次")
     @TableField("batch")
     private String batch;
 
-    @ApiModelProperty("本数")
-    @TableField("available")
-    private Integer available;
+    @ApiModelProperty("发票状态")
+    @TableField("state")
+    private String state;
 
+    @ApiModelProperty("领用人姓名")
+    @TableField("employee")
+    private String employee;
+
+    @ApiModelProperty("是否生效")
+    @TableField("dstate")
+    private String dstate;
+
+    @ApiModelProperty("分站ID")
+    @TableField("substation_id")
+    private String substationId;
+
+    @ApiModelProperty("失效原因")
+    @TableField("details")
+    private String details;
 
 }
