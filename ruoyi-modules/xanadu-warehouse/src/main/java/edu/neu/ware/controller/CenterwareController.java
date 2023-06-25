@@ -36,8 +36,8 @@ public class CenterwareController {
             return AjaxResult.error("预警值不能小于100");
         }
         //最高值必须要大于预警值两倍
-        if (centerware.getMaxNumber() < centerware.getWarnNumber() * 2) {
-            return AjaxResult.error("最高容量必须大于预警容量的两倍");
+        if (centerware.getMaxNumber() < centerware.getWarnNumber() * 4) {
+            return AjaxResult.error("最高容量必须大于预警容量的四倍");
         }
         //更新数据库
         boolean result = centerwareService.updateById(centerware);
