@@ -225,6 +225,7 @@
         <module>ruoyi-modules/mybatisplus-generator</module>
         <module>ruoyi-modules/xanadu_base</module>
         <module>ruoyi-modules/xanadu-warehouse</module>
+        <module>ruoyi-modules/xanadu-accountant-center</module>
     </modules>
     <packaging>pom</packaging>
 

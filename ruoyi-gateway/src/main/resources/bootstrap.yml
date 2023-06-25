@@ -1,11 +1,13 @@
 # Tomcat
 server:
-  port: 8080
+  port: 8089
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  
+
 # Spring
 spring: 
   application:
@@ -116,3 +118,7 @@ spring:
           uri: lb://xanadu-sub
           predicates:
             - Path=/sub/**
+        - id: xanadu-sub
+          uri: lb://xanadu-ac
+          predicates:
+            - Path=/ac/**

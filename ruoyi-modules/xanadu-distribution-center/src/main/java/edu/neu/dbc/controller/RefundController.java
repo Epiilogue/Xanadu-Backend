@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
+import java.util.stream.Collectors;
 import static com.ruoyi.common.core.utils.PageUtils.startPage;
 
 /**
@@ -69,23 +69,21 @@ public class RefundController {
 
 
     @GetMapping("/list")
-    @ApiOperation("查询所有退货安排")
+    @ApiOperation("查询所有历史退货安排")
+    //TODO:前端界面
     public AjaxResult list() {
         //TODO: 2023/6/2 11:14 修改为查询出库记录
         return AjaxResult.success(refundService.list());
     }
 
-    @PostMapping("/update")
-    @ApiOperation(value = "修改退货信息", notes = "修改退货信息")
-    @CrossOrigin
-    public AjaxResult updateInvoice(@RequestBody Refund refund) {
-        boolean res = refundService.updateById(refund);
-        if (!res) {
-            return AjaxResult.error("修改退货信息失败");
-        }
-        return AjaxResult.success("修改成功", refund);
+    @GetMapping("/feign/getRefundId/{refundId}")
+    AjaxResult updateRefundStatus(@PathVariable("refundId") Long refundId) {
+        Refund refund = refundService.getById(refundId);
+        if (refund == null) return AjaxResult.error("退货安排不存在");
+        refund.setStatus(InputOutputStatus.OUTPUT);
+        refundService.updateById(refund);
+        return AjaxResult.success();
     }
-
 
     @GetMapping("/searchForReturn")
     @ApiOperation("根据供应商 、进货日期段 、商品号查询需要进行退货安排的商品 ，查询结果包含以下信息： 查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数")
@@ -105,7 +103,7 @@ public class RefundController {
 
         Product product;
         Supplier supplier;
-        QueryWrapper<PurchaseRecord> queryWrapper = null;
+        QueryWrapper<PurchaseRecord> queryWrapper;
         List<PurchaseRecord> list;
 
         if (supplierId == null) {
@@ -132,6 +130,7 @@ public class RefundController {
 
 
         }
+        //对于每一个商品，我们都要进行映射，映射未对应的退货记录
         //查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数
         //获取到所有的记录
         list = purchaseRecordService.list(queryWrapper);
@@ -158,7 +157,7 @@ public class RefundController {
 
     @PostMapping("/generateReturnOrder/{number}")
     @ApiOperation("生成中心仓库退货单")
-    public AjaxResult generateReturnOrder(@ApiParam("退货Vo") @RequestBody Refund refund,@PathVariable("number") Integer number) {
+    public AjaxResult generateReturnOrder(@ApiParam("退货Vo") @RequestBody Refund refund, @PathVariable("number") Integer number) {
         //number为退货数量，用户前端输入，表示要退货的商品数量
 
         if (refund == null) return AjaxResult.error("退货信息为空");
@@ -166,6 +165,7 @@ public class RefundController {
             return AjaxResult.error("退货数量不合法");
         //更新原记录，修改退货状态
         refund.setRefundCount(number);
+        refund.setRefundTime(new Date());
         refund.setStatus(InputOutputStatus.SUBMITTED);
         boolean b = refundService.save(refund);
         if (!b) throw new ServiceException("退货记录保存失败");

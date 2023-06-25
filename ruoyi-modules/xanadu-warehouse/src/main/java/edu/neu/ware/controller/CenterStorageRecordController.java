@@ -67,7 +67,8 @@ public class CenterStorageRecordController {
         List<CenterStorageRecord> centerStorageRecords = centerStorageRecordService.listByIds(new ArrayList<>(productIdMap.keySet()));
         centerStorageRecords.forEach(centerStorageRecord -> {
             if (centerStorageRecord.getAllocateAbleNum() < productIdMap.get(centerStorageRecord.getProductId())) {
-                productRecordsVo.addProductRecord(centerStorageRecord.getProductId(), productIdMap.get(centerStorageRecord.getProductId()) - centerStorageRecord.getAllocateAbleNum());
+                productRecordsVo.addProductRecord(centerStorageRecord.getProductId(),
+                        productIdMap.get(centerStorageRecord.getProductId()) - centerStorageRecord.getAllocateAbleNum());
             }
         });
         //如果没有记录被添加到缺货map则说明不缺货
