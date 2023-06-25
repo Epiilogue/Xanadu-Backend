@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ public class StockoutController {
         }
         return AjaxResult.success(list);
     }
+
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
     public AjaxResult edit(@RequestBody Stockout stockout) {
@@ -72,6 +74,20 @@ public class StockoutController {
         } else {
             return AjaxResult.error("只允许编辑未提交的记录");
         }
+    }
+
+
+    @PostMapping("/add")
+    @ApiOperation("新增缺货记录,不用选订单ID，但是需要选择商品ID,前端需要添加创建缺货记录页面，选择商品以及数量即可")
+    public AjaxResult add(@RequestBody Stockout stockout) {
+        stockout.setId(null);
+        stockout.setDeleted(false);
+        //TODO: 2023/6/1 11:20 根据上下文自动获取用户ID
+        stockout.setCreateBy(1L);
+        stockout.setCreateTime(new Date());
+        stockout.setStatus(StockoutConstant.UNCOMMITTED);
+        stockoutService.save(stockout);
+        return AjaxResult.success("新增成功");
     }
 
     @PutMapping("/commit/{id}")
@@ -148,7 +164,7 @@ public class StockoutController {
     @PostMapping("/feign/updateLackRecordStatusToPurchased")
     @ApiOperation("更新缺货记录状态,feign远程调用专用，前端不要使用该接口,传递的参数id列表")
     public Boolean updateLackRecordStatusToPurchased(@RequestBody List<Long> ids) {
-        if(ids.size() == 0) return true;
+        if (ids.size() == 0) return true;
         UpdateWrapper<Stockout> set = new UpdateWrapper<Stockout>().in("id", ids).set("status", StockoutConstant.PURCHASED);
         return stockoutService.update(set);
     }

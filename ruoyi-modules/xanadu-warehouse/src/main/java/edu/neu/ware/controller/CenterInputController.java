@@ -63,7 +63,7 @@ public class CenterInputController {
     @GetMapping("/list/{type}")
     @ApiOperation("获取入库列表")
     public AjaxResult getInputList(@ApiParam(name = "type", value = "入库类型") @PathVariable("type") String type) {
-        if (type == null) return AjaxResult.error("入库类型不能为空");
+        if (type == null) throw new ServiceException("入库类型不能为空");
         if (!type.equals(InputOutputType.PURCHASE) && !type.equals(InputOutputType.RETURN))
             throw new ServiceException("类型错误");
         List<CenterInput> centerInputs = centerInputService.list(new QueryWrapper<CenterInput>().eq("input_type", type));
@@ -84,29 +84,29 @@ public class CenterInputController {
     @PutMapping("/confirm/{id}/{number}")
     @ApiOperation("确认入库,并根据入库的类型更新状态,输入实际的入库量")
     public AjaxResult confirm(@PathVariable("id") Long id, @PathVariable("number") Integer number) {
-        if (number == null || number <= 0) return AjaxResult.error("入库数量错误");
-        if (id == null) return AjaxResult.error("id不能为空");
+        if (number == null || number <= 0) throw new ServiceException("入库数量错误");
+        if (id == null) throw new ServiceException("id不能为空");
         //入库单不存在
         CenterInput centerInput = centerInputService.getById(id);
-        if (centerInput == null) return AjaxResult.error("入库单不存在");
+        if (centerInput == null) throw new ServiceException("入库单不存在");
         //如果入库单的类型为购货入库，那么需要拿到对应的采购单实体类，获取到对应的缺货ID，然后调用远程方法更新
 
         Long inputId = centerInput.getInputId();
         if (centerInput.getInputType().equals(InputOutputType.PURCHASE)) {
             //拿到sourceId
             //远程调用获取到缺货单对应的缺货记录ID
-            List<Long> lackIds = purchaseRecordClient.getLackIdsAndUpdate(inputId);
-            if (lackIds == null || lackIds.size() == 0) return AjaxResult.error("入库错误,入库对应缺货单不存在");
+            List<Long> lackIds = purchaseRecordClient.getLackIds(inputId);
+            if (lackIds == null || lackIds.size() == 0) throw new ServiceException("入库错误,入库对应购货单不存在");
             //更新缺货状态
             Boolean aBoolean = ccOrderClient.updateLackRecordStatusToArrival(centerInput.getInputNum(), lackIds);
-            if (aBoolean == null || !aBoolean) return AjaxResult.error("入库错误,更新缺货记录失败");
+            if (aBoolean == null || !aBoolean) throw new ServiceException("入库错误,更新缺货记录失败");
         } else {
             //拿到原有的记录
             SubOutput record = subOutputService.getById(inputId);
-            if (record == null) return AjaxResult.error("入库错误,退货记录不存在");
+            if (record == null) throw new ServiceException("入库错误,退货记录不存在");
             record.setStatus(InputOutputStatus.CENTER_INPUT);
             boolean b = subOutputService.updateById(record);
-            if (!b) return AjaxResult.error("更新分库出库记录状态失败");
+            if (!b) throw new ServiceException("更新分库出库记录状态失败");
         }
 
         //入库，增加可分配库存,可能查不到这个商品，此时就需要创建商品

@@ -2,6 +2,7 @@ package edu.neu.dbc.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.InputOutputStatus;
@@ -25,13 +26,12 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +67,12 @@ public class PurchaseRecordController {
     @Autowired
     CenterWareClient centerWareClient;
 
+    @Autowired
+    ProductService productService;
+
+
+    @Autowired
+    RefundService refundService;
 
     @ApiOperation("列表查看采购单，后面有已到货按钮，点击后，需要填写实际到货数量，将采购单状态置为已到货，生成入库调拨单")
     @GetMapping("/list")
@@ -90,7 +96,7 @@ public class PurchaseRecordController {
         if (!purchaseRecordService.updateById(record)) throw new ServiceException("更新采购单状态失败");
         //生成入库调拨单
         CenterInputVo centerInputVo = new CenterInputVo(null, id, InputOutputType.PURCHASE, record.getProductId(),
-                record.getProductName(), number, record.getProductPrice(), new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId(),null,null);
+                record.getProductName(), number, record.getProductPrice(), new Date(), InputOutputStatus.NOT_INPUT, record.getSupplierId(), null, null);
         //远程调用接口，保存入库调拨单，之后可以根据入库调拨单进行入库操作
         if (!centerWareClient.addInputRecord(centerInputVo)) throw new ServiceException("生成入库调拨单失败");
         return AjaxResult.success("确认采购到货成功");
@@ -130,8 +136,8 @@ public class PurchaseRecordController {
         boolean saved = purchaseRecordService.save(purchaseRecord);
         if (!saved) throw new ServiceException("采购单生成失败");
         Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream().
-                filter(s->!s.getSource().equals("缺货检查")).
-                map(SingleLackRecordVo::getId).collect(Collectors.toList()));
+                map(SingleLackRecordVo::getId).
+                filter(id -> id != -1).collect(Collectors.toList()));
         if (!updateSuccess) throw new ServiceException("更新缺货记录状态失败");
 
         return AjaxResult.success("采购单生成成功");
@@ -143,11 +149,104 @@ public class PurchaseRecordController {
     public List<Long> getLackIdsAndUpdate(@PathVariable("purchaseId") Long purchaseId) {
         PurchaseRecord record = purchaseRecordService.getById(purchaseId);
         if (record == null) return null;
-        record.setStatus(PurchaseRecordStatusConstant.IN_STORAGE);
-        purchaseRecordService.updateById(record);
         return Arrays.stream(record.getLackIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
     }
 
 
+    /**
+     * 当我们完成某一个时间点某一个商品的结算后，修改相应的采购单状态为已结算，修改相应的退货单状态为已结算
+     * 我们还需要记录一下结算的时间，保存一下结算记录，以便于后续查询
+     */
+    @ApiOperation("供应商结算远程查询接口，允许查询指定供应商，指定商品，指定时间段的结算信息,必须要指定供应商，但是可以不用指定商品，必须指定时间段")
+    @GetMapping("/feign/settlement")
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId") Long productId,
+                                 @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime) {
+        //检查数据合法性
+        //1.检查供应商是否存在
+        Supplier supplier = supplierService.getById(supplierId);
+        if (supplier == null) return AjaxResult.error("供应商不存在");
+        //2.检查商品是否存在
+        Product product = productService.getById(productId);
+        if (product == null) return AjaxResult.error("商品不存在");
+        //3.检查商品和供应商是否对应
+        if (!product.getSupplierId().equals(supplierId)) return AjaxResult.error("商品和供应商不对应");
+        //4.检查时间合法性<
+        if (startTime.after(endTime)) return AjaxResult.error("开始时间不能晚于结束时间");
+
+        //查询时间范围内状态为开始时间到结束时间的购买记录以及退货记录，然后记录ID，在结算后需要更新他们的状态
+        //同时在SettlementVo中需要记录对应的ID列表，用以追踪更新状态
+        List<PurchaseRecord> purchaseRecords = purchaseRecordService.lambdaQuery().
+                eq(PurchaseRecord::getSupplierId, supplierId).
+                between(PurchaseRecord::getCreateTime, startTime, endTime).
+                eq(PurchaseRecord::getStatus, PurchaseRecordStatusConstant.ARRIVED).
+                list();
+        //如果商品ID不为空的话，filter过滤一遍
+        if (productId != null)
+            purchaseRecords = purchaseRecords.stream().filter(p -> p.getProductId().equals(productId)).collect(Collectors.toList());
+
+        //拿到了所有的购买记录，之后需要获取所有的退货记录
+        List<Refund> refunds = refundService.lambdaQuery().
+                eq(Refund::getSupplierId, supplierId).
+                between(Refund::getRefundTime, startTime, endTime).
+                eq(Refund::getStatus, InputOutputStatus.OUTPUT).
+                list();
+        //如果商品ID不为空的话，filter过滤一遍
+        if (productId != null)
+            refunds = refunds.stream().filter(r -> r.getProductId().equals(productId)).collect(Collectors.toList());
+
+        //拿到了所有的purchasesRecord和refund，根据他们的商品ID汇总生成列表用来结算,返回的是列表信息，对于非此时间段进货的商品，若是此时间段退货了，不会被计算在内
+        Map<Long, SettlementVo> map = new HashedMap<>();
+        //先处理进货记录,若存在则更新，不存在则使用全参构造函数创建
+        purchaseRecords.forEach(p -> {
+            SettlementVo settlementVo = map.get(p.getProductId());
+            if (settlementVo == null) {
+                settlementVo = new SettlementVo(p.getProductId(), p.getSupplierId(), p.getProductName(),
+                        p.getProductPrice(), 0, 0, 0, 0.0, null, null, new ArrayList<>(), new ArrayList<>());
+            } else {
+                //增加供货数量，给列表增加供货单ID
+                settlementVo.setSupplyNum(settlementVo.getSupplyNum() + p.getNumber());
+                settlementVo.getPurchaseRecordIdList().add(p.getId());
+            }
+            map.put(p.getProductId(), settlementVo);
+        });
+        //处理退货记录，退货记录对于之前不存在的需要创建并更新，对于之前存在的需要更新
+        refunds.forEach(r -> {
+            SettlementVo settlementVo = map.get(r.getProductId());
+            if (settlementVo == null) {
+                settlementVo = new SettlementVo(r.getProductId(), r.getSupplierId(), r.getProductName(),
+                        r.getProductPrice(), 0, 0, 0, 0.0, null, null, new ArrayList<>(), new ArrayList<>());
+            }
+            //增加退货数量，给列表增加退货单ID
+            settlementVo.setReturnNum(settlementVo.getReturnNum() + r.getRefundCount());
+            settlementVo.getRefundRecordIdList().add(r.getId());
+            map.put(r.getProductId(), settlementVo);
+        });
+        //计算结算数量和结算金额
+        map.forEach((k, v) -> {
+            v.setTotalNum(v.getSupplyNum() - v.getReturnNum());
+            v.setTotalAmount(v.getTotalNum() * v.getPrice());
+            //如果结算金额为负数说明需要供销商退款
+            if (v.getTotalAmount() < 0) v.setSettleType(SettlementVo.REFUND);
+            else v.setSettleType(SettlementVo.PAY);
+            v.setTotalAmount(Math.abs(v.getTotalAmount()));
+        });
+        //如果不存在内容则返回错误
+        if (map.size() == 0) return AjaxResult.error("此时间段内不存在相应条件的进货或退货记录");
+        return AjaxResult.success(map.values());
+    }
+
+
+    @PostMapping("/feign/updateStatus")
+    @ApiOperation("更新所有涉及的退货单或者购货单状态为已结算")
+    AjaxResult updateStatus(@RequestBody List<SettlementVo> settlementVos) {
+        //所有的都是已经请求结算的信息，我们找到对应的进货单以及退货单更新为已结算
+        settlementVos.forEach(s -> {
+            List<Long> purchaseRecordIdList = s.getPurchaseRecordIdList();
+            purchaseRecordIdList.forEach(p -> purchaseRecordService.update(new UpdateWrapper<PurchaseRecord>().lambda().eq(PurchaseRecord::getId, p).set(PurchaseRecord::getStatus, PurchaseRecordStatusConstant.SETTLED)));
+            List<Long> refundRecordIdList = s.getRefundRecordIdList();
+            refundRecordIdList.forEach(r -> refundService.update(new UpdateWrapper<Refund>().lambda().eq(Refund::getId, r).set(Refund::getStatus, PurchaseRecordStatusConstant.SETTLED)));
+        });
+        return AjaxResult.success();
+    }
 }
 
