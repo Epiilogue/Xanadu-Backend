@@ -1,5 +1,6 @@
 package edu.neu.auth.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.auth.entity.User;
 import edu.neu.auth.service.UserService;
@@ -50,7 +51,7 @@ public class UserController {
 
     @GetMapping("/delete/{id}")
     @ApiOperation(value = "删除用户", notes = "删除用户")
-    public AjaxResult deleteSubware(@PathVariable Long id) {
+    public AjaxResult deleteUser(@PathVariable Long id) {
         User user = userService.getById(id);
         if (user == null) {
             return AjaxResult.error("用户不存在");
@@ -66,7 +67,7 @@ public class UserController {
 
     @GetMapping("/get/{id}")
     @ApiOperation(value = "获取用户", notes = "获取用户")
-    public AjaxResult getSubware(@PathVariable Long id) {
+    public AjaxResult getUser(@PathVariable Long id) {
         User user = userService.getById(id);
         if (user == null) {
             return AjaxResult.error("获取用户失败");
@@ -76,12 +77,25 @@ public class UserController {
 
     @GetMapping("/listAll")
     @ApiOperation(value = "获取所有用户", notes = "获取所有用户")
-    public AjaxResult getAllSubware() {
+    public AjaxResult getAllUser() {
         List<User> userList = userService.list();
         if (userList == null) {
             return AjaxResult.error("获取用户列表失败");
         }
         return AjaxResult.success("获取用户列表成功", userList);
+    }
+
+    @GetMapping("/listByJob/{job}")
+    @ApiOperation("通过totalid获取发票信息")
+    @CrossOrigin
+    public AjaxResult listByJob(@PathVariable(value = "job", required = false) String job) {
+        List<User> usersList;
+        if (job == null) {
+            usersList = null;
+            return AjaxResult.success(usersList);
+        }
+        QueryWrapper<User> outputTypeQuery = new QueryWrapper<User>().eq("job", job);
+        return AjaxResult.success(userService.list(outputTypeQuery));
     }
 
 }
