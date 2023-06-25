@@ -148,6 +148,7 @@ public class RefundController {
             return AjaxResult.error("退货数量不合法");
         //更新原记录，修改退货状态
         refund.setRefundCount(number);
+        refund.setRefundTime(new Date());
         refund.setStatus(InputOutputStatus.SUBMITTED);
         boolean b = refundService.save(refund);
         if (!b) throw new ServiceException("退货记录保存失败");
