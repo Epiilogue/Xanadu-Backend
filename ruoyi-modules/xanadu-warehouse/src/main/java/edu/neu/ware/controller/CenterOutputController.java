@@ -299,9 +299,9 @@ public class CenterOutputController {
         centerOutputVo.setProductPrice(centerOutput.getProductPrice());//设置商品价格
         AjaxResult substationClientSubstationId = substationClient.getSubstationId(centerOutputVo.getSubstationId());
         if (substationClientSubstationId.isError()) return AjaxResult.error("修改失败,未找到该分站");
-        //检查一下分库是否存在
-        Subware subware = subwareService.getById(centerOutputVo.getSubwareId());
-        if (subware == null) return AjaxResult.error("修改失败,未找到该分库");
+        //分库ID可以直接由分站获取
+        AjaxResult subwareIdResult = substationClient.getSubwareId(centerOutputVo.getSubstationId());
+        centerOutputVo.setSubwareId((Long) subwareIdResult.get("data"));
         //修改信息
         BeanUtils.copyProperties(centerOutputVo, centerOutput);
         //更新
@@ -320,7 +320,7 @@ public class CenterOutputController {
         //查找一下对应的记录
         CenterOutput centerOutput = centerOutputService.getOne(centerOutputQueryWrapper);
         if (centerOutput == null) return false;
-        //如果是已出库的，不能删除
+        //如果是已出库的，不能删除,日后需要结算
         if (centerOutput.getStatus().equals(InputOutputStatus.OUTPUT)) return false;
         //与订单关联的也不能删
         if (centerOutput.getTaskId() != null) return false;
