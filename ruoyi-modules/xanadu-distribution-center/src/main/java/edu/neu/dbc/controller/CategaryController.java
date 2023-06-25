@@ -1,9 +1,12 @@
 package edu.neu.dbc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Categary;
+import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.service.CategaryService;
+import edu.neu.dbc.service.ProductService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,10 @@ public class CategaryController {
 
     @Autowired
     private CategaryService categaryService;
+
+    @Autowired
+    private ProductService productService;
+
 
     @GetMapping("/listAll")
     @ApiOperation("获取所有分类")
@@ -78,6 +85,18 @@ public class CategaryController {
             return AjaxResult.error("没有该分类");
         }
         return AjaxResult.success(categary);
+    }
+
+
+    @ApiOperation("根据id获取小分类下的所有商品")
+    @GetMapping("/feign/getGoods/{id}")
+    public AjaxResult getGoods(@PathVariable("id") Integer id) {
+        Categary categary = categaryService.getById(id);
+        if (categary.getLevel() == 0) return AjaxResult.error("商品分类填写不完整");
+        //查找所有的同分类ID的商品列表
+        QueryWrapper<Product> secondCategray = new QueryWrapper<Product>().eq("second_categray", id);
+        List<Long> Idlist = productService.list(secondCategray).stream().map(Product::getId).collect(Collectors.toList());
+        return AjaxResult.success(Idlist);
     }
 
 

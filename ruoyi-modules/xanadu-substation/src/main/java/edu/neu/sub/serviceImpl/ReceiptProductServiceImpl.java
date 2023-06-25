@@ -112,8 +112,7 @@ public class ReceiptProductServiceImpl extends ServiceImpl<ReceiptProductMapper,
                         });
                         break;
                     case TaskType.RETURN:
-                        receiptProducts.forEach(
-                                p -> {
+                        receiptProducts.forEach(p -> {
                                     Integer actualNum = p.getReturnNum();//先拿到实际数量
                                     p.setSignNum(0);
                                     p.setReturnNum(actualNum);//实际退回来几个，就签收几个

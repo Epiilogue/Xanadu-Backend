@@ -19,15 +19,15 @@ import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.RefundService;
 import edu.neu.dbc.service.SupplierService;
 import edu.neu.dbc.vo.CenterOutputVo;
+import edu.neu.dbc.vo.StorageVo;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -84,10 +84,11 @@ public class RefundController {
         if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
         if (supplierId == null && productId == null) return AjaxResult.error("供应商ID或商品ID为空");
 
-        Product product = null;
+        Product product;
         Supplier supplier;
         QueryWrapper<PurchaseRecord> queryWrapper = null;
-        List<PurchaseRecord> list = new ArrayList<>();
+        List<PurchaseRecord> list;
+
         if (supplierId == null) {
             product = productService.getById(productId);
             if (product == null) return AjaxResult.error("商品不存在");
@@ -95,45 +96,61 @@ public class RefundController {
             queryWrapper = new QueryWrapper<PurchaseRecord>().
                     eq("product_id", productId).between("create_time", startTime, endTime).
                     or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
-            list = purchaseRecordService.list(queryWrapper);
-        } else if (productId == null) {
+        } else {
+            product = null;
             supplier = supplierService.getById(supplierId);
             if (supplier == null) return AjaxResult.error("供应商不存在");
-            //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
-            queryWrapper = new QueryWrapper<PurchaseRecord>().
-                    eq("supplier_id", supplierId).between("create_time", startTime, endTime).
-                    or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
-            list = purchaseRecordService.list(queryWrapper);
+            if (productId == null)
+                //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
+                queryWrapper = new QueryWrapper<PurchaseRecord>().
+                        eq("supplier_id", supplierId).between("create_time", startTime, endTime).
+                        or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+            else
+                //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
+                queryWrapper = new QueryWrapper<PurchaseRecord>().
+                        eq("supplier_id", supplierId).between("create_time", startTime, endTime).eq("product_id", productId).
+                        or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+
+
         }
+        //对于每一个商品，我们都要进行映射，映射未对应的退货记录
         //查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数
         //获取到所有的记录
         list = purchaseRecordService.list(queryWrapper);
-        //统计所有的进货数量
-        Integer inputCount = list.stream().map(PurchaseRecord::getNumber).reduce(0, Integer::sum);
-        //2.查询当前的商品库存数
-        Integer storage = wareCenterStorageRecordClient.getStorage(productId).getTotalNum();
-        //生成退货记录
-        assert product != null;
-        Refund refund = new Refund(null, supplierId, productId, product.getName(), product.getPrice(), inputCount,
-                storage, 0, InputOutputStatus.NOT_SUBMIT, false, null);
-        //保存至数据库
-        //boolean saved = refundService.save(refund);
-        //if (!saved) throw new ServiceException("退货单生成失败");
-
-        return AjaxResult.success(refund);
+        if (list == null || list.size() == 0) return AjaxResult.error("查询结果为空");
+        Map<Long, Refund> refundMap = new HashMap<>();
+        list.forEach(p -> {
+            //对于每一条购买记录，我们都需要将其映射未对应的商品refund记录列表
+            Long searchId = p.getProductId();
+            if (!refundMap.containsKey(searchId)) {
+                StorageVo storageVo = wareCenterStorageRecordClient.getStorage(productId);
+                if (storageVo == null) throw new ServiceException("查询商品库存失败");
+                Refund refund = new Refund(null, p.getSupplierId(), p.getProductId(), p.getProductName(), p.getProductPrice(), 0,
+                        storageVo.getTotalNum(), storageVo.getReturnedNum(), null, false, null);
+                refundMap.put(searchId, refund);
+            }
+            //取出对应的退货记录
+            Refund refund = refundMap.get(searchId);
+            refund.setInputNum(refund.getInputNum() + p.getNumber());
+        });
+        List<Refund> collect = new ArrayList<>(refundMap.values());
+        return AjaxResult.success(collect);
     }
 
 
-    @PostMapping("/generateReturnOrder")
+    @PostMapping("/generateReturnOrder/{number}")
     @ApiOperation("生成中心仓库退货单")
-    public AjaxResult generateReturnOrder(@ApiParam("退货Vo") @RequestBody Refund refund) {
+    public AjaxResult generateReturnOrder(@ApiParam("退货Vo") @RequestBody Refund refund,@PathVariable("number") Integer number) {
+        //number为退货数量，用户前端输入，表示要退货的商品数量
+
         if (refund == null) return AjaxResult.error("退货信息为空");
-        if (refund.getRefundCount() > refund.getNowCount())
-            return AjaxResult.error("退货数量不能大于库存数量");
+        if (refund.getRefundCount() < number)
+            return AjaxResult.error("退货数量不合法");
         //更新原记录，修改退货状态
+        refund.setRefundCount(number);
         refund.setStatus(InputOutputStatus.SUBMITTED);
-        boolean b = refundService.updateById(refund);
-        if (!b) throw new ServiceException("退货记录更新失败");
+        boolean b = refundService.save(refund);
+        if (!b) throw new ServiceException("退货记录保存失败");
 
         //生成退货单,远程调用写入退货单，
         CenterOutputVo returnRecord = new CenterOutputVo(refund.getId(), refund.getProductId(), refund.getProductName(), refund.getRefundCount()
