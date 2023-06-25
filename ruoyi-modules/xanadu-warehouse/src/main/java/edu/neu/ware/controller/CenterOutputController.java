@@ -13,9 +13,7 @@ import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.ware.entity.CenterOutput;
 import edu.neu.ware.entity.CenterStorageRecord;
 import edu.neu.ware.entity.Subware;
-import edu.neu.ware.feign.CCOrderClient;
-import edu.neu.ware.feign.SupplierClient;
-import edu.neu.ware.feign.TaskClient;
+import edu.neu.ware.feign.*;
 import edu.neu.ware.service.CenterOutputService;
 import edu.neu.ware.service.CenterStorageRecordService;
 import edu.neu.ware.service.SubwareService;
@@ -58,6 +56,12 @@ public class CenterOutputController {
 
     @Autowired
     CCOrderClient ccOrderClient;
+
+    @Autowired
+    RefundClient refundClient;
+
+    @Autowired
+    SubstationClient substationClient;
 
     /**
      * 中心仓库可以查两个输出，一个是退货出库，一个是调度出库,两个独立拥有不同的字段
@@ -107,6 +111,7 @@ public class CenterOutputController {
 
     @PutMapping("/confirm/{id}/{number}")
     @ApiOperation("确认出库，传入记录ID以及确认的出库数量")
+    //TODO：逻辑修改，实际出库数量与记录数量不一致时，仓库减去原始数量
     public AjaxResult confirm(@PathVariable("id") Long id, @PathVariable("number") Integer number) {
         if (id == null || number == null) return AjaxResult.error("确认失败，参数不能为空");
         if (number <= 0) return AjaxResult.error("确认失败，出库数量必须大于0");
@@ -118,26 +123,32 @@ public class CenterOutputController {
         if (!status.equals(InputOutputStatus.NOT_OUTPUT)) return AjaxResult.error("确认失败，该出库记录已经出库");
         //拿到出库记录的出库数量
         Integer outputNum = centerOutput.getOutputNum();
-        if(number<outputNum) return AjaxResult.error("确认失败，出库数量不能小于出库数量");
         //获取出库类型
         String outputType = centerOutput.getOutputType();
         boolean updateSuccess;
         switch (outputType) {
             case InputOutputType.RETURN_OUT:
-                //TODO: 退货出库，选择退货数量进行退货，不应该选择已分配数量，此处逻辑有误，后续需要修改逻辑
-                updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("allocate_able_num=allocate_able_num-" + number).
-                        eq("product_id", centerOutput.getProductId()).ge("allocate_able_num", number));
-                if (!updateSuccess) throw new ServiceException("出库失败，实际出库数量大于可分配数量");
+                updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("refund_num=refund_num-" + number).
+                        eq("product_id", centerOutput.getProductId()).ge("refund_num", number));
+                if (!updateSuccess) throw new ServiceException("出库失败");
+                //1.拿到退货单ID
+                Long refundId = centerOutput.getOutputId();
+                //2.远程调用，更新退货单状态
+                AjaxResult ajaxResult = refundClient.updateRefundStatus(refundId);
+                if (ajaxResult == null || ajaxResult.isError())
+                    throw new ServiceException("出库失败，更新退货单状态失败");
                 break;
             case InputOutputType.DISPATCH_OUT:
                 //如果是调拨出库，需要把原来的分配数量划到可分配数量，然后减去实际出库的可分配数量，如果小于0，返回错误并提示失败
                 updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("allocate_able_num=allocate_able_num+" + outputNum).
-                        setSql("allocated_num=allocated_num-" + outputNum).eq("product_id", centerOutput.getProductId()).ge("allocate_able_num", 0));
+                        setSql("allocated_num=allocated_num-" + outputNum).eq("product_id", centerOutput.getProductId()).ge("allocated_num", outputNum));
                 //实际出库，出库失败则回滚
                 if (!updateSuccess) throw new ServiceException("出库失败，已分配数量不足");
+
                 updateSuccess = centerStorageRecordService.update(new UpdateWrapper<CenterStorageRecord>().setSql("allocate_able_num=allocate_able_num-" + number).
                         eq("product_id", centerOutput.getProductId()).ge("allocate_able_num", number));
                 if (!updateSuccess) throw new ServiceException("出库失败，可分配数量不足");
+
                 //将该记录状态更新为已出库
                 //如果记录存在有taskId，我们需要检查该taskID是否存在有未完成的任务，如果没有，我们需要把状态更新为中心仓库出库
                 if (centerOutput.getTaskId() != null) {
@@ -274,25 +285,23 @@ public class CenterOutputController {
 
     //修改
     @PostMapping("/feign/update")
-    @ApiOperation("修改出库记录")
+    @ApiOperation("修改调拨出库记录")
     public AjaxResult update(@RequestBody CenterOutputVo centerOutputVo) {
         if (centerOutputVo == null) return AjaxResult.error("修改失败,参数为空");
         //拿到ID
         Long outputId = centerOutputVo.getOutputId();
         //构建查询条件，output_id为outputId
-        QueryWrapper<CenterOutput> centerOutputQueryWrapper = new QueryWrapper<CenterOutput>().eq("output_id", outputId);
+        QueryWrapper<CenterOutput> centerOutputQueryWrapper = new QueryWrapper<CenterOutput>().
+                eq("output_id", outputId).eq("output_type", InputOutputType.DISPATCH_OUT);
         //根据查询条件查询出库记录
         CenterOutput centerOutput = centerOutputService.getOne(centerOutputQueryWrapper);
         if (centerOutput == null) return AjaxResult.error("修改失败,未找到该出库记录");
         centerOutputVo.setProductPrice(centerOutput.getProductPrice());//设置商品价格
-        //检查一下子站是否存在
-        if (centerOutputVo.getOutputType().equals(InputOutputType.DISPATCH_OUT)) {
-            Subware subware = subwareService.getById(centerOutputVo.getSubwareId());
-            if (subware == null) return AjaxResult.error("修改失败,未找到该子站");
-        } else if (centerOutputVo.getOutputType().equals(InputOutputType.RETURN_OUT)) {
-            //TODO: 找供应商是否存在
-
-        }
+        AjaxResult substationClientSubstationId = substationClient.getSubstationId(centerOutputVo.getSubstationId());
+        if (substationClientSubstationId.isError()) return AjaxResult.error("修改失败,未找到该分站");
+        //检查一下分库是否存在
+        Subware subware = subwareService.getById(centerOutputVo.getSubwareId());
+        if (subware == null) return AjaxResult.error("修改失败,未找到该分库");
         //修改信息
         BeanUtils.copyProperties(centerOutputVo, centerOutput);
         //更新

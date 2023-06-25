@@ -1,6 +1,6 @@
 # Tomcat
 server:
-  port: 8080
+  port: 8089
 
 # Spring
 spring: 
@@ -112,3 +112,7 @@ spring:
           uri: lb://xanadu-sub
           predicates:
             - Path=/sub/**
+        - id: xanadu-sub
+          uri: lb://xanadu-ac
+          predicates:
+            - Path=/ac/**

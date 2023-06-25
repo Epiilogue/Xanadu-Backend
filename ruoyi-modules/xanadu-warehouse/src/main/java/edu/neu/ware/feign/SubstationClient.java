@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(value = "xanadu-sub")
+@FeignClient(value = "xanadu-sub" , contextId = "SubstationClient")
 public interface SubstationClient {
     @GetMapping("/sub/substation/feign/getSubstationId/{subwareId}")
     @ApiOperation(value = "获取分站的ID")

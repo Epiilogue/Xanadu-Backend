@@ -14,6 +14,6 @@ public interface PurchaseRecordClient {
 
     @ApiOperation("获取缺货记录ID列表,feign调用")
     @GetMapping("/dbc/purchaseRecord/feign/getLackIds/{purchaseId}}")
-    public List<Long> getLackIdsAndUpdate(@PathVariable("purchaseId") Long purchaseId);
+    public List<Long> getLackIds(@PathVariable("purchaseId") Long purchaseId);
 
 }

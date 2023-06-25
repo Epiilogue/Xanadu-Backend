@@ -136,8 +136,8 @@ public class PurchaseRecordController {
         boolean saved = purchaseRecordService.save(purchaseRecord);
         if (!saved) throw new ServiceException("采购单生成失败");
         Boolean updateSuccess = stockoutClient.updateLackRecordStatusToPurchased(allLackRecordVo.getSingleLackRecordVos().stream().
-                filter(s -> !s.getSource().equals("缺货检查")).
-                map(SingleLackRecordVo::getId).collect(Collectors.toList()));
+                map(SingleLackRecordVo::getId).
+                filter(id -> id != -1).collect(Collectors.toList()));
         if (!updateSuccess) throw new ServiceException("更新缺货记录状态失败");
 
         return AjaxResult.success("采购单生成成功");

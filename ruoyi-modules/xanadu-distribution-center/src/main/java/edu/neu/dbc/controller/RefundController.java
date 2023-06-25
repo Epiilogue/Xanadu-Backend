@@ -68,10 +68,19 @@ public class RefundController {
 
 
     @GetMapping("/list")
-    @ApiOperation("查询所有退货安排")
+    @ApiOperation("查询所有历史退货安排")
+    //TODO:前端界面
     public AjaxResult list() {
-        //TODO: 2023/6/2 11:14 修改为查询出库记录
         return AjaxResult.success(refundService.list());
+    }
+
+    @GetMapping("/feign/getRefundId/{refundId}")
+    AjaxResult updateRefundStatus(@PathVariable("refundId") Long refundId) {
+        Refund refund = refundService.getById(refundId);
+        if (refund == null) return AjaxResult.error("退货安排不存在");
+        refund.setStatus(InputOutputStatus.OUTPUT);
+        refundService.updateById(refund);
+        return AjaxResult.success();
     }
 
     @GetMapping("/searchForReturn")
@@ -86,7 +95,7 @@ public class RefundController {
 
         Product product;
         Supplier supplier;
-        QueryWrapper<PurchaseRecord> queryWrapper = null;
+        QueryWrapper<PurchaseRecord> queryWrapper;
         List<PurchaseRecord> list;
 
         if (supplierId == null) {
@@ -140,7 +149,7 @@ public class RefundController {
 
     @PostMapping("/generateReturnOrder/{number}")
     @ApiOperation("生成中心仓库退货单")
-    public AjaxResult generateReturnOrder(@ApiParam("退货Vo") @RequestBody Refund refund,@PathVariable("number") Integer number) {
+    public AjaxResult generateReturnOrder(@ApiParam("退货Vo") @RequestBody Refund refund, @PathVariable("number") Integer number) {
         //number为退货数量，用户前端输入，表示要退货的商品数量
 
         if (refund == null) return AjaxResult.error("退货信息为空");
