@@ -1,9 +1,11 @@
 package edu.neu.cc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.security.utils.SecurityUtils;
+import edu.neu.base.constant.cc.NewOrderType;
 import edu.neu.base.constant.cc.OperationTypeConstant;
 import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.StockoutConstant;
@@ -76,13 +78,15 @@ public class RefundController {
         Order preOrder = orderService.getById(refundVo.getOrderId());
         if (preOrder == null) return AjaxResult.error("原订单不存在");
         //检查订单状态
-        if (!preOrder.getStatus().equals(OrderStatusConstant.COMPLETED))
-            return AjaxResult.error("原订单状态不是已完成，不能换货");
+        String status = preOrder.getStatus();
+        if (!(status.equals(OrderStatusConstant.COMPLETED)))
+            return AjaxResult.error("原订单状态未完成，不允许换货");
+        if (!preOrder.getOrderType().equals(OperationTypeConstant.ORDER))
+            return AjaxResult.error("原订单不是新订类型，不允许换货");
 
-        //TODO：检查原来的订单是不是新订类型
-
-        //TODO：拿到原来订单对应的子站ID
-
+        NewOrder newOrder = newOrderService.getById(preOrder.getId());
+        if (newOrder == null) return AjaxResult.error("原订单不存在");
+        Long substationId = newOrder.getSubstationId();
         Order order = new Order();
         Refund refund = new Refund();
         BeanUtils.copyProperties(refundVo, order);
@@ -94,6 +98,16 @@ public class RefundController {
         products.forEach(p -> {
             if (!p.getChangeAble()) throw new ServiceException("存在商品不允许换货");
         });
+        //拿到原来的订单商品
+        List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", refundVo.getOrderId()));
+        //检查对应商品数量是不是小于换货数量，超过了不允许换
+        for (Product product : products) {
+            for (Product p : productList) {
+                if (product.getProductId().equals(p.getProductId())) {
+                    if (product.getNumber() > p.getNumber()) return AjaxResult.error("换货数量超过原订单数量");
+                }
+            }
+        }
 
         //将商品ID和数量封装成键值对
         Map<Long, Integer> productIdNumberMap = products.stream().collect(Collectors.toMap(Product::getProductId, Product::getNumber));
@@ -103,10 +117,11 @@ public class RefundController {
         if (productRecordsVo.getIsLack()) order.setStatus(OrderStatusConstant.OUT_OF_STOCK);
         else order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
         order.setOrderType(OperationTypeConstant.EXCHANGE);
-        //插入订单数据库
+        //插入换货数据库
         orderService.save(order);
         refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
+        refund.setSubstationId(substationId);
 
         refundService.save(refund);
         Long userId = SecurityUtils.getUserId();
@@ -158,27 +173,39 @@ public class RefundController {
         //客户希望创建订单，检查对应的商品是否缺货，如果缺货则生成缺货记录，否则订单状态为可分配
         if (refundVo == null) return AjaxResult.error("退货信息不能为空");
 
+
         Order preOrder = orderService.getById(refundVo.getOrderId());
         if (preOrder == null) return AjaxResult.error("原订单不存在");
         //检查订单状态
-        if (!preOrder.getStatus().equals(OrderStatusConstant.COMPLETED))
-            return AjaxResult.error("原订单状态不是已完成，不能退货");
-        //检查提交的商品是否都允许退货
-        //TODO：检查原来的订单是不是新订类型
-        //TODO：拿到原来订单对应的子站ID
+        String status = preOrder.getStatus();
+        if (!(status.equals(OrderStatusConstant.COMPLETED)))
+            return AjaxResult.error("原订单状态未完成，不允许换货");
+        if (!preOrder.getOrderType().equals(OperationTypeConstant.ORDER))
+            return AjaxResult.error("原订单不是新订类型，不允许换货");
 
+        NewOrder newOrder = newOrderService.getById(preOrder.getId());
+        if (newOrder == null) return AjaxResult.error("原订单不存在");
+        Long substationId = newOrder.getSubstationId();
         Order order = new Order();
         Refund refund = new Refund();
         BeanUtils.copyProperties(refundVo, order);
-        BeanUtils.copyProperties(refundVo, refund);//属性注入
-
+        BeanUtils.copyProperties(refundVo, refund);
         List<Product> products = refundVo.getProducts();
         products = products.stream().filter(p -> p.getNumber() > 0).collect(Collectors.toList());
-        if (products.size() == 0) return AjaxResult.error("退货商品数量为0");
+        if (products.size() == 0) return AjaxResult.error("换货商品数量为0");
         products.forEach(p -> {
-            if (!p.getRefundAble()) throw new ServiceException("存在不允许退货的商品");
+            if (!p.getRefundAble()) throw new ServiceException("存在商品不允许退货");
         });
-
+        //拿到原来的订单商品
+        List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", refundVo.getOrderId()));
+        //检查对应商品数量是不是小于退货数量，超过了不允许换
+        for (Product product : products) {
+            for (Product p : productList) {
+                if (product.getProductId().equals(p.getProductId())) {
+                    if (product.getNumber() > p.getNumber()) return AjaxResult.error("换货数量超过原订单数量");
+                }
+            }
+        }
         products.forEach(p -> {
             //插入商品记录
             p.setOrderId(order.getId());
@@ -191,6 +218,7 @@ public class RefundController {
         orderService.save(order);
         refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
+        refund.setSubstationId(substationId);
         refundService.save(refund);
 
         refundVo.setId(order.getId());
@@ -200,18 +228,5 @@ public class RefundController {
     }
 
 
-
-
-    @GetMapping("/test")
-    public AjaxResult test(){
-        ProductRecordsVo check = wareCenterStorageRecordClient.check(new HashMap<>());
-        return AjaxResult.success(check);
-    }
-
-    @PostMapping("/postTest")
-    public AjaxResult postTest(){
-        ProductRecordsVo check = wareCenterStorageRecordClient.check(new HashMap<>());
-        return AjaxResult.success(check);
-    }
 }
 

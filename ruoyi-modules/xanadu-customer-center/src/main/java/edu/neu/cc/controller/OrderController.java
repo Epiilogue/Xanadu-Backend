@@ -130,7 +130,7 @@ public class OrderController {
             if (!stockout.getStatus().equals(StockoutConstant.ARRIVAL))
                 return AjaxResult.error("订单中存在未到货的商品");
         }
-        //TODO: 修改订单状态为可分配，我们需要提前锁定库存，避免其他的订单把这部分库存划走
+        //仅仅切换订单状态即可，不需要加锁，入库的时候会自己加锁，出库的时候一定要保证按照入库的数量减少，避免出现加锁未分配
         order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
         //更新订单状态
         boolean b = orderService.updateById(order);
@@ -184,7 +184,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/cc/order/feign/updateOrderSubstationId/{substationId}/{orderId}")
+    @PostMapping("/feign/updateOrderSubstationId/{substationId}/{orderId}")
     public Boolean updateOrderSubstationId(@PathVariable("substationId") Long substationId, @PathVariable("orderId") Long orderId) {
         NewOrder newOrder = newOrderService.getById(orderId);
         if (newOrder == null) return false;
