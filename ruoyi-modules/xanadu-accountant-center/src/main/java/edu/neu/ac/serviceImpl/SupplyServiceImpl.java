@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
  *  服务实现类
  * </p>
  *
- * @author Gaosong Xu
- * @since 2023-06-23 09:35:39
+ * @author jin Zhang
+ * @since 2023-06-26 09:58:23
  */
 @Service
 public class SupplyServiceImpl extends ServiceImpl<SupplyMapper, Supply> implements SupplyService {

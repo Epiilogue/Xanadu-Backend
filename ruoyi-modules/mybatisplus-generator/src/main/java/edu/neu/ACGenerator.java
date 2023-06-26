@@ -16,10 +16,10 @@ public class ACGenerator {
 
     public static void main(String[] args) {
         //1、配置数据源
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/xanadu_ac", "root", "xgs1150840779")
+        FastAutoGenerator.create("jdbc:mysql://39.106.145.84:3306/xanadu_ac", "root", "zj13188157172")
                 //2、全局配置
                 .globalConfig(builder -> {
-                    builder.author("Gaosong Xu") // 设置作者名
+                    builder.author("jin Zhang") // 设置作者名
                             .outputDir(System.getProperty("user.dir") + "/src/main/java")   //设置输出路径：项目的 java 目录下
                             .commentDate("yyyy-MM-dd hh:mm:ss")   //注释日期
                             .dateType(DateType.ONLY_DATE)   //定义生成的实体类中日期的类型 TIME_PACK=LocalDateTime;ONLY_DATE=Date;

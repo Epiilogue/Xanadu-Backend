@@ -19,7 +19,7 @@ import java.util.List;
  * @since 2023-06-25 10:59:21
  */
 @RestController
-@RequestMapping("/auth/user")
+@RequestMapping("/admin/user")
 
 public class UserController {
     
@@ -91,7 +91,7 @@ public class UserController {
     }
 
     @GetMapping("/listByJob/{job}")
-    @ApiOperation("通过totalid获取发票信息")
+    @ApiOperation("通过职务获取用户列表")
     @CrossOrigin
     public AjaxResult listByJob(@PathVariable(value = "job", required = false) String job) {
         List<User> usersList;

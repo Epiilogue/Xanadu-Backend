@@ -15,8 +15,8 @@ import lombok.Setter;
  * 分站发票管理
  * </p>
  *
- * @author Gaosong Xu
- * @since 2023-06-23 09:35:39
+ * @author jin Zhang
+ * @since 2023-06-26 09:58:23
  */
 @Getter
 @Setter
@@ -30,21 +30,37 @@ public class Invoices implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty("开始号码")
-    @TableField("start")
-    private String start;
+    @ApiModelProperty("发票批次序号")
+    @TableField("totalid")
+    private Long totalid;
 
-    @ApiModelProperty("结束号码")
-    @TableField("end")
-    private String end;
+    @ApiModelProperty("发票号码")
+    @TableField("number")
+    private String number;
+
+    @ApiModelProperty("发票领用状态")
+    @TableField("state")
+    private String state;
 
     @ApiModelProperty("批次")
     @TableField("batch")
     private String batch;
 
-    @ApiModelProperty("可用数量")
-    @TableField("available")
-    private Integer available;
+    @ApiModelProperty("分站id")
+    @TableField("substation_id")
+    private String substationId;
+
+    @ApiModelProperty("领用人")
+    @TableField("employee")
+    private String employee;
+
+    @ApiModelProperty("失效状态")
+    @TableField("dstate")
+    private String dstate;
+
+    @ApiModelProperty("失效原因")
+    @TableField("details")
+    private String details;
 
 
 }
