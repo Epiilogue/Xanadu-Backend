@@ -69,7 +69,6 @@ public class RefundController {
 
     @GetMapping("/list")
     @ApiOperation("查询所有历史退货安排")
-    //TODO:前端界面
     public AjaxResult list() {
         return AjaxResult.success(refundService.list());
     }

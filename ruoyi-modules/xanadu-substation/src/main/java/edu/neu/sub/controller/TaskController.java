@@ -10,20 +10,19 @@ import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.base.constant.cc.TaskType;
 import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.ReceiptProduct;
+import edu.neu.sub.entity.Substation;
 import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
 import edu.neu.sub.mapper.ReceiptProductMapper;
 import edu.neu.sub.service.*;
-import edu.neu.sub.vo.PaymentReceiptVo;
-import edu.neu.sub.vo.ProductVo;
-import edu.neu.sub.vo.ReceiptVo;
-import edu.neu.sub.vo.TaskVo;
+import edu.neu.sub.vo.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -371,6 +370,45 @@ public class TaskController {
         AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), receipt.getState());
         if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
         return AjaxResult.success("回执单填写成功");
+    }
+
+    /**
+     * 根据 要求完成日期、 任务类型、配送员条件，查询符合条件的任务单。查询结果如下：
+     * 任务号、客户姓名、 投递地址、投递员、任务生成日期、 要求完成日期、任务类型。
+     * <p>
+     * 任务号、客户姓名、联系电话、送货地址、送货日期、送货要求、送货分站、分站地址、
+     * 分站电话、是否要发票、商品名称、单价、商品数量、商品总价、任务类型、备注、客户反馈、客户签名
+     * 说明：
+     * 任务号：可通过链接查询任务信息
+     */
+    @ApiOperation("根据条件查询任务单,本地查找找到的都是已经分配的任务单，前端打印使用")
+    @GetMapping("/queryTask")
+    public AjaxResult queryTask(@RequestParam("deadline") Date deadline,
+                                @RequestParam("taskType") TaskType taskType,
+                                @RequestParam("deliverId") Long courierId) {
+        QueryWrapper<Task> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("task_type", taskType).eq("courier_id", courierId)
+                .le("deadline", deadline);
+        List<Task> tasks = taskService.list(queryWrapper);
+        if (tasks == null || tasks.size() == 0) return AjaxResult.error("无符合条件的任务单");
+        return AjaxResult.success("查询成功", tasks);
+    }
+
+
+    @ApiOperation("打印指定的送货签收单,拿到大部分信息，需要回显，签名、反馈等字段前端打印时需要自己留空")
+    @GetMapping("/printReceipt/{taskId}")
+    public AjaxResult printReceipt(@PathVariable("taskId") Long taskId) {
+        Task task = taskService.getById(taskId);
+        if (task == null) return AjaxResult.error("任务不存在");
+        //检查任务类型是不是送货收款，或者送货
+        if (!TaskType.DELIVERY.equals(task.getTaskType()) && !TaskType.PAYMENT_DELIVERY.equals(task.getTaskType()))
+            return AjaxResult.error("当前任务类型无法打印送货签收单");
+        task.setProducts(JSON.parseArray(task.getProductsJson(), ProductVo.class));
+        //查找分站信息
+        Substation substation = substationService.getById(task.getSubId());
+        if (substation == null) return AjaxResult.error("分站不存在");
+        PrintReceiptVo printReceiptVo = new PrintReceiptVo(task, substation);
+        return AjaxResult.success("查询成功", printReceiptVo);
     }
 
 

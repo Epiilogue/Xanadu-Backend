@@ -107,6 +107,8 @@ public class FinanceController {
             });
             //不用管收款的事情，收款由送货数据负责更新完成
         });
+        //更新，待缴额为实收额*0.9
+        productFinanceMap.values().forEach(finance -> finance.setPay(finance.getActual() * 0.9));
         return AjaxResult.success(productFinanceMap.values());
     }
 
