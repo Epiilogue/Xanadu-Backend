@@ -1,8 +1,11 @@
 package edu.neu.dbc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.dbc.entity.PurchaseRecord;
 import edu.neu.dbc.entity.Supplier;
+import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.SupplierService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class SupplierController {
     @Autowired
     SupplierService supplierService;
 
+    @Autowired
+    PurchaseRecordService purchaseRecordService;
+
 
     @GetMapping("/list")
     @ApiOperation("查询所有供应商")
@@ -51,7 +57,10 @@ public class SupplierController {
     @DeleteMapping("/delete/{id}")
     @ApiOperation("删除供应商")
     public AjaxResult delete(@PathVariable Long id) {
-        //TODO: 检查供应商是否有过采购记录
+        QueryWrapper<PurchaseRecord> purchaseRecordQueryWrapper = new QueryWrapper<PurchaseRecord>().eq("supplier_id", id);
+        if (purchaseRecordService.count(purchaseRecordQueryWrapper) > 0) {
+            return AjaxResult.error("该供应商有过采购记录，无法删除");
+        }
         return AjaxResult.success(supplierService.removeById(id));
     }
 

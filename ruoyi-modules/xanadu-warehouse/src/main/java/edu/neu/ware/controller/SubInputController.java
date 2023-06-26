@@ -62,9 +62,6 @@ public class SubInputController {
     @Autowired
     TaskClient taskClient;
 
-    //TODO： 需要注意的是不同的库管员登陆只能看到自己的仓库，所以需要在前端传入仓库id
-
-    //1.子库的所有调拨入库的单子，其中状态为已出库
 
     @GetMapping("/listDispatch/{subwareId}")
     @ApiOperation("查询子库的所有调拨入库的单子")

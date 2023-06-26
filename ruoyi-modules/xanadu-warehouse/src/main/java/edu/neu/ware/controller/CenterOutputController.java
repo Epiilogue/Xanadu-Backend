@@ -111,7 +111,6 @@ public class CenterOutputController {
 
     @PutMapping("/confirm/{id}/{number}")
     @ApiOperation("确认出库，传入记录ID以及确认的出库数量")
-    //TODO：逻辑修改，实际出库数量与记录数量不一致时，仓库减去原始数量
     public AjaxResult confirm(@PathVariable("id") Long id, @PathVariable("number") Integer number) {
         if (id == null || number == null) return AjaxResult.error("确认失败，参数不能为空");
         if (number <= 0) return AjaxResult.error("确认失败，出库数量必须大于0");
