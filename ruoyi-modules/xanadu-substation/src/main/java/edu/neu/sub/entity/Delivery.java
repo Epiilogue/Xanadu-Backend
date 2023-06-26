@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -21,35 +23,33 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("sub_delivery")
 @ApiModel(value = "Delivery对象", description = "投递费结算")
+//待完成任务数，已完成总任务数，今日完成数，今日待结配送费，计算公式,平均满意度
 public class Delivery implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("ID")
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     @ApiModelProperty("投递员ID")
-    @TableField("courier_id")
     private Long courierId;
 
     @ApiModelProperty("分站ID")
-    @TableField("substation_id")
     private Long substationId;
 
-    @ApiModelProperty("投递数量")
-    @TableField("num")
-    private Integer num;
+    @ApiModelProperty("待完成任务数")
+    private Integer unfinishedTask;
 
-    @ApiModelProperty("投递费")
-    @TableField("salary")
-    private Double salary;
+    @ApiModelProperty("已完成总任务数")
+    private Integer finishedTask;
 
-    @ApiModelProperty("日期(天)")
-    @TableField("time")
-    private Date time;
+    @ApiModelProperty("今日完成数")
+    private Integer todayFinishedTask;
+
+    @ApiModelProperty("今日待结配送费,每一单实收款*(1.0+(客户满意度-0.5))")
+    private Double todayDeliveryFee;
+
+    @ApiModelProperty("平均满意度")
+    private Double averageSatisfaction;
 
 
 }

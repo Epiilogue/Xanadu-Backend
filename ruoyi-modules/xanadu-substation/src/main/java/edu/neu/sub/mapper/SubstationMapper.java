@@ -18,4 +18,7 @@ import java.util.List;
 public interface SubstationMapper extends BaseMapper<Substation> {
 
     List<Long> getCourierBySubstationId(Long subId);
+
+    Long getSubstationIdByCourierId(Long courierId);
+
 }

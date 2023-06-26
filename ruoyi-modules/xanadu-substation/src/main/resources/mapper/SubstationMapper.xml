@@ -5,4 +5,7 @@
     <select id="getCourierBySubstationId"  resultType="java.lang.Long">
         select  user_id from sub_user_sub where substation_id=#{substationId}
     </select>
+    <select id="getSubstationIdByCourierId" resultType="java.lang.Long">
+        select substation_id from sub_user_sub where user_id=#{courierId}
+    </select>
 </mapper>
