@@ -45,16 +45,6 @@ public class InvoiceController {
         return AjaxResult.success(invoiceList);
     }
 
-    @GetMapping("/listlimited")
-    @ApiOperation("筛选发票信息")
-    @CrossOrigin
-    public AjaxResult listlimited() {
-        startPage();
-        List<Invoice> invoiceList = invoiceService.list();
-        return AjaxResult.success(invoiceList);
-    }
-
-
     @PostMapping("/register")
     @ApiOperation("改变发票登记状态")
     @CrossOrigin

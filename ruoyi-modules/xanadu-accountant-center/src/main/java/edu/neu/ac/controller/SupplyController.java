@@ -13,6 +13,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,8 +40,19 @@ public class SupplyController {
     @GetMapping("/listToSettlement")
     @ApiOperation("与供应商结算,获取结算列表")
     public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId,
-                                 @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime) {
-        AjaxResult ajaxResult = settleClient.settlement(supplierId, startTime, endTime);
+                                 @RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        // 把String转换成Data类型数据
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d HH:mm:ss");
+        Date startTimeToData;
+        Date endTimeToData;
+        try {
+            startTimeToData = sdf.parse(startTime);
+            endTimeToData = sdf.parse(endTime);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        AjaxResult ajaxResult = settleClient.settlement(supplierId, startTimeToData, endTimeToData);
         if (ajaxResult == null) return AjaxResult.error("获取结算订单失败");
         if (ajaxResult.isError()) return AjaxResult.error(ajaxResult.getMsg());
         List<SettlementVo> settlementVos = JSON.parseArray(JSON.toJSONString(ajaxResult.get("data")), SettlementVo.class);
