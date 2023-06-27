@@ -130,6 +130,23 @@ public class SysUserController extends BaseController
         return R.ok(sysUserVo);
     }
 
+
+    @InnerAuth
+    @GetMapping("/infoFromEmail/{email}")
+    public R<LoginUser> infoFromEmail(@PathVariable("email")String email){
+        SysUser sysUser = userService.selectUserByEmail(email);
+        if (StringUtils.isNull(sysUser))
+        {
+            return R.fail("该邮箱不存在");
+        }
+        // 角色集合
+        Set<String> roles = permissionService.getRolePermission(sysUser);
+        LoginUser sysUserVo = new LoginUser();
+        sysUserVo.setSysUser(sysUser);
+        sysUserVo.setRoles(roles);
+        return R.ok(sysUserVo);
+    }
+
     /**
      * 注册用户信息
      */

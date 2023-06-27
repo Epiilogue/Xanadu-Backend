@@ -40,4 +40,8 @@ public interface RemoteUserService
      */
     @PostMapping("/user/register")
     public R<Boolean> registerUserInfo(@RequestBody SysUser sysUser, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+
+    @GetMapping("/user/infoFromEmail/{email}")
+    public R<LoginUser> infoFromEmail(@PathVariable("email")String email);
 }

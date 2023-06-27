@@ -36,6 +36,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             {
                 return R.fail("注册用户失败:" + throwable.getMessage());
             }
+
+            @Override
+            public R<LoginUser> infoFromEmail(String email) {
+                return R.fail("验证码发送失败" + throwable.getMessage());
+            }
+
         };
     }
 }
