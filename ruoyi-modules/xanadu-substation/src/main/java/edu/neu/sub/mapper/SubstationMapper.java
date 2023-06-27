@@ -21,4 +21,9 @@ public interface SubstationMapper extends BaseMapper<Substation> {
 
     Long getSubstationIdByCourierId(Long courierId);
 
+    List<Long> getAllSubstationManager();
+
+    List<Substation> listByManagerId(Long userId);
+
+    void removeMasters(Long subId);
 }

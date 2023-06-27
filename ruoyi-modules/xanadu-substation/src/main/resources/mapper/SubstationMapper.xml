@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="edu.neu.sub.mapper.SubstationMapper">
+    <update id="removeMasters">
+        delete from sub_master_sub where sub_id=#{subId}
+    </update>
+
 
     <select id="getCourierBySubstationId"  resultType="java.lang.Long">
         select  user_id from sub_user_sub where substation_id=#{substationId}
@@ -8,4 +12,16 @@
     <select id="getSubstationIdByCourierId" resultType="java.lang.Long">
         select substation_id from sub_user_sub where user_id=#{courierId}
     </select>
+    <select id="getAllSubstationManager" resultType="java.lang.Long">
+        select master_id
+        from sub_master_sub
+    </select>
+    <select id="listByManagerId" resultType="edu.neu.sub.entity.Substation">
+        select id, name, address, phone, subware_id
+        from sub_substation s
+                 left join sub_master_sub m
+                           on s.id = m.sub_id
+        where master_id = #{userId}
+    </select>
+
 </mapper>
