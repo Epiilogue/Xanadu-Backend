@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import edu.neu.base.constant.cc.InputOutputStatus;
 import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.base.constant.cc.OrderStatusConstant;
@@ -172,8 +173,8 @@ public class CenterOutputController {
         centerOutput.setStatus(InputOutputStatus.OUTPUT);
         centerOutput.setOutputTime(new Date());
         centerOutput.setActualNum(number);
-        //TODO：动态获取登录用户作为操作人
-        centerOutput.setOperatorId(1L);
+        Long userId= SecurityUtils.getUserId();
+        centerOutput.setOperatorId(userId);
         return AjaxResult.success(centerOutputService.updateById(centerOutput));
     }
 

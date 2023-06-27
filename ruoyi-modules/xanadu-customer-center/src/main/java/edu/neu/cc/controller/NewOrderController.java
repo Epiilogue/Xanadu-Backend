@@ -105,9 +105,7 @@ public class NewOrderController {
         newOrderService.save(newOrder);
 
         Long userId = SecurityUtils.getUserId();
-        //一开始是空，可以设置默认值
-        //TODO: 由gateway设置用户ID，若未登陆则提示错误
-        if (userId == null) userId = 1L;
+
 
         //插入对应的数据表，保存相关记录
         if (productRecordsVo.getIsLack()) {
@@ -163,8 +161,6 @@ public class NewOrderController {
         if (!Objects.equals(order.getStatus(), OrderStatusConstant.OUT_OF_STOCK) && !Objects.equals(order.getStatus(), OrderStatusConstant.CAN_BE_ALLOCATED))
             return AjaxResult.error("订单状态不可撤销");
         Long userId = SecurityUtils.getUserId();
-        if (userId == null) userId = 1L;//TODO: 由gateway设置用户ID，若未登陆则提示错误
-
         //撤销订单,删除订单以及相关的缺货记录、商品记录
         //删除订单
         orderService.removeById(orderId);
@@ -226,7 +222,6 @@ public class NewOrderController {
         }
         //退订订单，插入退订记录，更新原订单状态
         Long userId = SecurityUtils.getUserId();
-        if (userId == null) userId = 1L;//TODO: 由gateway设置用户ID，若未登陆则提示错误
 
         //生成一条新的order记录，
         Order unsubscribeOrder = new Order();
