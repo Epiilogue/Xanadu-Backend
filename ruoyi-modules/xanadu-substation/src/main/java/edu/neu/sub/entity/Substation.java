@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -46,9 +48,9 @@ public class Substation implements Serializable {
     @TableField("subware_id")
     private Long subwareId;
 
-    @ApiModelProperty("管理人ID")
-    @TableField("user_id")
-    private Long userId;
 
+    @ApiModelProperty("对应的管理员ID列表")
+    @TableField(exist = false)
+    private List<Long> adminIds;
 
 }
