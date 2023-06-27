@@ -43,7 +43,7 @@ public class TokenController {
         return sysLoginService.getEmailCode(email);
     }
 
-    @PostMapping("loginByEmail/{email}")
+    @PostMapping("loginByEmail")
     public R<?> loginByEmail(@RequestBody EmailBody emailBody) {
         // 用户登录
         LoginUser userInfo = sysLoginService.loginByEmail(emailBody.getEmail(), emailBody.getCode());

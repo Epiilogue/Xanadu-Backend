@@ -129,6 +129,7 @@ public class PurchaseRecordController {
         purchaseRecord.setSupplierId(product.getSupplierId());
         purchaseRecord.setNumber(allLackRecordVo.getInputCount());
         purchaseRecord.setLackIds(stringBuilder.toString());
+        purchaseRecord.setDeleted(false);
         //设置采购单状态
         purchaseRecord.setStatus(PurchaseRecordStatusConstant.PURCHASED);
         purchaseRecord.setTotalCost(allLackRecordVo.getInputCount() * product.getPrice());

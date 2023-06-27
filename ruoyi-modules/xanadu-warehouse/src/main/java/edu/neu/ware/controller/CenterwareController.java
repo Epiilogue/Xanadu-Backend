@@ -55,9 +55,5 @@ public class CenterwareController {
         }
         return AjaxResult.success(centerware);
     }
-
-
-
-
 }
 

@@ -72,6 +72,15 @@ public class DispatchController {
         return ccOrderClient.checkAllArrival(id);
     }
 
+    @GetMapping("/get/{id}")
+    @ApiOperation("获取调拨单")
+    public AjaxResult get(@PathVariable Integer id) {
+        Dispatch dispatch = dispatchService.getById(id);
+        if (dispatch == null) {
+            return AjaxResult.error("调拨单不存在");
+        }
+        return AjaxResult.success(dispatch);
+    }
 
     /**
      * 任务单： 订单号、任务单、客户姓名、投递地址、商品名称、商品数量、要求完成日期、任务类型、任务状态

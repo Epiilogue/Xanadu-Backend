@@ -40,7 +40,6 @@ public class LackRecordController {
         //查询库存量
         Integer storage = wareCenterStorageRecordClient.getStorage(product.getId()).getTotalNum();
         assert storage != null;
-
         if (isCheck && storage < product.getSafeStock()) {
             Integer lackNumber = product.getSafeStock() - storage;
             SingleLackRecordVo checkSingleLackRecordVo = new SingleLackRecordVo();
@@ -50,9 +49,8 @@ public class LackRecordController {
             checkSingleLackRecordVo.setNeedNumbers(lackNumber);
             remoteLackRecords.add(checkSingleLackRecordVo);
         }
-
         if (remoteLackRecords.size() == 0) return null;
-        //需要给出当前库存数量，缺货数量，
+        //需要给出当前库存数量，缺货数量
         AllLackRecordVo allLackRecordVo = new AllLackRecordVo();
         allLackRecordVo.setSingleLackRecordVos(remoteLackRecords);
         allLackRecordVo.setProduct(product);
@@ -93,4 +91,3 @@ public class LackRecordController {
         return AjaxResult.success(allLackRecordVos);
     }
 }
-

@@ -44,7 +44,7 @@ public interface RemoteUserService
 
 
     @GetMapping("/user/infoFromEmail/{email}")
-    public R<LoginUser> infoFromEmail(@PathVariable("email")String email);
+    public R<LoginUser> infoFromEmail(@PathVariable("email")String email, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
 
 
     @GetMapping("/user/listByRole/{roleName}")

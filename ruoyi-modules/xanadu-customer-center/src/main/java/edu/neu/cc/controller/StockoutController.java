@@ -61,6 +61,15 @@ public class StockoutController {
         return AjaxResult.success(list);
     }
 
+    @GetMapping("/get/{id}")
+    @ApiOperation("获取一条缺货记录")
+    public AjaxResult getStockOut(@PathVariable(value = "id") String id){
+        Stockout stockout = stockoutService.getById(id);
+        if(stockout == null){
+            return AjaxResult.error("该商品不存在");
+        }
+        return AjaxResult.success(stockout);
+    }
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
     public AjaxResult edit(@RequestBody Stockout stockout) {

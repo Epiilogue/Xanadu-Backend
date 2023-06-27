@@ -2,8 +2,11 @@ package com.ruoyi.auth.service;
 
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.extra.mail.MailUtil;
 import com.ruoyi.common.core.exception.CaptchaException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import com.ruoyi.common.core.constant.CacheConstants;
 import com.ruoyi.common.core.constant.Constants;
@@ -21,6 +24,7 @@ import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
 
+import javax.mail.internet.MimeMessage;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +45,9 @@ public class SysLoginService {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    JavaMailSender javaMailSender;
 
     /**
      * 登录
@@ -103,7 +110,7 @@ public class SysLoginService {
         if (!isEmail) return R.fail("邮箱格式不正确");
 
         //数据库查询是否存在该邮箱号
-        R<LoginUser> userResult = remoteUserService.getUserInfo(email, SecurityConstants.INNER);
+        R<LoginUser> userResult = remoteUserService.infoFromEmail(email,SecurityConstants.INNER);
         if (StringUtils.isNull(userResult) || StringUtils.isNull(userResult.getData())) {
             throw new ServiceException("该邮箱号码不存在");
         }
@@ -170,11 +177,19 @@ public class SysLoginService {
 
     private Boolean sendMail(String email, String code) {
         //TODO: 发送邮件，向 email 发送 code ,返回是否发送成功
-
-
-        return false;
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true);
+            helper.setSubject("Xanadu");
+            helper.setFrom("1023118868@qq.com");
+            helper.setText(code);
+            helper.setTo(email);
+            javaMailSender.send(message);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return true;
     }
-
     public void logout(String loginName) {
         recordLogService.recordLogininfor(loginName, Constants.LOGOUT, "退出成功");
     }

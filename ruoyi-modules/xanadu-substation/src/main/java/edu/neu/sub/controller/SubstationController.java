@@ -68,10 +68,10 @@ public class SubstationController {
         if (substationService.getOne(userEq) != null) return AjaxResult.error("该管理人已经管理了其他分站");
         QueryWrapper<Substation> subwareEq = new QueryWrapper<Substation>().eq("subware_id", substation.getSubwareId());
         if (substationService.getOne(subwareEq) != null) return AjaxResult.error("该仓库已经被其他分站使用");
-        substationService.save(substation);
         //检查是否存在相同地址
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
         if (substationService.getOne(addressEq) != null) return AjaxResult.error("同地址下已有分站");
+        substationService.save(substation);
         return AjaxResult.success("添加成功");
     }
 
@@ -80,19 +80,21 @@ public class SubstationController {
     public AjaxResult update(@RequestBody Substation substation) {
         //更新分站，需要注意的是分站的管理人和仓库都是一对一，我们首先需要查询是否有其他分站有相同的管理人或者仓库
         //如果有，就不能添加
-        QueryWrapper<Substation> userEq = new QueryWrapper<Substation>().eq("user_id", substation.getUserId());
-        if (substationService.getOne(userEq) != null) return AjaxResult.error("该管理人已经管理了其他分站");
         //检查是否存在相同地址
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
-        if (substationService.getOne(addressEq) != null) return AjaxResult.error("同地址下已有分站");
+        Substation substation1 = substationService.getOne(addressEq);
+        if(substation1.getId()==null)return AjaxResult.error("该分站不存在");
+        if (!Objects.equals(substationService.getOne(addressEq).getId(), substation.getId())) return AjaxResult.error("同地址下已有分站");
         //不允许更新子站
         Substation byId = substationService.getById(substation.getId());
-        if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) return AjaxResult.error("不允许更新子站");
+        if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) return AjaxResult.error("不允许更新分库ID");
         substationService.updateById(substation);
         return AjaxResult.success("更新成功");
     }
 
-    @PostMapping("/delete/{id}")
+
+    @CrossOrigin
+    @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "删除分站")
     public AjaxResult delete(@PathVariable("id") Long id) {
         //删除分站，需要注意的是分站的管理人和仓库都是一对一，我们首先需要查询是否有其他分站有相同的管理人或者仓库

@@ -39,7 +39,7 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             }
 
             @Override
-            public R<LoginUser> infoFromEmail(String email) {
+            public R<LoginUser> infoFromEmail(String email, String source) {
                 return R.fail("验证码发送失败" + throwable.getMessage());
             }
 
