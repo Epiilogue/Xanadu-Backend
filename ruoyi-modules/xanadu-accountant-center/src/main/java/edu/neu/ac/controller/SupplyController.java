@@ -39,7 +39,7 @@ public class SupplyController {
 
     @GetMapping("/listToSettlement")
     @ApiOperation("与供应商结算,获取结算列表")
-    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId,
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId") Long productId,
                                  @RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         // 把String转换成Data类型数据
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d HH:mm:ss");
@@ -52,7 +52,7 @@ public class SupplyController {
             throw new RuntimeException(e);
         }
 
-        AjaxResult ajaxResult = settleClient.settlement(supplierId, startTimeToData, endTimeToData);
+        AjaxResult ajaxResult = settleClient.settlement(supplierId, productId, startTimeToData, endTimeToData);
         if (ajaxResult == null) return AjaxResult.error("获取结算订单失败");
         if (ajaxResult.isError()) return AjaxResult.error(ajaxResult.getMsg());
         List<SettlementVo> settlementVos = JSON.parseArray(JSON.toJSONString(ajaxResult.get("data")), SettlementVo.class);

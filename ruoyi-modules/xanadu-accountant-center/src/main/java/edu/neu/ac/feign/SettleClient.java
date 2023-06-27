@@ -16,7 +16,7 @@ import java.util.List;
 public interface SettleClient {
 
     @GetMapping("/dbc/purchaseRecord/feign/settlement")
-    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId,
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId,@RequestParam(value = "productId") Long productId,
                                  @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime);
 
 
