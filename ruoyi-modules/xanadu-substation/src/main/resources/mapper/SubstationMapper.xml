@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="edu.neu.sub.mapper.SubstationMapper">
+    <insert id="addCourier">
+        insert into sub_user_sub(user_id, substation_id)
+        values (#{courierId}, #{substationId})
+    </insert>
+
+
     <update id="removeMasters">
         delete from sub_master_sub where sub_id=#{subId}
     </update>
@@ -22,6 +28,15 @@
                  left join sub_master_sub m
                            on s.id = m.sub_id
         where master_id = #{userId}
+    </select>
+    <select id="getAllCourier" resultType="java.lang.Long">
+        select user_id
+        from sub_user_sub
+    </select>
+    <select id="getCourierList" resultType="java.lang.Long">
+        select user_id
+        from sub_user_sub
+        where substation_id = #{substationId}
     </select>
 
 </mapper>

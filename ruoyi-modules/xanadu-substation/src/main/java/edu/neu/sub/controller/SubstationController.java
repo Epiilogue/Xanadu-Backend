@@ -73,6 +73,16 @@ public class SubstationController {
         return AjaxResult.success(substationList);
     }
 
+    @GetMapping("/listAll")
+    @ApiOperation(value = "分站列表,查找所有的,管理员专用")
+    public AjaxResult listAll() {
+        List<Substation> substationList = substationService.list();
+        if (substationList == null || substationList.size() == 0) {
+            return AjaxResult.success("当前用户没有管理任何分站");
+        }
+        return AjaxResult.success(substationList);
+    }
+
 
     @ApiOperation(value = "获取所有的分站管理角色对应的用户列表，过滤掉已经分配过的，但是不过滤管理员")
     @GetMapping("/getSubstationUserList")
@@ -118,7 +128,8 @@ public class SubstationController {
         //检查是否存在相同地址
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
         Substation one = substationService.getOne(addressEq);
-        if ( one!= null&& !Objects.equals(one.getId(), substation.getId())) return AjaxResult.error("同地址下已有分站");
+        if (one != null && !Objects.equals(one.getId(), substation.getId()))
+            return AjaxResult.error("同地址下已有分站");
         //不允许更新分库以及管理员
         Substation byId = substationService.getById(substation.getId());
         if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) return AjaxResult.error("不允许更新分库");
@@ -142,6 +153,53 @@ public class SubstationController {
     }
 
 
+    /**
+     * 分站快递员管理，增加删除分站快递员
+     */
+
+    @ApiOperation(value = "获取快递员身份用户列表，过滤掉已经是分站快递员的用户，但是不过滤管理员")
+    @GetMapping("/getCourierUserList")
+    public AjaxResult getCourierUserList() {
+        AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.COURIER);
+        List<SysUser> userList = JSON.parseArray(JSON.toJSONString(ajaxResult.get("data")), SysUser.class);
+        //过滤掉已经被分配的管理人，但如果是管理员，就不过滤
+        //拿到所有的已经分配过id
+        List<Long> allCourierIds = substationService.getAllCourier();
+        //过滤掉userlist中已经出现过并且不是管理员身份的用户列表
+        userList = userList.stream().filter(user -> {
+                    //如果是管理员，就不过滤
+                    for (SysRole role : user.getRoles()) {
+                        if (Objects.equals(role.getRoleName(), UserRoles.ADMIN)) return true;
+                    }
+                    return !allCourierIds.contains(user.getUserId());
+                }
+        ).collect(Collectors.toList());
+        return AjaxResult.success(userList);
+    }
+
+    @PostMapping("/addCourier/{substationId}}")
+    @ApiOperation(value = "批量添加分站快递员")
+    public AjaxResult addCourier(@PathVariable("substationId") Long substationId, @RequestBody List<Long> courierIds) {
+        //添加分站快递员，需要注意的是分站快递员是一对多
+        //如果有，就不能添加
+        substationService.addCourier(substationId, courierIds);
+        return AjaxResult.success("添加成功");
+    }
+
+    @ApiOperation(value = "获取当前分站快递员列表")
+    @GetMapping("/getCourierList/{substationId}")
+    public AjaxResult getCourierList(@PathVariable("substationId") Long substationId) {
+
+        //如果有，就不能添加
+        List<Long> courierIdList = substationService.getCourierList(substationId);
+
+        //TODO: 根据id列表查询用户列表
+        return null;
+
+    }
+
+
+
     @GetMapping("/feign/getSubwareId/{id}")
     @ApiOperation(value = "获取分站的仓库ID")
     public AjaxResult getSubwareId(@PathVariable("id") Long id) {
@@ -160,6 +218,7 @@ public class SubstationController {
         Substation substation = list.get(0);
         return AjaxResult.success(substation.getId());
     }
+
 
     /**
      * 定时任务，每晚远程调用。统计有当日每个分站的快递员数量，任务类型数量，完成度数量，送货数量，收款额，退回数量，
