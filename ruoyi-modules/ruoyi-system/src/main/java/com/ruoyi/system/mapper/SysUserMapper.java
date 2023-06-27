@@ -126,4 +126,6 @@ public interface SysUserMapper
     public SysUser checkEmailUnique(String email);
 
     public SysUser selectUserByEmail(String email);
+
+    List<SysUser> selectUserByRoleName(String roleName);
 }

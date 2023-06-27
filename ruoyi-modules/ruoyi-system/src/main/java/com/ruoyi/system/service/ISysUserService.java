@@ -206,4 +206,6 @@ public interface ISysUserService
 
     SysUser selectUserByEmail(String email);
 
+    List<SysUser> selectUserByRoleName(String roleName);
+
 }

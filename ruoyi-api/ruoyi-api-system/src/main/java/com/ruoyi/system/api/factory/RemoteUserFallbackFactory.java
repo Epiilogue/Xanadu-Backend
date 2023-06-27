@@ -1,5 +1,6 @@
 package com.ruoyi.system.api.factory;
 
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FallbackFactory;
@@ -40,6 +41,11 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             @Override
             public R<LoginUser> infoFromEmail(String email) {
                 return R.fail("验证码发送失败" + throwable.getMessage());
+            }
+
+            @Override
+            public AjaxResult listByRole(String roleName) {
+                return AjaxResult.error("获取用户失败:" + throwable.getMessage());
             }
 
         };

@@ -146,7 +146,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where u.email = #{email}
 	</select>
 
-    <insert id="insertUser" parameterType="SysUser" useGeneratedKeys="true" keyProperty="userId">
+	<select id="selectUserByRoleName" parameterType="String"  resultMap="SysUserResult">
+		<include refid="selectUserVo"/>
+		where r.role_name=#{roleName}
+	</select>
+
+	<insert id="insertUser" parameterType="SysUser" useGeneratedKeys="true" keyProperty="userId">
  		insert into sys_user(
  			<if test="userId != null and userId != 0">user_id,</if>
  			<if test="deptId != null and deptId != 0">dept_id,</if>

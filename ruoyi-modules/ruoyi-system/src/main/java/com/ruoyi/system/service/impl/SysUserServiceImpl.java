@@ -130,6 +130,11 @@ public class SysUserServiceImpl implements ISysUserService
         return userMapper.selectUserByEmail(email);
     }
 
+    @Override
+    public List<SysUser> selectUserByRoleName(String roleName) {
+        return userMapper.selectUserByRoleName(roleName);
+    }
+
     /**
      * 查询用户所属角色组
      * 
