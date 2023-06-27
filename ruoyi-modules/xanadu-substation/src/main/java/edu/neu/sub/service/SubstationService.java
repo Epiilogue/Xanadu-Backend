@@ -17,5 +17,5 @@ public interface SubstationService extends IService<Substation> {
 
     List<Long> getCourierBySubstationId(Long subId);
 
-
+    Long getSubstationIdByCourierId(Long courierId);
 }
