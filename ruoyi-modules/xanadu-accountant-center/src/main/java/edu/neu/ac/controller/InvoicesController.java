@@ -1,9 +1,11 @@
 package edu.neu.ac.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import edu.neu.ac.entity.Invoices;
 import edu.neu.ac.service.InvoicesService;
+import edu.neu.base.constant.cc.TaskType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.ruoyi.common.core.utils.bean.BeanUtils;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -74,6 +76,18 @@ public class InvoicesController {
             return AjaxResult.error("修改发票失败");
         }
         return AjaxResult.success("修改成功", invoices);
+    }
+
+    @ApiOperation("返回打印发票的所有数据")
+    @GetMapping("/printInvoices/{Id}")
+    @CrossOrigin
+    public AjaxResult printReceipt(@PathVariable("Id") Long Id) {
+        Date da=new Date();
+        SimpleDateFormat ma1=new SimpleDateFormat("yyyy 年 MM 月 dd 日 E ");
+        System.out.println(ma1.format(da));
+        Invoices invoices = invoicesService.getById(Id);
+        invoices.setPrintTime(da);
+        return AjaxResult.success("打印成功", invoices);
     }
 }
 

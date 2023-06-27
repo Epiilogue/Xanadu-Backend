@@ -1,10 +1,14 @@
 package edu.neu.ac.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.utils.bean.BeanUtils;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.ac.entity.Invoice;
+import edu.neu.ac.entity.Invoices;
+import edu.neu.ac.mapper.InvoiceMapper;
 import edu.neu.ac.service.InvoiceService;
+import edu.neu.ac.service.InvoicesService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +32,9 @@ import static com.ruoyi.common.core.utils.PageUtils.startPage;
 public class InvoiceController {
     @Autowired
     InvoiceService invoiceService;
+
+    @Autowired
+    InvoicesService invoicesService;
 
     @GetMapping("/list")
     @ApiOperation("获取发票信息")
@@ -72,11 +79,43 @@ public class InvoiceController {
         if (invoiceVo == null) {
             return false;
         }
+
         Invoice invoice = new Invoice();
         BeanUtils.copyProperties(invoiceVo, invoice);
-        System.out.println(invoice);
         invoice.setTime(da);
-        return invoiceService.save(invoice);
+        // 保存这批发票
+        invoiceService.save(invoice);
+
+        //根据id,开始号码和本数生成相应数量的单张发票
+        QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("start_number", invoice.getStartNumber());
+        Invoice invoice1 = invoiceService.getOne(queryWrapper);
+        System.out.println(invoice1);
+
+        //发票号的后几位
+        String Type = invoice.getStartNumber().substring(0,9);
+        String No = invoice.getStartNumber().substring(10,12);
+
+        //其他信息         
+        int batch = invoice1.getBatch();
+        int id = invoice1.getId();
+        int total = invoice1.getTotal();
+
+        int no = Integer.parseInt(No);
+        //生成发票
+        for (int i = 0; i < total; i++){
+            //根据开始号码按顺序生成发票号
+            Invoices invoices = new Invoices();
+            invoices.setTotalid((long) id);
+            invoices.setBatch(batch);
+            no = no + 1;
+            String number = String.format(Type + "%03d", no);
+            invoices.setNumber(number);
+            // 保存发票
+            invoicesService.save(invoices);
+            System.out.println(number);
+        }
+
+        return true;
     }
 
     @GetMapping("/getinvoice/{id}")
@@ -92,7 +131,7 @@ public class InvoiceController {
     @ApiOperation(value = "修改发票", notes = "修改发票")
     @CrossOrigin
     public AjaxResult updateInvoice(@RequestBody Invoice invoice) {
-
+        //
         boolean res = invoiceService.updateById(invoice);
         if (!res) {
             return AjaxResult.error("修改发票失败");

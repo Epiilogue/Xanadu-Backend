@@ -17,7 +17,7 @@ import lombok.Setter;
  * </p>
  *
  * @author jin Zhang
- * @since 2023-06-26 09:58:23
+ * @since 2023-06-26 10:34:41
  */
 @Getter
 @Setter
@@ -31,14 +31,6 @@ public class Invoice implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @ApiModelProperty("分站ID")
-    @TableField("substation_id")
-    private String substationId;
-
-    @ApiModelProperty("发票号")
-    @TableField("invoice_number")
-    private String invoiceNumber;
-
     @ApiModelProperty("开始号码")
     @TableField("start_number")
     private String startNumber;
@@ -51,45 +43,21 @@ public class Invoice implements Serializable {
     @TableField("registration")
     private String registration;
 
-    @ApiModelProperty("发票状态")
-    @TableField("state")
-    private String state;
-
     @ApiModelProperty("批次")
     @TableField("batch")
-    private String batch;
-
-    @ApiModelProperty("订单号")
-    @TableField("order_id")
-    private Long orderId;
-
-    @ApiModelProperty("金额")
-    @TableField("amount")
-    private Double amount;
-
-    @ApiModelProperty("使用人姓名")
-    @TableField("user")
-    private String user;
+    private int batch;
 
     @ApiModelProperty("本数")
     @TableField("total")
-    private String total;
+    private int total;
 
-    @ApiModelProperty("领用人姓名")
-    @TableField("employee")
-    private String employee;
+    @ApiModelProperty("分站id")
+    @TableField("substation_id")
+    private String substationId;
 
     @ApiModelProperty("发票生成日期")
     @TableField("time")
     private Date time;
-
-    @ApiModelProperty("发票是否生效")
-    @TableField("dstate")
-    private String dstate;
-
-    @ApiModelProperty("备注")
-    @TableField("details")
-    private String details;
 
 
 }

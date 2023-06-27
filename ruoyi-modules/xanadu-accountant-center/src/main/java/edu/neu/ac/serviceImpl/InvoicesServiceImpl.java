@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @author jin Zhang
- * @since 2023-06-26 09:58:23
+ * @since 2023-06-26 10:34:41
  */
 @Service
 public class InvoicesServiceImpl extends ServiceImpl<InvoicesMapper, Invoices> implements InvoicesService {

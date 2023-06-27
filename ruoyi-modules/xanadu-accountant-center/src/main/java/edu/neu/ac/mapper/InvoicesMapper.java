@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
  * </p>
  *
  * @author jin Zhang
- * @since 2023-06-26 09:58:23
+ * @since 2023-06-26 10:34:41
  */
 @Mapper
 public interface InvoicesMapper extends BaseMapper<Invoices> {

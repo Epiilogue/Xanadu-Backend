@@ -18,6 +18,8 @@
         <module>xanadu-distribution-center</module>
         <module>xanadu-dispatch-center</module>
         <module>xanadu-substation</module>
+        <module>xanadu-admin</module>
+        <module>xanadu-accountant-center</module>
 
     </modules>
 
