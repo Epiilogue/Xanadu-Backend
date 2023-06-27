@@ -15,7 +15,20 @@ import java.util.List;
  */
 public interface SubstationService extends IService<Substation> {
 
+
     List<Long> getCourierBySubstationId(Long subId);
 
+    Long getSubstationIdByCourierId(Long courierId);
 
+    List<Long> getAllSubstationManager();
+
+    List<Substation> listByManagerId(Long userId);
+
+    void removeMasters(Long id);
+
+    List<Long> getAllCourier();
+
+    void addCourier(Long substationId, List<Long> courierIds);
+
+    List<Long> getCourierList(Long substationId);
 }

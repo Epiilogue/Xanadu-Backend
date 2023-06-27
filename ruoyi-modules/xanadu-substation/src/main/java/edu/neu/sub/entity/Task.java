@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -87,7 +88,7 @@ public class Task implements Serializable {
     @TableField("task_status")
     private String taskStatus;
 
-//    products_json
+    //    products_json
     @ApiModelProperty("商品信息列表json")
     @TableField("products_json")
     private String productsJson;
@@ -105,5 +106,12 @@ public class Task implements Serializable {
     @TableField("receipt_id")
     private Long receiptId;
 
+    @ApiModelProperty("删除标记")
+    @TableField("deleted")
+    @TableLogic
+    private Boolean deleted;
 
+    public Task() {
+        deleted = false;
+    }
 }

@@ -3,6 +3,7 @@ package edu.neu.sub.service;
 import edu.neu.sub.entity.Task;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,4 +17,7 @@ import java.util.List;
 public interface TaskService extends IService<Task> {
 
     List<Task> getTasksByCourierId(Long courierId);
+
+    List<Task> getTodayTasks(Date start, Date now);
+
 }

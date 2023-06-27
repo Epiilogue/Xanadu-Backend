@@ -125,13 +125,9 @@ public class RefundController {
 
         refundService.save(refund);
         Long userId = SecurityUtils.getUserId();
-        //一开始是空，可以设置默认值
-        //TODO: 由gateway设置用户ID，若未登陆则提示错误
-        if (userId == null) userId = 1L;
         //插入对应的数据表，保存相关记录
         if (productRecordsVo.getIsLack()) {
             //生成缺货记录
-            Long finalUserId = userId;
             Map<Long, Integer> lackMap = productRecordsVo.getProductIdNumberMap();
             products.forEach(product -> {
                 if (lackMap.containsKey(product.getProductId())) product.setIslack(true);
@@ -144,7 +140,7 @@ public class RefundController {
                     stockout.setProductId(product.getProductId());
                     stockout.setOrderId(order.getId());
                     stockout.setNeedNumbers(lackMap.get(product.getProductId()));
-                    stockout.setCreateBy(finalUserId);
+                    stockout.setCreateBy(userId);
                     stockout.setStatus(StockoutConstant.UNCOMMITTED);
                     //插入缺货记录
                     stockoutService.save(stockout);
