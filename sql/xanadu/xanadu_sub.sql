@@ -11,11 +11,40 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 20/06/2023 11:55:43
+ Date: 28/06/2023 12:07:52
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for sub_daily_report
+-- ----------------------------
+DROP TABLE IF EXISTS `sub_daily_report`;
+CREATE TABLE `sub_daily_report`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `substation_id` bigint(20) NULL DEFAULT NULL,
+  `substation_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `statistic_time` datetime NULL DEFAULT NULL,
+  `is_settled` tinyint(1) NULL DEFAULT NULL,
+  `courier_num` int(11) NULL DEFAULT NULL,
+  `delivery_receive_task_num` int(11) NULL DEFAULT NULL,
+  `receive_task_num` int(11) NULL DEFAULT NULL,
+  `return_task_num` int(11) NULL DEFAULT NULL,
+  `exchange_task_num` int(11) NULL DEFAULT NULL,
+  `delivery_task_num` int(11) NULL DEFAULT NULL,
+  `finish_task_num` int(11) NULL DEFAULT NULL,
+  `fail_task_num` int(11) NULL DEFAULT NULL,
+  `part_finish_task_num` int(11) NULL DEFAULT NULL,
+  `sign_num` int(11) NULL DEFAULT NULL,
+  `receive` double NULL DEFAULT NULL,
+  `return_num` int(11) NULL DEFAULT NULL,
+  `refund` double(20, 2) NULL DEFAULT NULL,
+  `delivery_fee` double(20, 2) NULL DEFAULT NULL,
+  `to_pay` double(20, 2) NULL DEFAULT NULL,
+  `feedback` double(20, 2) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for sub_delivery
@@ -50,6 +79,16 @@ CREATE TABLE `sub_finance`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '商品收款' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Table structure for sub_master_sub
+-- ----------------------------
+DROP TABLE IF EXISTS `sub_master_sub`;
+CREATE TABLE `sub_master_sub`  (
+  `master_id` bigint(20) NOT NULL COMMENT '分站管理员ID',
+  `sub_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  PRIMARY KEY (`master_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for sub_pending_product
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_pending_product`;
@@ -70,7 +109,7 @@ CREATE TABLE `sub_pending_product`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_receipt`;
 CREATE TABLE `sub_receipt`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回执录入日期',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回执ID',
   `task_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   `receiver_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '接收人姓名',
   `phone` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '客户联系电话',
@@ -119,7 +158,6 @@ CREATE TABLE `sub_substation`  (
   `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '分站地址',
   `phone` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL COMMENT '分站电话',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分站对应的分仓库的ID',
-  `user_id` bigint(20) NULL DEFAULT NULL COMMENT '管理人ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci COMMENT = '分站' ROW_FORMAT = DYNAMIC;
 
@@ -143,6 +181,7 @@ CREATE TABLE `sub_task`  (
   `task_status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务状态',
   `products_json` varchar(2048) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品列表json字符串',
   `sub_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
+  `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '任务单' ROW_FORMAT = DYNAMIC;
 
@@ -151,11 +190,8 @@ CREATE TABLE `sub_task`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_user_sub`;
 CREATE TABLE `sub_user_sub`  (
-  `id` bigint(20) NOT NULL COMMENT '记录ID',
   `user_id` bigint(20) NULL DEFAULT NULL COMMENT '快递员ID',
-  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
-  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`) USING BTREE
+  `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID'
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
