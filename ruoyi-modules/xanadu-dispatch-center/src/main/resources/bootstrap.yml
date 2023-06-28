@@ -49,7 +49,7 @@ spring:
         # 主库数据源
         master:
           username: root
-          password: xgs1150840779
+          password: '@QWErty156'
           url: jdbc:mysql://localhost:3306/xanadu_dpc?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
           driver-class-name: com.mysql.cj.jdbc.Driver
           # 从库数据源
