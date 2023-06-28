@@ -88,7 +88,5 @@ public class SupplyController {
         if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("提交结算失败");
         return AjaxResult.success("提交结算成功");
     }
-
-
 }
 

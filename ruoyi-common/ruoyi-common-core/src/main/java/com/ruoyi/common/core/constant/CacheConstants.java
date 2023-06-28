@@ -19,6 +19,8 @@ public class CacheConstants
      */
     public final static long REFRESH_TIME = 120;
 
+    public final static long Email = 10;
+
     /**
      * 密码最大错误次数
      */

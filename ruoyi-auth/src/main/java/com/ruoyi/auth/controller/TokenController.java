@@ -38,12 +38,14 @@ public class TokenController {
         return R.ok(tokenService.createToken(userInfo));
     }
 
+    @CrossOrigin
     @GetMapping("getEmailCode/{email}")
     public AjaxResult loginByEmail(@PathVariable("email") String email) {
         // 用户登录
         return sysLoginService.getEmailCode(email);
     }
 
+    @CrossOrigin
     @PostMapping("loginByEmail")
     public R<?> loginByEmail(@RequestBody EmailBody emailBody) {
         // 用户登录
@@ -51,7 +53,6 @@ public class TokenController {
         // 获取登录token
         return R.ok(tokenService.createToken(userInfo));
     }
-
 
     @DeleteMapping("logout")
     public R<?> logout(HttpServletRequest request) {
