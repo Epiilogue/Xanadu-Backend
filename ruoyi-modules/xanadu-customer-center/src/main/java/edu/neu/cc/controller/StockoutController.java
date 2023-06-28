@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import edu.neu.base.constant.cc.StockoutConstant;
 import edu.neu.cc.entity.Stockout;
 import edu.neu.cc.service.StockoutService;
@@ -60,6 +61,15 @@ public class StockoutController {
         return AjaxResult.success(list);
     }
 
+    @GetMapping("/get/{id}")
+    @ApiOperation("获取一条缺货记录")
+    public AjaxResult getStockOut(@PathVariable(value = "id") String id){
+        Stockout stockout = stockoutService.getById(id);
+        if(stockout == null){
+            return AjaxResult.error("该商品不存在");
+        }
+        return AjaxResult.success(stockout);
+    }
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
     public AjaxResult edit(@RequestBody Stockout stockout) {
@@ -82,8 +92,8 @@ public class StockoutController {
     public AjaxResult add(@RequestBody Stockout stockout) {
         stockout.setId(null);
         stockout.setDeleted(false);
-        //TODO: 2023/6/1 11:20 根据上下文自动获取用户ID
-        stockout.setCreateBy(1L);
+        Long userId = SecurityUtils.getUserId();
+        stockout.setCreateBy(userId);
         stockout.setCreateTime(new Date());
         stockout.setStatus(StockoutConstant.UNCOMMITTED);
         stockoutService.save(stockout);

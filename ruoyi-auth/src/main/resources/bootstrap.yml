@@ -3,7 +3,19 @@ server:
   port: 9200
 
 # Spring
-spring: 
+spring:
+  mail:
+    host: smtp.qq.com
+    username: 1023118868@qq.com
+    password: 'llblstlxgxanbbie'
+    properties:
+      mail:
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+    #         ssl:
+    #           enable :true
+    default-encoding: utf-8
   application:
     # 应用名称
     name: ruoyi-auth

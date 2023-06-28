@@ -124,8 +124,7 @@ public class OrderController {
     @GetMapping("/feign/count/{substationId}")
     public Boolean getOrderCountBySubstationId(@PathVariable Long substationId) {
         long newCount = newOrderService.count(new QueryWrapper<NewOrder>().eq("substation_id", substationId));
-        long refundCount = refundService.count(new QueryWrapper<Refund>().eq("substation_id", substationId));
-        return newCount + refundCount > 0;
+        return newCount > 0;
     }
 
 

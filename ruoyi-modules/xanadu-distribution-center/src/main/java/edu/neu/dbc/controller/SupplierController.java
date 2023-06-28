@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.entity.PurchaseRecord;
 import edu.neu.dbc.entity.Supplier;
 import edu.neu.dbc.service.PurchaseRecordService;
@@ -42,6 +43,16 @@ public class SupplierController {
     @ApiOperation("查询所有供应商")
     public AjaxResult list() {
         return AjaxResult.success(supplierService.list());
+    }
+
+    @GetMapping("/get/{id}")
+    @ApiOperation("获取供应商")
+    public AjaxResult get(@PathVariable Integer id) {
+        Supplier supplier = supplierService.getById(id);
+        if (supplier == null) {
+            return AjaxResult.error("供应商不存在");
+        }
+        return AjaxResult.success(supplier);
     }
 
     @GetMapping("/list/{pageNum}/{pageSize}")

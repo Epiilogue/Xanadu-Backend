@@ -1,5 +1,6 @@
 package com.ruoyi.system.api;
 
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,4 +41,12 @@ public interface RemoteUserService
      */
     @PostMapping("/user/register")
     public R<Boolean> registerUserInfo(@RequestBody SysUser sysUser, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+
+    @GetMapping("/user/infoFromEmail/{email}")
+    public R<LoginUser> infoFromEmail(@PathVariable("email")String email, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+
+    @GetMapping("/user/listByRole/{roleName}")
+    public AjaxResult listByRole(@PathVariable("roleName") String roleName);
 }
