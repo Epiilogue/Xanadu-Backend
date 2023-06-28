@@ -10,12 +10,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <description>
-       工具集合类
+        工具集合类
     </description>
     <groupId>edu.neu.xanadu</groupId>
     <artifactId>xanadu_base</artifactId>
     <version>0.0.1</version>
     <dependencies>
+
 
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -51,6 +52,10 @@
             <artifactId>ruoyi-common-security</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-api-system</artifactId>
+        </dependency>
     </dependencies>
 
 
