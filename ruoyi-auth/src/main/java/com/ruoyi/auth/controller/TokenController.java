@@ -3,6 +3,7 @@ package com.ruoyi.auth.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import com.ruoyi.auth.form.EmailBody;
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.auth.form.LoginBody;
@@ -38,7 +39,7 @@ public class TokenController {
     }
 
     @GetMapping("getEmailCode/{email}")
-    public R<?> loginByEmail(@PathVariable("email") String email) {
+    public AjaxResult loginByEmail(@PathVariable("email") String email) {
         // 用户登录
         return sysLoginService.getEmailCode(email);
     }

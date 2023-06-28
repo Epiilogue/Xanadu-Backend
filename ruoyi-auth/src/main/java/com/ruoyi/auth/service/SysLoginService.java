@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.extra.mail.MailUtil;
 import com.ruoyi.common.core.exception.CaptchaException;
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class SysLoginService {
     @Autowired
+    @SuppressWarnings("all")
     private RemoteUserService remoteUserService;
 
     @Autowired
@@ -104,13 +106,13 @@ public class SysLoginService {
     }
 
 
-    public R<?> getEmailCode(String email) {
-        if (StringUtils.isEmpty(email)) return R.fail("邮箱不能为空");
+    public AjaxResult getEmailCode(String email) {
+        if (StringUtils.isEmpty(email)) return AjaxResult.error("邮箱不能为空");
         boolean isEmail = Validator.isEmail(email);
-        if (!isEmail) return R.fail("邮箱格式不正确");
+        if (!isEmail) return AjaxResult.error("邮箱格式不正确");
 
         //数据库查询是否存在该邮箱号
-        R<LoginUser> userResult = remoteUserService.infoFromEmail(email,SecurityConstants.INNER);
+        R<LoginUser> userResult = remoteUserService.infoFromEmail(email, SecurityConstants.INNER);
         if (StringUtils.isNull(userResult) || StringUtils.isNull(userResult.getData())) {
             throw new ServiceException("该邮箱号码不存在");
         }
@@ -126,11 +128,11 @@ public class SysLoginService {
         }
         //生成验证码，连带着用户名一起存入redis，之后直接就能找到了
         String code = RandomUtil.randomNumbers(6);
-        redisService.setCacheObject(CacheConstants.EMAIL_CODE_KEY+email, code + ":" + user.getUserName(), (long) 5.0, TimeUnit.MINUTES);
+        redisService.setCacheObject(CacheConstants.EMAIL_CODE_KEY + email, code + ":" + user.getUserName(), CacheConstants.EMAIL, TimeUnit.MINUTES);
         //发送邮件
         Boolean sendMailSuccess = sendMail(email, code);
-        if (sendMailSuccess) return R.ok("验证码发送成功");
-        else return R.fail("验证码发送失败");
+        if (sendMailSuccess) return AjaxResult.success("验证码发送成功");
+        else return AjaxResult.error("验证码发送失败");
     }
 
     public LoginUser loginByEmail(String email, String code) {
@@ -173,23 +175,22 @@ public class SysLoginService {
     }
 
 
-
-
     private Boolean sendMail(String email, String code) {
         //TODO: 发送邮件，向 email 发送 code ,返回是否发送成功
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message,true);
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject("Xanadu");
             helper.setFrom("1023118868@qq.com");
             helper.setText(code);
             helper.setTo(email);
             javaMailSender.send(message);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return true;
     }
+
     public void logout(String loginName) {
         recordLogService.recordLogininfor(loginName, Constants.LOGOUT, "退出成功");
     }

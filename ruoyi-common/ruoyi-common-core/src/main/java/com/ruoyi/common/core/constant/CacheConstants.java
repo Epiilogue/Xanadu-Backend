@@ -12,6 +12,8 @@ public class CacheConstants
      */
     public final static long EXPIRATION = 720;
 
+    public final static long EMAIL = 10;
+
     /**
      * 缓存刷新时间，默认120（分钟）
      */
