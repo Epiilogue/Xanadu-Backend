@@ -5,9 +5,12 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.system.api.RemoteUserService;
+import com.ruoyi.system.api.domain.SysUser;
 import edu.neu.base.constant.cc.ReceiptStatus;
 import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.base.constant.cc.TaskType;
+import edu.neu.base.constant.cc.UserRoles;
 import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.ReceiptProduct;
 import edu.neu.sub.entity.Substation;
@@ -26,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -61,6 +65,8 @@ public class TaskController {
     @Autowired
     PendingProductService pendingProductService;
 
+    @Autowired
+    RemoteUserService remoteUserService;
 
     @GetMapping("/list/{subId}")
     @ApiOperation(value = "获取子站所有任务记录,对应所有任务页面")
@@ -79,7 +85,7 @@ public class TaskController {
     }
 
     @GetMapping("/listCouriers/{subId}")
-    @ApiOperation(value = "获取子站对应的所有快递员")
+    @ApiOperation(value = "获取子站对应的所有快递员,方法升级，可获取详细信息")
     public AjaxResult listCouriers(@PathVariable("subId") Long subId) {
         //获取所有的快递员ID
         List<Long> courierIds = substationService.getCourierBySubstationId(subId);
@@ -87,7 +93,19 @@ public class TaskController {
             return AjaxResult.error("查询分站快递员列表失败");
         }
         if (courierIds.size() == 0) return AjaxResult.error("该分站未指定快递员");
-        return AjaxResult.success(courierIds);
+        //获取所有的快递员信息
+        AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.COURIER);
+        if (ajaxResult == null || ajaxResult.isError()) {
+            return AjaxResult.error("查询快递员信息失败");
+        }
+        String data = JSON.toJSONString(ajaxResult.get("data"));
+        List<SysUser> sysUsers = JSON.parseArray(data, SysUser.class);
+        if (sysUsers == null || sysUsers.size() == 0) {
+            return AjaxResult.error("该分站未指定快递员");
+        }
+        //过滤
+        sysUsers = sysUsers.stream().filter(sysUser -> courierIds.contains(sysUser.getUserId())).collect(Collectors.toList());
+        return AjaxResult.success(sysUsers);
     }
 
     @GetMapping("/listHanding/{subId}")

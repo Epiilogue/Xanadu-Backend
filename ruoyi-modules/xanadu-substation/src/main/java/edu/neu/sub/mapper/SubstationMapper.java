@@ -33,4 +33,6 @@ public interface SubstationMapper extends BaseMapper<Substation> {
     void addCourier(@Param("substationId") Long substationId,@Param("courierId") Long courierId);
 
     List<Long> getCourierList(Long substationId);
+
+    int deleteCourier(Long substationId, Long courierId);
 }

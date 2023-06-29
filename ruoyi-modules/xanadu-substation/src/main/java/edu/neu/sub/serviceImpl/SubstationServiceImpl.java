@@ -63,4 +63,9 @@ public class SubstationServiceImpl extends ServiceImpl<SubstationMapper, Substat
     public List<Long> getCourierList(Long substationId) {
         return substationMapper.getCourierList(substationId);
     }
+
+    @Override
+    public int deleteCourier(Long substationId, Long courierId) {
+        return substationMapper.deleteCourier(substationId, courierId);
+    }
 }
