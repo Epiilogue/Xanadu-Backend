@@ -57,7 +57,6 @@ public class SubstationController {
     @Autowired
     ReceiptService receiptService;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     RemoteUserService remoteUserService;
 
@@ -153,11 +152,12 @@ public class SubstationController {
     }
 
 
+
     /**
      * 分站快递员管理，增加删除分站快递员
      */
 
-    @ApiOperation(value = "获取快递员身份用户列表，过滤掉已经是分站快递员的用户，但是不过滤管理员")
+    @ApiOperation(value = "获取可添加的快递员身份用户列表，过滤掉已经是分站快递员的用户，但是不过滤管理员")
     @GetMapping("/getCourierUserList")
     public AjaxResult getCourierUserList() {
         AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.COURIER);
@@ -192,12 +192,21 @@ public class SubstationController {
 
         //如果有，就不能添加
         List<Long> courierIdList = substationService.getCourierList(substationId);
-
-        //TODO: 根据id列表查询用户列表
-        return null;
-
+        AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.COURIER);
+        List<SysUser> userList = JSON.parseArray(JSON.toJSONString(ajaxResult.get("data")), SysUser.class);
+        //只留下id在courierIdList中的用户
+        userList = userList.stream().filter(user -> courierIdList.contains(user.getUserId())).collect(Collectors.toList());
+        return AjaxResult.success(userList);
     }
 
+    @ApiOperation(value = "删除分站快递员")
+    @PostMapping("/deleteCourier/{substationId}/{courierId}")
+    public AjaxResult deleteCourier(@PathVariable("substationId") Long substationId, @PathVariable("courierId") Long courierId) {
+        //如果有，就不能添加
+        int result = substationService.deleteCourier(substationId, courierId);
+        if (result == 0) return AjaxResult.error("删除失败");
+        return AjaxResult.success("删除成功");
+    }
 
 
     @GetMapping("/feign/getSubwareId/{id}")

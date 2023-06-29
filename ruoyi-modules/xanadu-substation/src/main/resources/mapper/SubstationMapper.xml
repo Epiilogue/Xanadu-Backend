@@ -10,6 +10,9 @@
     <update id="removeMasters">
         delete from sub_master_sub where sub_id=#{subId}
     </update>
+    <delete id="deleteCourier">
+        delete from sub_user_sub where user_id=#{courierId} and substation_id=#{substationId}
+    </delete>
 
 
     <select id="getCourierBySubstationId"  resultType="java.lang.Long">

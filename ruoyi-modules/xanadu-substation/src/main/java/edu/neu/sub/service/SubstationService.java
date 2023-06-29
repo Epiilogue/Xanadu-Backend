@@ -31,4 +31,6 @@ public interface SubstationService extends IService<Substation> {
     void addCourier(Long substationId, List<Long> courierIds);
 
     List<Long> getCourierList(Long substationId);
+
+    int deleteCourier(Long substationId, Long courierId);
 }
