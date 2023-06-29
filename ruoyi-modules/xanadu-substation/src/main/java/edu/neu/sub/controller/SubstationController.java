@@ -4,6 +4,7 @@ package edu.neu.sub.controller;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -47,7 +48,6 @@ public class SubstationController {
     @Autowired
     TaskService taskService;
 
-
     @Autowired
     OrderClient orderClient;
 
@@ -61,19 +61,18 @@ public class SubstationController {
     RemoteUserService remoteUserService;
 
 
-    @GetMapping("/list")
-    @ApiOperation(value = "分站列表,只查找自己所管理的")
-    public AjaxResult list() {
-        Long userId = SecurityUtils.getUserId();//获取当前用户的id
-        List<Substation> substationList = substationService.listByManagerId(userId);
-        if (substationList == null || substationList.size() == 0) {
-            return AjaxResult.success("当前用户没有管理任何分站");
+    @GetMapping("/infoByUser/{userId}")
+    @ApiOperation(value = "根据用户id获取分站信息")
+    public AjaxResult infoByUser(@PathVariable("userId") Long userId) {
+        Substation substation = substationService.getByManagerId(userId);
+        if (substation == null) {
+            return AjaxResult.error("该用户尚未管理分站");
         }
-        return AjaxResult.success(substationList);
+        return AjaxResult.success(substation);
     }
 
     @GetMapping("/listAll")
-    @ApiOperation(value = "分站列表,查找所有的,管理员专用")
+    @ApiOperation(value = "分站列表,查找所有的,管理员专用，如果登录用户是管理员的话直接请求该接口")
     public AjaxResult listAll() {
         List<Substation> substationList = substationService.list();
         if (substationList == null || substationList.size() == 0) {
@@ -83,7 +82,7 @@ public class SubstationController {
     }
 
 
-    @ApiOperation(value = "获取所有的分站管理角色对应的用户列表，过滤掉已经分配过的，但是不过滤管理员")
+    @ApiOperation(value = "获取所有的分站管理角色对应的用户列表，过滤掉已经分配过的")
     @GetMapping("/getSubstationUserList")
     public AjaxResult getSubstationUserList() {
         AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.SUBSTATION_MANAGER);
@@ -92,16 +91,26 @@ public class SubstationController {
         //拿到所有的已经分配过id
         List<Long> allSubstationManagerIds = substationService.getAllSubstationManager();
         //过滤掉userlist中已经出现过并且不是管理员身份的用户列表
-        userList = userList.stream().filter(user -> {
-                    //如果是管理员，就不过滤
-                    for (SysRole role : user.getRoles()) {
-                        if (Objects.equals(role.getRoleName(), UserRoles.ADMIN)) return true;
-                    }
-                    return !allSubstationManagerIds.contains(user.getUserId());
-                }
+        userList = userList.stream().filter(user -> !allSubstationManagerIds.contains(user.getUserId())
         ).collect(Collectors.toList());
         return AjaxResult.success(userList);
     }
+
+    @ApiOperation(value = "获取当前分站的所有管理员信息")
+    @GetMapping("/getSubstationManager/{substationId}")
+    public AjaxResult getSubstationManager(@PathVariable("substationId") Long substationId) {
+        Substation substation = substationService.getById(substationId);
+        if (substation == null) return AjaxResult.error("分站不存在");
+        List<Long> ids = substationService.getSubstationMatsers(substationId);
+        if (ids == null || ids.size() == 0) return AjaxResult.success("该分站没有管理员");
+        AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.SUBSTATION_MANAGER);
+        List<SysUser> userList = JSON.parseArray(JSON.toJSONString(ajaxResult.get("data")), SysUser.class);
+        //只留下当前分站的管理员
+        userList = userList.stream().filter(user -> ids.contains(user.getUserId())).collect(Collectors.toList());
+        //返回
+        return AjaxResult.success(userList);
+    }
+
 
     @PostMapping("/add")
     @ApiOperation(value = "添加分站,")
@@ -115,12 +124,14 @@ public class SubstationController {
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
         if (substationService.getOne(addressEq) != null) return AjaxResult.error("同地址下已有分站");
         substationService.save(substation);
-        //检查是否存在相同地址
+        //需要添加管理员与分站的关系，我们默认此时提交的id里不会存在有已经管理别的分站的ID
+        Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
+        if (result == 0 || result != substation.getAdminIds().size()) throw new ServiceException("添加库管员失败");
         return AjaxResult.success("添加成功");
     }
 
     @PostMapping("/update")
-    @ApiOperation(value = "更新分站信息")
+    @ApiOperation(value = "更新分站信息，在这里可以更新分站的管理人和仓库，我们需要删除掉原先所有的关系，然后重新添加新的关系")
     public AjaxResult update(@RequestBody Substation substation) {
         //更新分站，需要注意的是分站的管理人和仓库都是一对一，我们首先需要查询是否有其他分站有相同的管理人或者仓库
         //如果有，就不能添加
@@ -129,10 +140,12 @@ public class SubstationController {
         Substation one = substationService.getOne(addressEq);
         if (one != null && !Objects.equals(one.getId(), substation.getId()))
             return AjaxResult.error("同地址下已有分站");
-        //不允许更新分库以及管理员
+        //不允许更新分库
         Substation byId = substationService.getById(substation.getId());
         if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) return AjaxResult.error("不允许更新分库");
         substationService.updateById(substation);
+        substationService.removeMasters(substation.getId());
+        substationService.addMasters(substation.getId(), substation.getAdminIds());
         return AjaxResult.success("更新成功");
     }
 
@@ -152,7 +165,6 @@ public class SubstationController {
     }
 
 
-
     /**
      * 分站快递员管理，增加删除分站快递员
      */
@@ -166,13 +178,7 @@ public class SubstationController {
         //拿到所有的已经分配过id
         List<Long> allCourierIds = substationService.getAllCourier();
         //过滤掉userlist中已经出现过并且不是管理员身份的用户列表
-        userList = userList.stream().filter(user -> {
-                    //如果是管理员，就不过滤
-                    for (SysRole role : user.getRoles()) {
-                        if (Objects.equals(role.getRoleName(), UserRoles.ADMIN)) return true;
-                    }
-                    return !allCourierIds.contains(user.getUserId());
-                }
+        userList = userList.stream().filter(user -> !allCourierIds.contains(user.getUserId())
         ).collect(Collectors.toList());
         return AjaxResult.success(userList);
     }

@@ -5,33 +5,46 @@
         insert into sub_user_sub(user_id, substation_id)
         values (#{courierId}, #{substationId})
     </insert>
+    <insert id="addMaster">
+        insert into sub_master_sub(master_id, sub_id)
+        values (#{masterId}, #{subId})
+    </insert>
 
 
     <update id="removeMasters">
-        delete from sub_master_sub where sub_id=#{subId}
+        delete
+        from sub_master_sub
+        where sub_id = #{subId}
     </update>
     <delete id="deleteCourier">
-        delete from sub_user_sub where user_id=#{courierId} and substation_id=#{substationId}
+        delete
+        from sub_user_sub
+        where user_id = #{courierId}
+          and substation_id = #{substationId}
+    </delete>
+    <delete id="deleteManager">
+        delete
+        from sub_master_sub
+        where master_id = #{userId}
+          and sub_id = #{substationId}
     </delete>
 
 
-    <select id="getCourierBySubstationId"  resultType="java.lang.Long">
-        select  user_id from sub_user_sub where substation_id=#{substationId}
+    <select id="getCourierBySubstationId" resultType="java.lang.Long">
+        select user_id
+        from sub_user_sub
+        where substation_id = #{substationId}
     </select>
     <select id="getSubstationIdByCourierId" resultType="java.lang.Long">
-        select substation_id from sub_user_sub where user_id=#{courierId}
+        select substation_id
+        from sub_user_sub
+        where user_id = #{courierId}
     </select>
     <select id="getAllSubstationManager" resultType="java.lang.Long">
         select master_id
         from sub_master_sub
     </select>
-    <select id="listByManagerId" resultType="edu.neu.sub.entity.Substation">
-        select id, name, address, phone, subware_id
-        from sub_substation s
-                 left join sub_master_sub m
-                           on s.id = m.sub_id
-        where master_id = #{userId}
-    </select>
+
     <select id="getAllCourier" resultType="java.lang.Long">
         select user_id
         from sub_user_sub
@@ -40,6 +53,19 @@
         select user_id
         from sub_user_sub
         where substation_id = #{substationId}
+    </select>
+
+    <select id="getByManagerId" resultType="edu.neu.sub.entity.Substation">
+        select id, name, address, phone, subware_id
+        from sub_substation s
+                 left join sub_master_sub m
+                           on s.id = m.sub_id
+        where master_id = #{userId}
+    </select>
+    <select id="getSubstationMasters" resultType="java.lang.Long">
+        select master_id
+        from sub_master_sub
+        where sub_id = #{substationId}
     </select>
 
 </mapper>
