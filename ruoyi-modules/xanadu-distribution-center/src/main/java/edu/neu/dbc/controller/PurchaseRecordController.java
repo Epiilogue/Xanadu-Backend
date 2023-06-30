@@ -160,18 +160,19 @@ public class PurchaseRecordController {
      */
     @ApiOperation("供应商结算远程查询接口，允许查询指定供应商，指定商品，指定时间段的结算信息,必须要指定供应商，但是可以不用指定商品，必须指定时间段")
     @GetMapping("/feign/settlement")
-    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId") Long productId,
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId",required = false) Long productId,
                                  @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime) {
         //检查数据合法性
         //1.检查供应商是否存在
         Supplier supplier = supplierService.getById(supplierId);
         if (supplier == null) return AjaxResult.error("供应商不存在");
         //2.检查商品是否存在
-        Product product = productService.getById(productId);
-        if (product == null) return AjaxResult.error("商品不存在");
-        //3.检查商品和供应商是否对应
-        if (!product.getSupplierId().equals(supplierId)) return AjaxResult.error("商品和供应商不对应");
-        //4.检查时间合法性<
+        if (productId != null) {
+            Product product = productService.getById(productId);
+            if (product == null) return AjaxResult.error("商品不存在");
+            //3.检查商品和供应商是否对应
+            if (!product.getSupplierId().equals(supplierId)) return AjaxResult.error("商品和供应商不对应");
+        }
         if (startTime.after(endTime)) return AjaxResult.error("开始时间不能晚于结束时间");
 
         //查询时间范围内状态为开始时间到结束时间的购买记录以及退货记录，然后记录ID，在结算后需要更新他们的状态
@@ -184,6 +185,7 @@ public class PurchaseRecordController {
         //如果商品ID不为空的话，filter过滤一遍
         if (productId != null)
             purchaseRecords = purchaseRecords.stream().filter(p -> p.getProductId().equals(productId)).collect(Collectors.toList());
+
 
         //拿到了所有的购买记录，之后需要获取所有的退货记录
         List<Refund> refunds = refundService.lambdaQuery().
