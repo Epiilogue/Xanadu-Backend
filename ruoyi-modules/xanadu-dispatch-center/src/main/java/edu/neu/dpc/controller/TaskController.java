@@ -16,6 +16,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/dpc/task")
+@CacheConfig(cacheNames = "task")
 public class TaskController {
     @Autowired
     TaskService taskService;
@@ -43,7 +47,8 @@ public class TaskController {
 
     @GetMapping("/feign/getOrderIdByTaskId/{taskId}")
     @ApiOperation("根据任务id获取订单id")
-    Long getOrderIdByTaskId(@PathVariable("taskId") Long taskId) {
+    @Cacheable(key = "#taskId")
+    public Long getOrderIdByTaskId(@PathVariable("taskId") Long taskId) {
         Task task = taskService.getById(taskId);
         if (task != null) {
             return task.getOrderId();
@@ -53,7 +58,8 @@ public class TaskController {
 
     @PostMapping("/feign/updateTaskStatus/{taskId}/{status}")
     @ApiOperation("根据任务id更新任务状态")
-    AjaxResult updateTaskStatus(@PathVariable("taskId") Long taskId, @PathVariable("status") String status) {
+    @CacheEvict(key = "#taskId")
+    public  AjaxResult updateTaskStatus(@PathVariable("taskId") Long taskId, @PathVariable("status") String status) {
         Task task = taskService.getById(taskId);
         if (task != null) {
             task.setTaskStatus(status);
