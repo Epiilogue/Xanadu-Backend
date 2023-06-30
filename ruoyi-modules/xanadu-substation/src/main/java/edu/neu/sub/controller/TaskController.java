@@ -17,7 +17,6 @@ import edu.neu.sub.entity.Substation;
 import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
-import edu.neu.sub.mapper.ReceiptProductMapper;
 import edu.neu.sub.service.*;
 import edu.neu.sub.vo.*;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +24,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +65,30 @@ public class TaskController {
 
     @Autowired
     RemoteUserService remoteUserService;
+
+
+    @GetMapping("/listByUserId/{userId}")
+    @ApiOperation(value = "获取子站所有任务记录,对应所有任务页面")
+    public AjaxResult listByUserId(@PathVariable("userId") Long userId) {
+        //根据用户信息拿到子站id
+        Substation substation = substationService.getByManagerId(userId);
+        if (substation == null) {
+            return AjaxResult.error("该用户没有管理的分站");
+        }
+        Long subId = substation.getId();
+        AjaxResult taskBySubstationId = taskClient.getTaskBySubstationId(subId);
+        if (taskBySubstationId == null || taskBySubstationId.isError()) {
+            return AjaxResult.error("查询分站任务列表失败");
+        }
+        //转化
+        String data = JSON.toJSONString(taskBySubstationId.get("data"));
+        List<TaskVo> taskVos = JSON.parseArray(data, TaskVo.class);
+        if (taskVos == null || taskVos.size() == 0) {
+            return AjaxResult.error("该分站没有任务");
+        }
+        return AjaxResult.success(taskVos);
+    }
+
 
     @GetMapping("/list/{subId}")
     @ApiOperation(value = "获取子站所有任务记录,对应所有任务页面")

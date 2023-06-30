@@ -16,7 +16,8 @@ public class UserRoles {
     public static final String CUSTOMER_SERVICE = "客服";
     public static final String TRANSPORTATION_CENTER = "运输中心工作人员";
     public static final String ALLOCATOR = "调拨员";
-    public static final String WAREHOUSE_MANAGER = "库管员";
+    public static final String SUB_WAREHOUSE_MANAGER = "分库库管员";
+    public static final String CENTER_WAREHOUSE_MANAGER = "中心仓库库管员";
     public static final String SUBSTATION_MANAGER = "分站长";
     public static final String COURIER = "快递员";
     public static final String FINANCIAL_STAFF = "财务人员";

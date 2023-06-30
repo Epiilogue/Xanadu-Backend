@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 @SpringBootApplication(exclude = {UtilAutoConfiguration.class}, scanBasePackages = {"edu.neu","com.ruoyi.common.security.handler"})
-@EnableFeignClients(basePackages = {"edu.neu.dbc.feign"})
+@EnableFeignClients(basePackages = {"edu.neu.dbc.feign","com.ruoyi.system.api"})
 @EnableTransactionManagement
 @EnableDiscoveryClient
 public class DistributionCenterApplication {

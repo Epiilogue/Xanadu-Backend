@@ -22,7 +22,7 @@ public interface SubstationService extends IService<Substation> {
 
     List<Long> getAllSubstationManager();
 
-    List<Substation> listByManagerId(Long userId);
+    Substation getByManagerId(Long userId);
 
     void removeMasters(Long id);
 
@@ -33,4 +33,10 @@ public interface SubstationService extends IService<Substation> {
     List<Long> getCourierList(Long substationId);
 
     int deleteCourier(Long substationId, Long courierId);
+
+    Integer addMasters(Long id, List<Long> adminIds);
+
+    List<Long> getSubstationMatsers(Long substationId);
+
+    int deleteManager(Long substationId, Long userId);
 }

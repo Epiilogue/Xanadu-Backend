@@ -24,7 +24,7 @@ public interface SubstationMapper extends BaseMapper<Substation> {
 
     List<Long> getAllSubstationManager();
 
-    List<Substation> listByManagerId(Long userId);
+    Substation getByManagerId(Long userId);
 
     void removeMasters(Long subId);
 
@@ -34,5 +34,11 @@ public interface SubstationMapper extends BaseMapper<Substation> {
 
     List<Long> getCourierList(Long substationId);
 
-    int deleteCourier(Long substationId, Long courierId);
+    int deleteCourier(@Param("substationId")Long substationId,@Param("courierId") Long courierId);
+
+    int addMaster(@Param("subId")Long subId,@Param("masterId") Long masterId);
+
+    List<Long> getSubstationMasters(Long substationId);
+
+    int deleteManager(@Param("substationId")Long substationId,@Param("userId") Long userId);
 }
