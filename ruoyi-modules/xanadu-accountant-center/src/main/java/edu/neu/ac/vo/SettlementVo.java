@@ -31,7 +31,7 @@ public class SettlementVo implements Serializable {
     public static final String PAY = "支出";
 
     @ApiModelProperty("商品ID")
-    @TableId(value = "product_id")
+    @TableId(value = "product_id", type = IdType.AUTO)
     private Long productId;
 
     @ApiModelProperty("供应商ID")

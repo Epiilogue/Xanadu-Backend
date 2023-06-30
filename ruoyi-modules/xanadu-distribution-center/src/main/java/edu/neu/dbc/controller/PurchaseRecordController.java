@@ -203,11 +203,11 @@ public class PurchaseRecordController {
             if (settlementVo == null) {
                 settlementVo = new SettlementVo(p.getProductId(), p.getSupplierId(), p.getProductName(),
                         p.getProductPrice(), 0, 0, 0, 0.0, null, null, new ArrayList<>(), new ArrayList<>());
-            } else {
-                //增加供货数量，给列表增加供货单ID
-                settlementVo.setSupplyNum(settlementVo.getSupplyNum() + p.getNumber());
-                settlementVo.getPurchaseRecordIdList().add(p.getId());
             }
+            //增加供货数量，给列表增加供货单ID
+            settlementVo.setSupplyNum(settlementVo.getSupplyNum() + p.getNumber());
+            settlementVo.getPurchaseRecordIdList().add(p.getId());
+
             map.put(p.getProductId(), settlementVo);
         });
         //处理退货记录，退货记录对于之前不存在的需要创建并更新，对于之前存在的需要更新

@@ -52,6 +52,13 @@ public class SubwareController {
         return AjaxResult.success("创建分库成功", subware);
     }
 
+    /**
+     * 1.获取所有可分配的库管员
+     * 2.批量添加库管员
+     * 3.删除库管员
+     * 4.查看库管员
+     */
+
 
     @PostMapping("/update")
     @ApiOperation(value = "修改分库", notes = "修改分库")

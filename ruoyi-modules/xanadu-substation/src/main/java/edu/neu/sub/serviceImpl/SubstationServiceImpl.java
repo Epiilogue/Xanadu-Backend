@@ -40,8 +40,8 @@ public class SubstationServiceImpl extends ServiceImpl<SubstationMapper, Substat
     }
 
     @Override
-    public List<Substation> listByManagerId(Long userId) {
-        return substationMapper.listByManagerId(userId);
+    public Substation getByManagerId(Long userId) {
+        return substationMapper.getByManagerId(userId);
     }
 
     @Override
@@ -62,5 +62,29 @@ public class SubstationServiceImpl extends ServiceImpl<SubstationMapper, Substat
     @Override
     public List<Long> getCourierList(Long substationId) {
         return substationMapper.getCourierList(substationId);
+    }
+
+    @Override
+    public int deleteCourier(Long substationId, Long courierId) {
+        return substationMapper.deleteCourier(substationId, courierId);
+    }
+
+    @Override
+    public Integer addMasters(Long id, List<Long> adminIds) {
+        int count = 0;
+        for (Long adminId : adminIds) {
+            count += substationMapper.addMaster(id, adminId);
+        }
+        return count;
+    }
+
+    @Override
+    public List<Long> getSubstationMatsers(Long substationId) {
+        return substationMapper.getSubstationMasters(substationId);
+    }
+
+    @Override
+    public int deleteManager(Long substationId, Long userId) {
+        return substationMapper.deleteManager(substationId, userId);
     }
 }
