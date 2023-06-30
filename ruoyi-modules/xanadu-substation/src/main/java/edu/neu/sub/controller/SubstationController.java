@@ -67,7 +67,7 @@ public class SubstationController {
     public AjaxResult infoByUser(@PathVariable("userId") Long userId) {
         Substation substation = substationService.getByManagerId(userId);
         if (substation == null) {
-            return AjaxResult.error("该用户尚未管理分站");
+            throw new ServiceException("该用户尚未管理分站");
         }
         return AjaxResult.success(substation);
     }
@@ -101,7 +101,7 @@ public class SubstationController {
     @GetMapping("/getSubstationManager/{substationId}")
     public AjaxResult getSubstationManager(@PathVariable("substationId") Long substationId) {
         Substation substation = substationService.getById(substationId);
-        if (substation == null) return AjaxResult.error("分站不存在");
+        if (substation == null) throw new ServiceException("分站不存在");
         List<Long> ids = substationService.getSubstationMatsers(substationId);
         if (ids == null || ids.size() == 0) return AjaxResult.success("该分站没有管理员");
         AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.SUBSTATION_MANAGER);
@@ -121,9 +121,9 @@ public class SubstationController {
         //分站与快递员是一对多
         //如果有，就不能添加
         QueryWrapper<Substation> subwareEq = new QueryWrapper<Substation>().eq("subware_id", substation.getSubwareId());
-        if (substationService.getOne(subwareEq) != null) return AjaxResult.error("该仓库已经被其他分站使用");
+        if (substationService.getOne(subwareEq) != null) throw new ServiceException("该仓库已经被其他分站使用");
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
-        if (substationService.getOne(addressEq) != null) return AjaxResult.error("同地址下已有分站");
+        if (substationService.getOne(addressEq) != null) throw new ServiceException("同地址下已有分站");
         substationService.save(substation);
         //需要添加管理员与分站的关系，我们默认此时提交的id里不会存在有已经管理别的分站的ID
         Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
@@ -140,10 +140,10 @@ public class SubstationController {
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
         Substation one = substationService.getOne(addressEq);
         if (one != null && !Objects.equals(one.getId(), substation.getId()))
-            return AjaxResult.error("同地址下已有分站");
+            throw new ServiceException("同地址下已有分站");
         //不允许更新分库
         Substation byId = substationService.getById(substation.getId());
-        if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) return AjaxResult.error("不允许更新分库");
+        if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) throw new ServiceException("不允许更新分库");
         substationService.updateById(substation);
         substationService.removeMasters(substation.getId());
         substationService.addMasters(substation.getId(), substation.getAdminIds());
@@ -156,10 +156,10 @@ public class SubstationController {
         //删除分站，需要注意的是分站的管理人和仓库都是一对一，我们首先需要查询是否有其他分站有相同的管理人或者仓库
         //如果有，就不能添加
         Substation byId = substationService.getById(id);
-        if (byId == null) return AjaxResult.error("分站不存在");
+        if (byId == null) throw new ServiceException("分站不存在");
         //检查是否存在相同地址,需要进行远程调用，查询订单表，是否存在分站ID，如果存在则无法删除、
         Boolean orderCountBySubstationId = orderClient.getOrderCountBySubstationId(id);
-        if (orderCountBySubstationId) return AjaxResult.error("该分站存在订单，无法删除");
+        if (orderCountBySubstationId) throw new ServiceException("该分站存在订单，无法删除");
         substationService.removeById(id);
         substationService.removeMasters(id);
         return AjaxResult.success("删除成功");
@@ -211,7 +211,7 @@ public class SubstationController {
     public AjaxResult deleteCourier(@PathVariable("substationId") Long substationId, @PathVariable("courierId") Long courierId) {
         //如果有，就不能添加
         int result = substationService.deleteCourier(substationId, courierId);
-        if (result == 0) return AjaxResult.error("删除失败");
+        if (result == 0) throw new ServiceException("删除失败");
         return AjaxResult.success("删除成功");
     }
 
@@ -221,7 +221,7 @@ public class SubstationController {
     public AjaxResult updateDailyReportStatus(@PathVariable("dailyReportId") Long dailyReportId){
         DailyReport dailyReport = dailyReportService.getById(dailyReportId);
         if(dailyReport == null){
-            return AjaxResult.error("该报表不存在");
+            throw new ServiceException("该报表不存在");
         }
         dailyReport.setIsSettled(true);
         return AjaxResult.success("修改成功");
@@ -236,7 +236,7 @@ public class SubstationController {
         QueryWrapper<DailyReport> dailyReportQueryWrapper = new QueryWrapper<DailyReport>().between("statistic_time",DateUtil.beginOfDay(date),DateUtil.endOfDay(date));
         List<DailyReport> dailyReports = dailyReportService.list(dailyReportQueryWrapper);
         if(dailyReports == null){
-            return AjaxResult.error("暂无数据");
+            throw new ServiceException("暂无数据");
         }
         // 返回你的响应
         return AjaxResult.success(dailyReports);
@@ -246,7 +246,7 @@ public class SubstationController {
     @ApiOperation(value = "获取分站的仓库ID")
     public AjaxResult getSubwareId(@PathVariable("id") Long id) {
         Substation substation = substationService.getById(id);
-        if (substation == null) return AjaxResult.error("分站不存在");
+        if (substation == null) throw new ServiceException("分站不存在");
         return AjaxResult.success(substation.getSubwareId());
     }
 
@@ -255,8 +255,8 @@ public class SubstationController {
     public AjaxResult getSubstationId(@PathVariable("subwareId") Long subwareId) {
         QueryWrapper<Substation> eq = new QueryWrapper<Substation>().eq("subware_id", subwareId);
         List<Substation> list = substationService.list(eq);
-        if (list == null || list.size() == 0) return AjaxResult.error("分库ID对应的分站不存在");
-        if (list.size() > 1) return AjaxResult.error("分库ID对应的分站不唯一");
+        if (list == null || list.size() == 0) throw new ServiceException("分库ID对应的分站不存在");
+        if (list.size() > 1) throw new ServiceException("分库ID对应的分站不唯一");
         Substation substation = list.get(0);
         return AjaxResult.success(substation.getId());
     }

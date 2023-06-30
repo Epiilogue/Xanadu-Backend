@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication(scanBasePackages = {"edu.neu","com.ruoyi.common.security.handler","edu.neu.base.config"})
-@EnableFeignClients
+@EnableFeignClients(basePackages = {"edu.neu","com.ruoyi"})
 @EnableDiscoveryClient
 @EnableTransactionManagement
 public class WarehouseApplication {
