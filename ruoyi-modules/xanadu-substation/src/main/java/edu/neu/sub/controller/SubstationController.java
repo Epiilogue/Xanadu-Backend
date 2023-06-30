@@ -24,6 +24,7 @@ import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -214,6 +215,32 @@ public class SubstationController {
         return AjaxResult.success("删除成功");
     }
 
+    //todo 传入id状态置为true
+    @ApiOperation(value="修改报表状态为已结算")
+    @GetMapping("/updateDailyReportStatus/{dailyReportId}")
+    public AjaxResult updateDailyReportStatus(@PathVariable("dailyReportId") Long dailyReportId){
+        DailyReport dailyReport = dailyReportService.getById(dailyReportId);
+        if(dailyReport == null){
+            return AjaxResult.error("该报表不存在");
+        }
+        dailyReport.setIsSettled(true);
+        return AjaxResult.success("修改成功");
+    }
+
+    @ApiOperation(value="根据日期查询报表")
+    @GetMapping("/dailyReportsByDate")
+    public AjaxResult getData(@RequestParam("date") String dateStr) {
+        Date date = DateUtil.parse(dateStr, "yyyy-MM-dd HH:mm:ss");
+        System.out.println(date);
+        // 在这里处理接收到的Date类型参数
+        QueryWrapper<DailyReport> dailyReportQueryWrapper = new QueryWrapper<DailyReport>().between("statistic_time",DateUtil.beginOfDay(date),DateUtil.endOfDay(date));
+        List<DailyReport> dailyReports = dailyReportService.list(dailyReportQueryWrapper);
+        if(dailyReports == null){
+            return AjaxResult.error("暂无数据");
+        }
+        // 返回你的响应
+        return AjaxResult.success(dailyReports);
+    }
 
     @GetMapping("/feign/getSubwareId/{id}")
     @ApiOperation(value = "获取分站的仓库ID")
@@ -241,7 +268,7 @@ public class SubstationController {
      * 直接获取一个列表，这个需要保存到数据库，允许历史查看
      */
 
-    @PostMapping("/feign/generateSubstationStatistics")
+    @GetMapping("/generateSubstationStatistics")
     @ApiOperation(value = "生成当日分站统计信息，每日定时任务")
     public AjaxResult generateSubstationStatistics() {
         //拿到所有的子站
@@ -314,11 +341,13 @@ public class SubstationController {
             dailyReport.setFeedback(dailyReport.getFeedback() + receipt.getFeedback());
         }
         dailyReportMap.values().forEach(d -> {
+            d.setIsSettled(false);
             //计算待缴费钱为实际收款额-退款额-配送费
             d.setToPay(d.getReceive() - d.getRefund() - d.getDeliveryFee());
             //实际满意度为满意度总和/任务总数
             d.setFeedback(d.getFeedback() / (d.getFinishTaskNum() + d.getFailTaskNum() + d.getPartFinishTaskNum()));
         });
+        dailyReportService.saveBatch(dailyReportMap.values());
         return AjaxResult.success(new ArrayList<>(dailyReportMap.values()));
     }
 

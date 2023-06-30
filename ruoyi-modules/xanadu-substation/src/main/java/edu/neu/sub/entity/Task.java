@@ -31,7 +31,6 @@ import lombok.Setter;
 @TableName("sub_task")
 @ApiModel(value = "Task对象", description = "任务单")
 @AllArgsConstructor
-@NoArgsConstructor
 public class Task implements Serializable {
 
     private static final long serialVersionUID = 1L;

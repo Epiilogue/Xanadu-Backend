@@ -23,6 +23,10 @@ import java.util.Date;
 @Data
 public class DailyReport implements Serializable {
 
+    @ApiModelProperty("ID")
+    @TableField("id")
+    private Long id;
+
     @ApiModelProperty("分站ID")
     @TableField("substation_id")
     private Long substationId;
@@ -129,4 +133,6 @@ public class DailyReport implements Serializable {
         this.feedback = 0.0;
     }
 
+    public DailyReport() {
+    }
 }
