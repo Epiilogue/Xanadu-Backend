@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -47,13 +48,15 @@ public class Subware implements Serializable {
     @TableField("y")
     private Double y;
 
-    @ApiModelProperty("库管员")
-    @TableField("master")
-    private Long master;
 
     @ApiModelProperty("分库城市地址")
     @TableField("city")
     private String city;
+
+
+    @ApiModelProperty("分库房管理员ID列表")
+    @TableField(exist = false)
+    private List<Long> managerIds;
 
 
 }
