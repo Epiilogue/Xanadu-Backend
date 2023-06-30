@@ -6,6 +6,9 @@ import edu.neu.ware.entity.Centerware;
 import edu.neu.ware.service.CenterwareService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/ware/centerware")
 @Api(tags = "中心仓库配置管理,允许设置中心仓库的相关信息")
+@CacheConfig(cacheNames = "centerWareInfo")
 public class CenterwareController {
 
 
@@ -48,6 +52,7 @@ public class CenterwareController {
     }
 
     @GetMapping("/info")
+    @Cacheable
     public AjaxResult getCenterwareInfo() {
         Centerware centerware = centerwareService.getById(1);
         if (centerware == null) {

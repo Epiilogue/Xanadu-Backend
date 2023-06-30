@@ -7,6 +7,7 @@ import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.cc.entity.Customer;
 import edu.neu.cc.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.web.bind.annotation.*;
 
 /**
