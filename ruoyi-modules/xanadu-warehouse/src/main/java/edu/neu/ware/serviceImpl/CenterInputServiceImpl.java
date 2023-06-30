@@ -1,9 +1,11 @@
 package edu.neu.ware.serviceImpl;
 
+import com.ruoyi.common.redis.service.RedisService;
 import edu.neu.ware.entity.CenterInput;
 import edu.neu.ware.mapper.CenterInputMapper;
 import edu.neu.ware.service.CenterInputService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
