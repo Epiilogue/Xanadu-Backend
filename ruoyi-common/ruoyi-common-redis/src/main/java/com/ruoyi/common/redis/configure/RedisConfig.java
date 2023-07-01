@@ -3,6 +3,9 @@ package com.ruoyi.common.redis.configure;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cache.CacheManager;
@@ -87,5 +90,12 @@ public class RedisConfig extends CachingConfigurerSupport {
             }
             return sb.toString();
         };
+    }
+
+    @Bean
+    public RedissonClient redissonClient(){
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://localhost:6379").setDatabase(1);
+        return Redisson.create(config);
     }
 }

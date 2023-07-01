@@ -14,6 +14,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import lombok.val;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +40,9 @@ public class CenterStorageRecordController {
 
     @Autowired
     CenterStorageRecordService centerStorageRecordService;
+
+    @Autowired
+    RedissonClient redissonClient;//分布式锁
 
     @GetMapping("/getCount/{productId}")
     @ApiOperation("获取商品库存")
@@ -95,9 +100,8 @@ public class CenterStorageRecordController {
         }
         val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
         CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
-        if (centerStorageRecord == null) {
+        if (centerStorageRecord == null)
             return 0;//中心仓库中不存在该商品
-        }
         return centerStorageRecord.getTotalNum();
     }
 
@@ -108,15 +112,21 @@ public class CenterStorageRecordController {
         if (productId == null) {
             return null;//商品ID不能为空
         }
-        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
-        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
-        if (centerStorageRecord == null) {
-            return false;//中心仓库中不存在该商品,锁定失败
+        RLock lock = redissonClient.getLock("lock:" + productId);
+        try {
+            val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+            CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+            if (centerStorageRecord == null) {
+                return false;//中心仓库中不存在该商品,锁定失败
+            }
+            UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                    .setSql("lock_num=lock_num+" + num).setSql("allocate_able_num=allocate_able_num-" + num)
+                    .ge("allocate_able_num", num).eq("id", centerStorageRecord.getId());
+            return centerStorageRecordService.update(updateWrapper);
+        } finally {
+            lock.unlock();
         }
-        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
-                .setSql("lock_num=lock_num+" + num).setSql("allocate_able_num=allocate_able_num-" + num)
-                .ge("allocate_able_num", num).eq("id", centerStorageRecord.getId());
-        return centerStorageRecordService.update(updateWrapper);
+
     }
 
 
@@ -126,20 +136,26 @@ public class CenterStorageRecordController {
         if (productId == null) {
             return null;//商品ID不能为空
         }
-        val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
-        CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
-        if (centerStorageRecord == null) {
-            return false;//中心仓库中不存在该商品,解锁失败
+        RLock lock = redissonClient.getLock("lock:" + productId);
+        try {
+            val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+            CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
+            if (centerStorageRecord == null) {
+                return false;//中心仓库中不存在该商品,解锁失败
+            }
+            UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                    .setSql("lock_num=lock_num-" + num).setSql("allocate_able_num=allocate_able_num+" + num)
+                    .ge("lock_num", num).eq("id", centerStorageRecord.getId());
+            return centerStorageRecordService.update(updateWrapper);
+        } finally {
+            lock.unlock();
         }
-        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
-                .setSql("lock_num=lock_num-" + num).setSql("allocate_able_num=allocate_able_num+" + num)
-                .ge("lock_num", num).eq("id", centerStorageRecord.getId());
-        return centerStorageRecordService.update(updateWrapper);
     }
 
     @PutMapping("/feign/dispatch/{productId}/{num}/{from}")
     @ApiOperation("分配商品库存,将商品库存由锁定的数量添加到已分配的数量中")
-    public AjaxResult dispatch(@PathVariable("productId") Long productId, @PathVariable("num") Integer num, @PathVariable("from") String from) {
+    public AjaxResult dispatch(@PathVariable("productId") Long productId, @PathVariable("num") Integer
+            num, @PathVariable("from") String from) {
         if (productId == null) {
             return AjaxResult.error("商品ID不能为空");
         }
@@ -148,19 +164,24 @@ public class CenterStorageRecordController {
         if (centerStorageRecord == null) {
             return AjaxResult.error("中心仓库中不存在该商品,分配失败");
         }
-        UpdateWrapper<CenterStorageRecord> updateWrapper = null;
-        if (from.equals("lock")) {
-            updateWrapper = new UpdateWrapper<CenterStorageRecord>()
-                    .setSql("lock_num=lock_num-" + num).setSql("allocated_num=allocated_num+" + num)
-                    .ge("lock_num", num).eq("id", centerStorageRecord.getId());
-        } else if (from.equals("unlock")) {
-            updateWrapper = new UpdateWrapper<CenterStorageRecord>()
-                    .setSql("allocate_able_num=allocate_able_num-" + num).setSql("allocated_num=allocated_num+" + num)
-                    .ge("allocate_able_num", num).eq("id", centerStorageRecord.getId());
+        RLock lock = redissonClient.getLock("lock:" + productId);
+        try {
+            UpdateWrapper<CenterStorageRecord> updateWrapper = null;
+            if (from.equals("lock")) {
+                updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                        .setSql("lock_num=lock_num-" + num).setSql("allocated_num=allocated_num+" + num)
+                        .ge("lock_num", num).eq("id", centerStorageRecord.getId());
+            } else if (from.equals("unlock")) {
+                updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                        .setSql("allocate_able_num=allocate_able_num-" + num).setSql("allocated_num=allocated_num+" + num)
+                        .ge("allocate_able_num", num).eq("id", centerStorageRecord.getId());
+            }
+            boolean update = centerStorageRecordService.update(updateWrapper);
+            if (update) return AjaxResult.success("分配成功");
+            else throw new ServiceException("分配失败");
+        } finally {
+            lock.unlock();
         }
-        boolean update = centerStorageRecordService.update(updateWrapper);
-        if (update) return AjaxResult.success("分配成功");
-        else throw new ServiceException("分配失败");
     }
 
     @GetMapping("/feign/getStorage/{productId}")
@@ -174,19 +195,26 @@ public class CenterStorageRecordController {
         if (centerStorageRecord == null) {
             return new StorageVo();//中心仓库中不存在该商品
         }
-        StorageVo storageVo = new StorageVo();
-        storageVo.setTotalNum(centerStorageRecord.getTotalNum());
-        storageVo.setLockedNum(centerStorageRecord.getLockNum());
-        storageVo.setReturnedNum(centerStorageRecord.getRefundNum());
-        storageVo.setAvailableNum(centerStorageRecord.getAllocateAbleNum());
-        storageVo.setAllocatedNum(centerStorageRecord.getAllocatedNum());
-        return storageVo;
+
+        RLock lock = redissonClient.getLock("lock:" + productId);
+        try {
+            StorageVo storageVo = new StorageVo();
+            storageVo.setTotalNum(centerStorageRecord.getTotalNum());
+            storageVo.setLockedNum(centerStorageRecord.getLockNum());
+            storageVo.setReturnedNum(centerStorageRecord.getRefundNum());
+            storageVo.setAvailableNum(centerStorageRecord.getAllocateAbleNum());
+            storageVo.setAllocatedNum(centerStorageRecord.getAllocatedNum());
+            return storageVo;
+        } finally {
+            lock.unlock();
+        }
     }
 
 
     @PutMapping("/feign/reDispatch/{productId}/{prevNum}/{nowNum}")
     @ApiOperation("回滚商品分配库存")
-    AjaxResult reDispatch(@PathVariable("productId") Long productId, @PathVariable("prevNum") Integer prevNum, @PathVariable("nowNum") Integer nowNum) {
+    AjaxResult reDispatch(@PathVariable("productId") Long productId, @PathVariable("prevNum") Integer
+            prevNum, @PathVariable("nowNum") Integer nowNum) {
         if (productId == null) {
             return AjaxResult.error("商品ID不能为空");
         }
@@ -195,19 +223,23 @@ public class CenterStorageRecordController {
         if (centerStorageRecord == null) {
             return AjaxResult.error("中心仓库中不存在该商品,撤回分配库存失败");
         }
-        UpdateWrapper<CenterStorageRecord> rollbackWrapper = new UpdateWrapper<CenterStorageRecord>()
-                .setSql("allocated_num=allocated_num-" + prevNum).setSql("allocate_able_num=allocate_able_num+" + prevNum)
-                .ge("allocated_num", prevNum).eq("id", centerStorageRecord.getId());
-        boolean update = centerStorageRecordService.update(rollbackWrapper);
-        if (!update) throw new ServiceException("撤回分配库存失败");
+        RLock lock = redissonClient.getLock("lock:" + productId);
+        try {
+            UpdateWrapper<CenterStorageRecord> rollbackWrapper = new UpdateWrapper<CenterStorageRecord>()
+                    .setSql("allocated_num=allocated_num-" + prevNum).setSql("allocate_able_num=allocate_able_num+" + prevNum)
+                    .ge("allocated_num", prevNum).eq("id", centerStorageRecord.getId());
+            boolean update = centerStorageRecordService.update(rollbackWrapper);
+            if (!update) throw new ServiceException("撤回分配库存失败");
 
-        UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
-                .setSql("allocate_able_num=allocate_able_num-" + nowNum).setSql("allocated_num=allocated_num+" + nowNum)
-                .ge("allocate_able_num", nowNum).eq("id", centerStorageRecord.getId());
-        update = centerStorageRecordService.update(updateWrapper);
-        if (update) return AjaxResult.success("调度成功");
-        else throw new ServiceException("调度失败");
-
+            UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
+                    .setSql("allocate_able_num=allocate_able_num-" + nowNum).setSql("allocated_num=allocated_num+" + nowNum)
+                    .ge("allocate_able_num", nowNum).eq("id", centerStorageRecord.getId());
+            update = centerStorageRecordService.update(updateWrapper);
+            if (update) return AjaxResult.success("调度成功");
+            else throw new ServiceException("调度失败");
+        } finally {
+            lock.unlock();
+        }
     }
 
 

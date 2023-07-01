@@ -112,7 +112,6 @@ public class CustomerController {
      * 用户列表查询
      * */
     @GetMapping("/list/{page}/{size}")
-    @Cacheable
     public AjaxResult list(@PathVariable("page") Long page, @PathVariable("size") Long size) {
         //分页查询客户信息
         Page<Customer> customerPage = customerService.page(new Page<>(page, size));
