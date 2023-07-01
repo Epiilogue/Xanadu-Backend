@@ -17,6 +17,9 @@ import edu.neu.ware.service.SubStorageRecordService;
 import edu.neu.ware.service.SubwareService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
 @RestController
 @Transactional
 @RequestMapping("/ware/subware")
+@CacheConfig(cacheNames = "subware")
 public class SubwareController {
 
     //分库的增加,前端需要选择好城市等信息，还需要选择库管员
@@ -112,6 +116,7 @@ public class SubwareController {
 
     @PostMapping("/update")
     @ApiOperation(value = "修改分库", notes = "修改分库")
+    @CacheEvict(key = "#subware.id")
     public AjaxResult updateSubware(@RequestBody Subware subware) {
 
         String valitedResult = subwareService.validateSubware(subware);
@@ -128,6 +133,7 @@ public class SubwareController {
     }
 
     @GetMapping("/delete/{id}")
+    @CacheEvict(key = "#id")
     @ApiOperation(value = "删除分库", notes = "删除分库")
     public AjaxResult deleteSubware(@PathVariable Long id) {
         Subware subware = subwareService.getById(id);
@@ -152,6 +158,7 @@ public class SubwareController {
     }
 
     @GetMapping("/get/{id}")
+    @Cacheable( key = "#id")
     @ApiOperation(value = "获取分库", notes = "获取分库")
     public AjaxResult getSubware(@PathVariable Long id) {
         Subware subware = subwareService.getById(id);

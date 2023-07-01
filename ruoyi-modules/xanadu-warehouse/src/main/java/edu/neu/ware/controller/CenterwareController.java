@@ -7,6 +7,7 @@ import edu.neu.ware.service.CenterwareService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ public class CenterwareController {
 
 
     @PostMapping("/edit")
+    @CacheEvict(allEntries = true)
     public AjaxResult editCenterware(@RequestBody Centerware centerware) {
         if (centerware == null) {
             return AjaxResult.error("中心仓库信息不能为空");

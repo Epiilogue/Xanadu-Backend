@@ -292,7 +292,7 @@ public class DispatchController {
 
     @PostMapping("/editDispatch")
     @ApiOperation(value = "修改商品调度单, 只允许修改调度的数量以及时间，目的地等信息", notes = "修改商品调度单")
-    @CacheEvict(key = "#id")
+    @CacheEvict(key = "#dispatch.id")
     public AjaxResult editDispatch(@RequestBody Dispatch dispatch) {
 
         if (dispatch.getTaskId() != null) throw new ServiceException("该调度单已与任务单关联，不允许修改");
