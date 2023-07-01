@@ -39,6 +39,14 @@ spring:
             data-type: json
             rule-type: gw-flow
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            exposedHeaders: "Content-Disposition,Content-Type,Cache-Control"
       discovery:
         locator:
           lowerCaseServiceId: true

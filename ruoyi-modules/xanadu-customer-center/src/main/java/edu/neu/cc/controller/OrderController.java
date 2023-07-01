@@ -1,6 +1,8 @@
 package edu.neu.cc.controller;
 
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -31,7 +33,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/cc/order")
 public class OrderController {
 
-
     @Autowired
     private OrderService orderService;
 
@@ -46,6 +47,19 @@ public class OrderController {
 
     @Autowired
     private StockoutService stockoutService;
+
+    @ApiOperation("获取已完成订单列表,数据大屏使用")
+    @GetMapping("/listAll")
+    public AjaxResult listAll(){
+        List<Order> orderList = orderService.list();
+        List<Order> completed = new ArrayList<>();
+        for(Order order : orderList){
+            if(order.getStatus().equals(OrderStatusConstant.COMPLETED))
+                completed.add(order);
+        }
+        return AjaxResult.success(completed);
+    }
+
 
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
     @GetMapping("/list/{customerId}")
@@ -135,6 +149,41 @@ public class OrderController {
         boolean b = orderService.updateById(order);
         if (!b) return AjaxResult.error("更新订单状态失败");
         return AjaxResult.success("订单状态更新成功,订单可分配");
+    }
+
+
+    @ApiOperation("分类统计每月订单数量")
+    @GetMapping("/getMonthlyOrdersByType")
+    public AjaxResult getMonthlyOrdersByType() {
+        List<Order> orderList = orderService.list();
+        Map<String, Object> orderMap = new HashMap<>();
+        int[] colListOrder = new int[13];
+        int[] colListExchange = new int[13];
+        int[] colListReturn = new int[13];
+        Arrays.fill(colListOrder,0);
+        Arrays.fill(colListReturn,0);
+        Arrays.fill(colListExchange,0);
+        for (Order order : orderList) {
+            switch (order.getOrderType()) {
+                case OperationTypeConstant.ORDER:
+                    int month = DateUtil.month(order.getCreateTime()) + 1;
+                    System.out.println(month);
+                    colListOrder[month]++;
+                    break;
+                case OperationTypeConstant.EXCHANGE:
+                    month = DateUtil.month(order.getCreateTime()) + 1;
+                    colListExchange[month]++;
+                    break;
+                case OperationTypeConstant.RETURN:
+                    month = DateUtil.month(order.getCreateTime()) + 1;
+                    colListReturn[month]++;
+                    break;
+            }
+        }
+        orderMap.put(OperationTypeConstant.ORDER, colListOrder);
+        orderMap.put(OperationTypeConstant.EXCHANGE, colListExchange);
+        orderMap.put(OperationTypeConstant.RETURN, colListReturn);
+        return AjaxResult.success(orderMap);
     }
 
 
