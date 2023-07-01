@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="edu.neu.ware.mapper.SubwareMapper">
+    <insert id="addMaster">
+        insert into ware_sub_master(master_id, subware_id)
+        values (#{masterId}, #{subwareId})
+    </insert>
+    <update id="removeMasters">
+        delete
+        from ware_sub_master
+        where subware_id = #{subwareId}
+    </update>
 
+
+    <select id="getAllSubwareManager" resultType="java.lang.Long">
+        select master_id from ware_sub_master
+    </select>
+    <select id="getSubwareIdByManagerId" resultType="java.lang.Long">
+        select subware_id from ware_sub_master where master_id = #{managerId}
+    </select>
+    <select id="getSubwareMatsers" resultType="java.lang.Long">
+        select master_id from ware_sub_master where subware_id = #{subwareId}
+    </select>
 </mapper>

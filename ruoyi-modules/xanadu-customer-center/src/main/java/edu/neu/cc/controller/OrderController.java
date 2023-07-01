@@ -20,6 +20,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -34,6 +38,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/cc/order")
+@CacheConfig(cacheNames = "order")
 public class OrderController {
 
 
@@ -80,6 +85,7 @@ public class OrderController {
 
     @ApiOperation("根据订单ID，获取订单详情")
     @GetMapping("/detail/{orderId}/{orderType}")
+    @Cacheable(key = "#orderId")
     public AjaxResult getOrderDetailByOrderId(
             @ApiParam(name = "orderId", value = "订单ID") @PathVariable Long orderId,
             @ApiParam(name = "orderType", value = "订单类型") @PathVariable String orderType) {
@@ -108,6 +114,7 @@ public class OrderController {
 
     @ApiOperation("修改订单状态")
     @PostMapping("/update/{orderId}/{status}")
+    @CacheEvict(key = "#orderId")
     public AjaxResult updateOrderStatus(
             @ApiParam(name = "orderId", value = "订单ID") @PathVariable Long orderId,
             @ApiParam(name = "status", value = "订单状态") @PathVariable String status) {
@@ -130,6 +137,7 @@ public class OrderController {
 
     @ApiOperation("批量更新订单状态,远程调用专用")
     @PostMapping("/feign/batchUpdateStatus")
+    @CacheEvict(allEntries = true)
     public Boolean batchUpdateStatus(@RequestParam("status") String status, @RequestBody List<Long> orderIdList) {
         return orderService.batchUpdateStatus(status, orderIdList);
     }
@@ -137,6 +145,7 @@ public class OrderController {
 
     @ApiOperation("根据订单ID检查订单是否可从缺货到货")
     @GetMapping("/feign/checkAllArrival/{id}")
+    @CacheEvict(key = "#id")
     public AjaxResult checkAllArrival(@PathVariable("id") Long id) {
         //先校验，检查订单是否存在
         Order order = orderService.getById(id);
@@ -161,6 +170,7 @@ public class OrderController {
 
     @ApiOperation("根据订单ID获取订单信息")
     @GetMapping("/feign/getOrder/{id}")
+    @Cacheable(key = "#id")
     public AjaxResult getOrderById(@PathVariable("id") Long id) {
         Order order = orderService.getById(id);
         if (order == null) return AjaxResult.error("订单不存在");
@@ -205,6 +215,7 @@ public class OrderController {
     }
 
     @PostMapping("/feign/updateOrderSubstationId/{substationId}/{orderId}")
+    @CacheEvict(key = "#orderId")
     public Boolean updateOrderSubstationId(@PathVariable("substationId") Long substationId, @PathVariable("orderId") Long orderId) {
         NewOrder newOrder = newOrderService.getById(orderId);
         if (newOrder == null) return false;
@@ -214,6 +225,7 @@ public class OrderController {
 
 
     @GetMapping("/feign/listTopProduct/{number}")
+    @Cacheable
     public AjaxResult listTopProducts(@RequestParam("startTime") Date startTime,
                                       @RequestParam("endTime") Date endTime,
                                       @RequestParam("number") Integer number) {

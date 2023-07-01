@@ -11,7 +11,7 @@
  Target Server Version : 50719
  File Encoding         : 65001
 
- Date: 20/06/2023 14:40:12
+ Date: 30/06/2023 10:46:36
 */
 
 SET NAMES utf8mb4;
@@ -117,6 +117,16 @@ CREATE TABLE `ware_sub_input`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Table structure for ware_sub_master
+-- ----------------------------
+DROP TABLE IF EXISTS `ware_sub_master`;
+CREATE TABLE `ware_sub_master`  (
+  `subware_id` bigint(20) NOT NULL COMMENT '分库ID',
+  `master_id` bigint(20) NULL DEFAULT NULL COMMENT '分库管理员ID',
+  PRIMARY KEY (`subware_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for ware_sub_output
 -- ----------------------------
 DROP TABLE IF EXISTS `ware_sub_output`;
@@ -125,7 +135,7 @@ CREATE TABLE `ware_sub_output`  (
   `output_id` bigint(20) NULL DEFAULT NULL COMMENT '任务ID',
   `product_id` bigint(20) NULL DEFAULT NULL COMMENT '商品ID',
   `product_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品名称',
-  `ouput_num` int(10) NULL DEFAULT NULL COMMENT '出库数量',
+  `output_num` int(10) NULL DEFAULT NULL COMMENT '出库数量',
   `output_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出库类型(退货或者领货)',
   `output_time` datetime NULL DEFAULT NULL COMMENT '出库时间',
   `subware_id` bigint(10) NULL DEFAULT NULL COMMENT '出库分站ID',
@@ -164,7 +174,6 @@ CREATE TABLE `ware_subware`  (
   `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库房地址',
   `x` double(20, 4) NULL DEFAULT NULL COMMENT '经度',
   `y` double(20, 4) NULL DEFAULT NULL COMMENT '纬度',
-  `master` bigint(20) NULL DEFAULT NULL COMMENT '库管员',
   `city` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '分库城市地址',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;

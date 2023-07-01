@@ -23,6 +23,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +43,7 @@ import java.util.*;
 @RequestMapping("/dpc/dispatch")
 @Api(value = "调度中心", tags = "调度中心")
 @Transactional
+@CacheConfig(cacheNames = "dispatch")
 public class DispatchController {
 
     //1. 列出所有的订单，可以复用order接口，获取所有订单
@@ -74,6 +78,7 @@ public class DispatchController {
 
     @GetMapping("/get/{id}")
     @ApiOperation("获取调拨单")
+    @Cacheable(key = "#id")
     public AjaxResult get(@PathVariable Integer id) {
         Dispatch dispatch = dispatchService.getById(id);
         if (dispatch == null) {
@@ -249,6 +254,7 @@ public class DispatchController {
 
     @PutMapping("/feign/updateDispatchStatus/{id}")
     @ApiOperation("更新调度单状态为已出库,传入参数为调度单id和调度单信息")
+    @CacheEvict(key = "#id")
     public AjaxResult updateDispatchStatus(@ApiParam("调度单ID") @PathVariable("id") Long id) {
         //修改调度单状态为已提交
         Dispatch dispatch = dispatchService.getById(id);
@@ -263,6 +269,7 @@ public class DispatchController {
 
     @DeleteMapping("/deleteDispatch/{id}")
     @ApiOperation(value = "删除调度单,传入参数为调度单id", notes = "删除调度单")
+    @CacheEvict(key = "#id")
     public AjaxResult deleteDispatch(@ApiParam("调度单ID") @PathVariable("id") Long id) {
         //修改调度单状态为已提交
         Dispatch dispatch = dispatchService.getById(id);
@@ -285,6 +292,7 @@ public class DispatchController {
 
     @PostMapping("/editDispatch")
     @ApiOperation(value = "修改商品调度单, 只允许修改调度的数量以及时间，目的地等信息", notes = "修改商品调度单")
+    @CacheEvict(key = "#dispatch.id")
     public AjaxResult editDispatch(@RequestBody Dispatch dispatch) {
 
         if (dispatch.getTaskId() != null) throw new ServiceException("该调度单已与任务单关联，不允许修改");
@@ -325,6 +333,7 @@ public class DispatchController {
 
     @GetMapping("/info/{id}")
     @ApiOperation(value = "获取调度单信息", notes = "获取调度单信息")
+    @Cacheable(key = "#id")
     public AjaxResult getDispatchInfo(@ApiParam("调度单ID") @PathVariable("id") Long id) {
         Dispatch dispatch = dispatchService.getById(id);
         if (dispatch == null) return AjaxResult.error("调度单不存在");

@@ -24,6 +24,9 @@ import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -66,7 +69,7 @@ public class SubstationController {
     public AjaxResult infoByUser(@PathVariable("userId") Long userId) {
         Substation substation = substationService.getByManagerId(userId);
         if (substation == null) {
-            return AjaxResult.error("该用户尚未管理分站");
+            throw new ServiceException("该用户尚未管理分站");
         }
         return AjaxResult.success(substation);
     }
@@ -100,7 +103,7 @@ public class SubstationController {
     @GetMapping("/getSubstationManager/{substationId}")
     public AjaxResult getSubstationManager(@PathVariable("substationId") Long substationId) {
         Substation substation = substationService.getById(substationId);
-        if (substation == null) return AjaxResult.error("分站不存在");
+        if (substation == null) throw new ServiceException("分站不存在");
         List<Long> ids = substationService.getSubstationMatsers(substationId);
         if (ids == null || ids.size() == 0) return AjaxResult.success("该分站没有管理员");
         AjaxResult ajaxResult = remoteUserService.listByRole(UserRoles.SUBSTATION_MANAGER);
@@ -120,9 +123,9 @@ public class SubstationController {
         //分站与快递员是一对多
         //如果有，就不能添加
         QueryWrapper<Substation> subwareEq = new QueryWrapper<Substation>().eq("subware_id", substation.getSubwareId());
-        if (substationService.getOne(subwareEq) != null) return AjaxResult.error("该仓库已经被其他分站使用");
+        if (substationService.getOne(subwareEq) != null) throw new ServiceException("该仓库已经被其他分站使用");
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
-        if (substationService.getOne(addressEq) != null) return AjaxResult.error("同地址下已有分站");
+        if (substationService.getOne(addressEq) != null) throw new ServiceException("同地址下已有分站");
         substationService.save(substation);
         //需要添加管理员与分站的关系，我们默认此时提交的id里不会存在有已经管理别的分站的ID
         Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
@@ -139,10 +142,10 @@ public class SubstationController {
         QueryWrapper<Substation> addressEq = new QueryWrapper<Substation>().eq("address", substation.getAddress());
         Substation one = substationService.getOne(addressEq);
         if (one != null && !Objects.equals(one.getId(), substation.getId()))
-            return AjaxResult.error("同地址下已有分站");
+            throw new ServiceException("同地址下已有分站");
         //不允许更新分库
         Substation byId = substationService.getById(substation.getId());
-        if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) return AjaxResult.error("不允许更新分库");
+        if (!Objects.equals(byId.getSubwareId(), substation.getSubwareId())) throw new ServiceException("不允许更新分库");
         substationService.updateById(substation);
         substationService.removeMasters(substation.getId());
         substationService.addMasters(substation.getId(), substation.getAdminIds());
@@ -155,10 +158,10 @@ public class SubstationController {
         //删除分站，需要注意的是分站的管理人和仓库都是一对一，我们首先需要查询是否有其他分站有相同的管理人或者仓库
         //如果有，就不能添加
         Substation byId = substationService.getById(id);
-        if (byId == null) return AjaxResult.error("分站不存在");
+        if (byId == null) throw new ServiceException("分站不存在");
         //检查是否存在相同地址,需要进行远程调用，查询订单表，是否存在分站ID，如果存在则无法删除、
         Boolean orderCountBySubstationId = orderClient.getOrderCountBySubstationId(id);
-        if (orderCountBySubstationId) return AjaxResult.error("该分站存在订单，无法删除");
+        if (orderCountBySubstationId) throw new ServiceException("该分站存在订单，无法删除");
         substationService.removeById(id);
         substationService.removeMasters(id);
         return AjaxResult.success("删除成功");
@@ -210,16 +213,42 @@ public class SubstationController {
     public AjaxResult deleteCourier(@PathVariable("substationId") Long substationId, @PathVariable("courierId") Long courierId) {
         //如果有，就不能添加
         int result = substationService.deleteCourier(substationId, courierId);
-        if (result == 0) return AjaxResult.error("删除失败");
+        if (result == 0) throw new ServiceException("删除失败");
         return AjaxResult.success("删除成功");
     }
 
+    //todo 传入id状态置为true
+    @ApiOperation(value="修改报表状态为已结算")
+    @GetMapping("/updateDailyReportStatus/{dailyReportId}")
+    public AjaxResult updateDailyReportStatus(@PathVariable("dailyReportId") Long dailyReportId){
+        DailyReport dailyReport = dailyReportService.getById(dailyReportId);
+        if(dailyReport == null){
+            throw new ServiceException("该报表不存在");
+        }
+        dailyReport.setIsSettled(true);
+        return AjaxResult.success("修改成功");
+    }
+
+    @ApiOperation(value="根据日期查询报表")
+    @GetMapping("/dailyReportsByDate")
+    public AjaxResult getData(@RequestParam("date") String dateStr) {
+        Date date = DateUtil.parse(dateStr, "yyyy-MM-dd HH:mm:ss");
+        System.out.println(date);
+        // 在这里处理接收到的Date类型参数
+        QueryWrapper<DailyReport> dailyReportQueryWrapper = new QueryWrapper<DailyReport>().between("statistic_time",DateUtil.beginOfDay(date),DateUtil.endOfDay(date));
+        List<DailyReport> dailyReports = dailyReportService.list(dailyReportQueryWrapper);
+        if(dailyReports == null){
+            throw new ServiceException("暂无数据");
+        }
+        // 返回你的响应
+        return AjaxResult.success(dailyReports);
+    }
 
     @GetMapping("/feign/getSubwareId/{id}")
     @ApiOperation(value = "获取分站的仓库ID")
     public AjaxResult getSubwareId(@PathVariable("id") Long id) {
         Substation substation = substationService.getById(id);
-        if (substation == null) return AjaxResult.error("分站不存在");
+        if (substation == null) throw new ServiceException("分站不存在");
         return AjaxResult.success(substation.getSubwareId());
     }
 
@@ -228,8 +257,8 @@ public class SubstationController {
     public AjaxResult getSubstationId(@PathVariable("subwareId") Long subwareId) {
         QueryWrapper<Substation> eq = new QueryWrapper<Substation>().eq("subware_id", subwareId);
         List<Substation> list = substationService.list(eq);
-        if (list == null || list.size() == 0) return AjaxResult.error("分库ID对应的分站不存在");
-        if (list.size() > 1) return AjaxResult.error("分库ID对应的分站不唯一");
+        if (list == null || list.size() == 0) throw new ServiceException("分库ID对应的分站不存在");
+        if (list.size() > 1) throw new ServiceException("分库ID对应的分站不唯一");
         Substation substation = list.get(0);
         return AjaxResult.success(substation.getId());
     }
@@ -241,7 +270,7 @@ public class SubstationController {
      * 直接获取一个列表，这个需要保存到数据库，允许历史查看
      */
 
-    @PostMapping("/feign/generateSubstationStatistics")
+    @GetMapping("/generateSubstationStatistics")
     @ApiOperation(value = "生成当日分站统计信息，每日定时任务")
     public AjaxResult generateSubstationStatistics() {
         //拿到所有的子站
@@ -314,11 +343,13 @@ public class SubstationController {
             dailyReport.setFeedback(dailyReport.getFeedback() + receipt.getFeedback());
         }
         dailyReportMap.values().forEach(d -> {
+            d.setIsSettled(false);
             //计算待缴费钱为实际收款额-退款额-配送费
             d.setToPay(d.getReceive() - d.getRefund() - d.getDeliveryFee());
             //实际满意度为满意度总和/任务总数
             d.setFeedback(d.getFeedback() / (d.getFinishTaskNum() + d.getFailTaskNum() + d.getPartFinishTaskNum()));
         });
+        dailyReportService.saveBatch(dailyReportMap.values());
         return AjaxResult.success(new ArrayList<>(dailyReportMap.values()));
     }
 

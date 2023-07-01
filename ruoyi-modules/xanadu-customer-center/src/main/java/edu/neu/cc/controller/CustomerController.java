@@ -10,6 +10,7 @@ import edu.neu.cc.entity.Order;
 import edu.neu.cc.service.CustomerService;
 import edu.neu.cc.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/cc/customer")
+@CacheConfig(cacheNames = "customer")
 public class CustomerController {
 
     //提供后端增删改查接口
@@ -38,6 +40,7 @@ public class CustomerController {
      * 创建新用户
      */
     @PostMapping("/create")
+    @CacheEvict(key = "'listAll'")
     public AjaxResult create(@RequestBody Customer customer) {
         //校验用户信息是否合法
         if (customer == null) {
@@ -55,6 +58,10 @@ public class CustomerController {
      * 删除用户,逻辑删除
      */
     @GetMapping("/delete/{id}")
+    @Caching(evict = {
+            @CacheEvict(key = "#id"),
+            @CacheEvict(key = "'listAll'")
+    })
     public AjaxResult delete(@PathVariable("id") Long id) {
         //校验用户信息是否合法
         if (id == null) {
@@ -77,6 +84,10 @@ public class CustomerController {
      * 更新用户信息
      */
     @PostMapping("/update")
+    @Caching(evict = {
+            @CacheEvict(key = "#customer.id"),
+            @CacheEvict(key = "'listAll'")
+    })
     public AjaxResult update(@RequestBody Customer customer) {
         //校验用户信息是否合法
         if (customer == null) {
@@ -97,6 +108,7 @@ public class CustomerController {
      * @return AjaxResult
      */
     @GetMapping("/query/{id}")
+    @Cacheable(key = "#id")
     public AjaxResult query(@PathVariable("id") Long id) {
         //校验用户信息是否合法
         if (id == null) {
@@ -110,6 +122,20 @@ public class CustomerController {
         return AjaxResult.success("查询用户成功", customer);
     }
 
+    /*
+     * 用户列表查询
+     * */
+    @GetMapping("/list/{page}/{size}")
+    @Cacheable
+    public AjaxResult list(@PathVariable("page") Long page, @PathVariable("size") Long size) {
+        //分页查询客户信息
+        Page<Customer> customerPage = customerService.page(new Page<>(page, size));
+        if (customerPage == null) {
+            return AjaxResult.error("查询用户列表失败");
+        }
+        //返回结果
+        return AjaxResult.success("查询用户列表成功", customerPage);
+    }
     /*
      * 用户列表查询
      * */
@@ -133,6 +159,7 @@ public class CustomerController {
     }
 
     @GetMapping("/listAll")
+    @Cacheable(key = "'listAll'")
     public AjaxResult listAll() {
         //查询客户信息
         return AjaxResult.success("查询用户列表成功", customerService.list());

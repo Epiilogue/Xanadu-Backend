@@ -14,6 +14,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -33,6 +37,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/cc/stockout")
+@CacheConfig(cacheNames = "stockout")
 public class StockoutController {
 
     @Autowired
@@ -53,6 +58,7 @@ public class StockoutController {
 
     @GetMapping("/listAll")
     @ApiOperation("获取所有缺货记录")
+    @Cacheable(key = "'listAll'")
     public AjaxResult list() {
         List<Stockout> list = stockoutService.list();
         if (list == null || list.size() == 0) {
@@ -63,6 +69,7 @@ public class StockoutController {
 
     @GetMapping("/get/{id}")
     @ApiOperation("获取一条缺货记录")
+    @Cacheable(key = "#id")
     public AjaxResult getStockOut(@PathVariable(value = "id") String id){
         Stockout stockout = stockoutService.getById(id);
         if(stockout == null){
@@ -72,6 +79,7 @@ public class StockoutController {
     }
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
+    @CacheEvict(key = "#stockout.id")
     public AjaxResult edit(@RequestBody Stockout stockout) {
         if (stockoutService.getById(stockout.getId()).getStatus().equals(StockoutConstant.UNCOMMITTED)) {
             val prevStockout = stockoutService.getById(stockout.getId());
@@ -89,6 +97,7 @@ public class StockoutController {
 
     @PostMapping("/add")
     @ApiOperation("新增缺货记录,不用选订单ID，但是需要选择商品ID,前端需要添加创建缺货记录页面，选择商品以及数量即可")
+    @CacheEvict(key = "'listAll'")
     public AjaxResult add(@RequestBody Stockout stockout) {
         stockout.setId(null);
         stockout.setDeleted(false);
@@ -102,6 +111,7 @@ public class StockoutController {
 
     @PutMapping("/commit/{id}")
     @ApiOperation("提交缺货记录")
+    @CacheEvict(key = "#id")
     public AjaxResult commit(@ApiParam("缺货记录ID") @PathVariable(value = "id", required = false) Long id) {
         val stockout = stockoutService.getById(id);
         if (stockout.getStatus().equals(StockoutConstant.UNCOMMITTED)) {
@@ -115,6 +125,7 @@ public class StockoutController {
 
     @PutMapping("/arrival/{id}")
     @ApiOperation("到货")
+    @CacheEvict(key = "#id")
     public AjaxResult arrival(@ApiParam("缺货记录ID") @PathVariable(value = "id", required = false) Long id) {
         val stockout = stockoutService.getById(id);
         if (stockout.getStatus().equals(StockoutConstant.COMMITTED)) {

@@ -8,6 +8,7 @@ import edu.neu.cc.vo.OperationContactResultVo;
 import edu.neu.cc.vo.OperationResultVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,8 @@ public class OperationResultController {
 
     @ApiOperation(value = "传入用户ID，开始时间，结束时间，操作类型，返回操作结果列表，返回的结果为商品名，商品总价值，商品数量等信息")
     @PostMapping("/listOperationResult/{userId}")
+    @Cacheable(cacheNames = "operationResult")
+    public AjaxResult listOperationResult(Long userId, @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime) {
     public AjaxResult listOperationResult(Long userId, @RequestParam("startTime") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startTime, @RequestParam("endTime") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endTime) {
         //查询一次，获取到所有商品的信息，然后需要合并相同的商品，使用stream map合并至新的list
         List<OperationResultVo> operationResultVos = operationResultService.listOperationResult(userId, startTime, endTime);

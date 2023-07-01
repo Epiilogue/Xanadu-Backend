@@ -202,7 +202,8 @@ public class TaskController {
     }
 
 
-    @GetMapping("/getTasksByCourierId/{subId}/{courierId}")
+
+    @GetMapping("/getTasksByCourierId/{courierId}")
     @ApiOperation(value = "根据快递员ID获取所有任务记录,列表后有两个按钮，一个是填写回执，一个是查看详情，查看详情可以任务里面的商品列表")
     public AjaxResult getTasksByCourierId(@PathVariable("courierId") Long courierId) {
         List<Task> tasks = taskService.getTasksByCourierId(courierId);
