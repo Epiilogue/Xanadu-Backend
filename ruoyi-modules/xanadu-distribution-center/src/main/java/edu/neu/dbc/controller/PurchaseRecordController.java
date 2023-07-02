@@ -27,6 +27,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.HashedMap;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.spring.cache.RedissonCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +76,9 @@ public class PurchaseRecordController {
 
     @Autowired
     RefundService refundService;
+
+    @Autowired
+    RedissonClient redissonClient;
 
     @ApiOperation("列表查看采购单，后面有已到货按钮，点击后，需要填写实际到货数量，将采购单状态置为已到货，生成入库调拨单")
     @GetMapping("/list")
@@ -160,7 +166,7 @@ public class PurchaseRecordController {
      */
     @ApiOperation("供应商结算远程查询接口，允许查询指定供应商，指定商品，指定时间段的结算信息,必须要指定供应商，但是可以不用指定商品，必须指定时间段")
     @GetMapping("/feign/settlement")
-    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId",required = false) Long productId,
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId", required = false) Long productId,
                                  @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime) {
         //检查数据合法性
         //1.检查供应商是否存在
@@ -242,14 +248,32 @@ public class PurchaseRecordController {
     @PostMapping("/feign/updateStatus")
     @ApiOperation("更新所有涉及的退货单或者购货单状态为已结算")
     AjaxResult updateStatus(@RequestBody List<SettlementVo> settlementVos) {
-        //所有的都是已经请求结算的信息，我们找到对应的进货单以及退货单更新为已结算
-        settlementVos.forEach(s -> {
-            List<Long> purchaseRecordIdList = s.getPurchaseRecordIdList();
-            purchaseRecordIdList.forEach(p -> purchaseRecordService.update(new UpdateWrapper<PurchaseRecord>().lambda().eq(PurchaseRecord::getId, p).set(PurchaseRecord::getStatus, PurchaseRecordStatusConstant.SETTLED)));
-            List<Long> refundRecordIdList = s.getRefundRecordIdList();
-            refundRecordIdList.forEach(r -> refundService.update(new UpdateWrapper<Refund>().lambda().eq(Refund::getId, r).set(Refund::getStatus, PurchaseRecordStatusConstant.SETTLED)));
-        });
-        return AjaxResult.success();
+        //一旦出现更新失败的情况，说明同一时刻有人在操作，需要重新请求结算,加分布式锁保护，避免冲突双方同时失败
+        RLock lock = redissonClient.getLock("settlement");
+        try {
+            lock.lock();
+            settlementVos.forEach(s -> {
+                List<Long> purchaseRecordIdList = s.getPurchaseRecordIdList();
+                purchaseRecordIdList.forEach(p -> {
+                    PurchaseRecord purchaseRecord = purchaseRecordService.getById(p);
+                    if (purchaseRecord.getStatus().equals(PurchaseRecordStatusConstant.ARRIVED))
+                        purchaseRecordService.update(new UpdateWrapper<PurchaseRecord>().lambda().eq(PurchaseRecord::getId, p).set(PurchaseRecord::getStatus, PurchaseRecordStatusConstant.SETTLED));
+                    else
+                        throw new ServiceException("更新购货单状态失败");
+                });
+                List<Long> refundRecordIdList = s.getRefundRecordIdList();
+                refundRecordIdList.forEach(r -> {
+                    Refund refund = refundService.getById(r);
+                    if (refund.getStatus().equals(InputOutputStatus.OUTPUT))
+                        refundService.update(new UpdateWrapper<Refund>().lambda().eq(Refund::getId, r).set(Refund::getStatus, PurchaseRecordStatusConstant.SETTLED));
+                    else
+                        throw new ServiceException("更新退货单状态失败");
+                });
+            });
+        } finally {
+            lock.unlock();
+        }
+        return AjaxResult.success("更新成功");
     }
 }
 

@@ -9,6 +9,10 @@ import edu.neu.dbc.service.CategaryService;
 import edu.neu.dbc.service.ProductService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/dbc/categary")
+@CacheConfig(cacheNames = "categary")
 public class CategaryController {
 
     @Autowired
@@ -35,6 +40,7 @@ public class CategaryController {
 
     @GetMapping("/listAll")
     @ApiOperation("获取所有分类")
+    @Cacheable(key = "'listAll'")
     public AjaxResult list() {
         List<Categary> list = categaryService.listTree();
         if (list == null || list.size() == 0) {
@@ -45,6 +51,7 @@ public class CategaryController {
 
     @PostMapping("/add")
     @ApiOperation("添加分类")
+    @CacheEvict(key = "'listAll'")
     public AjaxResult add(@RequestBody Categary categary) {
         //前端可能同时添加多个分类，交给前端构建,后端直接保存即可
         boolean saved = categaryService.save(categary);
@@ -56,6 +63,10 @@ public class CategaryController {
 
     @PostMapping("/update")
     @ApiOperation("更新分类")
+    @Caching(evict = {
+            @CacheEvict(key = "'listAll'"),
+            @CacheEvict(key = "#categary.id")
+    })
     public AjaxResult update(@RequestBody Categary categary) {
         //前端可能同时添加多个分类，交给前端构建,后端直接保存即可
         boolean updated = categaryService.updateById(categary);
@@ -67,6 +78,10 @@ public class CategaryController {
 
     @GetMapping("/delete/{id}")
     @ApiOperation("删除分类")
+    @Caching(evict = {
+            @CacheEvict(key = "'listAll'"),
+            @CacheEvict(key = "#id")
+    })
     public AjaxResult delete(@PathVariable Integer id) {
         //前端可能同时添加多个分类，交给前端构建,后端直接保存即可
         boolean deleted = categaryService.removeById(id);
@@ -79,6 +94,7 @@ public class CategaryController {
 
     @ApiOperation("根据id获取分类")
     @GetMapping("/get/{id}")
+    @Cacheable(key = "#id")
     public AjaxResult get(@PathVariable Integer id) {
         Categary categary = categaryService.getById(id);
         if (categary == null) {

@@ -10,6 +10,10 @@ import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.SupplierService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -25,6 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/dbc/supplier")
+@CacheConfig(cacheNames = "supplier")
 public class SupplierController {
 
     //列表方法以及根据ID查信息
@@ -45,6 +50,7 @@ public class SupplierController {
 
     @GetMapping("/get/{id}")
     @ApiOperation("获取供应商")
+    @Cacheable(key = "'get'+#id")
     public AjaxResult get(@PathVariable Integer id) {
         Supplier supplier = supplierService.getById(id);
         if (supplier == null) {
@@ -55,18 +61,25 @@ public class SupplierController {
 
     @PostMapping("/add")
     @ApiOperation("添加供应商")
+    @CacheEvict(key = "'list'")
     public AjaxResult add(@RequestBody Supplier supplier) {
         return AjaxResult.success(supplierService.save(supplier));
     }
 
     @PostMapping("/update")
     @ApiOperation("更新供应商")
+    @Caching(evict = {
+            @CacheEvict(key = "'get'+#supplier.id")
+    })
     public AjaxResult update(@RequestBody Supplier supplier) {
         return AjaxResult.success(supplierService.updateById(supplier));
     }
 
     @DeleteMapping("/delete/{id}")
     @ApiOperation("删除供应商")
+    @Caching(evict = {
+            @CacheEvict(key = "'get'+#id")
+    })
     public AjaxResult delete(@PathVariable Long id) {
         QueryWrapper<PurchaseRecord> purchaseRecordQueryWrapper = new QueryWrapper<PurchaseRecord>().eq("supplier_id", id);
         if (purchaseRecordService.count(purchaseRecordQueryWrapper) > 0) {
