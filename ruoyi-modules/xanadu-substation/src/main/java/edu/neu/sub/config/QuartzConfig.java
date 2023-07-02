@@ -11,6 +11,7 @@ public class QuartzConfig {
     @Bean
     public JobDetail jobDetail() {
         return JobBuilder.newJob(DailyReportJob.class)
+                .storeDurably()
                 .withIdentity("daily_report", "daily_report")
                 .build();
     }
