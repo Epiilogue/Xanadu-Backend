@@ -15,4 +15,5 @@ public class TaskStatus {
 
     public static final String PARTIAL_COMPLETED = "部分完成";
 
+    public static final String DELIVERED = "配送完成";
 }

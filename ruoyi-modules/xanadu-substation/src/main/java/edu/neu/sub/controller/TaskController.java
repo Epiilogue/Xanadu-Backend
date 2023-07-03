@@ -204,7 +204,7 @@ public class TaskController {
 
 
     @GetMapping("/getTasksByCourierId/{courierId}")
-    @ApiOperation(value = "根据快递员ID获取所有任务记录,列表后有两个按钮，一个是填写回执，一个是查看详情，查看详情可以任务里面的商品列表")
+    @ApiOperation(value = "根据快递员ID获取所有任务记录")
     public AjaxResult getTasksByCourierId(@PathVariable("courierId") Long courierId) {
         List<Task> tasks = taskService.getTasksByCourierId(courierId);
         if (tasks == null) return AjaxResult.error("查询失败");
@@ -269,9 +269,10 @@ public class TaskController {
         //检查回执状态是否合法
         Task task = taskService.getById(taskId);
         if (task == null) return AjaxResult.error("回执任务不存在");
-        //检查任务类型是不是首款类型并且任务状态是不是已分配
-        if (!TaskType.PAYMENT.equals(task.getTaskType()) || !TaskStatus.ASSIGNED.equals(task.getTaskStatus()))
-            return AjaxResult.error("当前任务状态无法填写回执单");
+        //所有任务都只有配送完成才可以填回执
+        if (!TaskStatus.DELIVERED.equals(task.getTaskStatus()))
+            return AjaxResult.error("任务状态不合法");
+
         Receipt receipt = new Receipt();
         BeanUtils.copyProperties(paymentReceiptVo, receipt);
         BeanUtils.copyProperties(task, receipt);

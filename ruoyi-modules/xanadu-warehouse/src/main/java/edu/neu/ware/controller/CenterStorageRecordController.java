@@ -114,6 +114,7 @@ public class CenterStorageRecordController {
         }
         RLock lock = redissonClient.getLock("lock:" + productId);
         try {
+            lock.lock();
             val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
             CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
             if (centerStorageRecord == null) {
@@ -138,6 +139,7 @@ public class CenterStorageRecordController {
         }
         RLock lock = redissonClient.getLock("lock:" + productId);
         try {
+            lock.lock();
             val queryMapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
             CenterStorageRecord centerStorageRecord = centerStorageRecordService.getOne(queryMapper);
             if (centerStorageRecord == null) {
@@ -166,6 +168,7 @@ public class CenterStorageRecordController {
         }
         RLock lock = redissonClient.getLock("lock:" + productId);
         try {
+            lock.lock();
             UpdateWrapper<CenterStorageRecord> updateWrapper = null;
             if (from.equals("lock")) {
                 updateWrapper = new UpdateWrapper<CenterStorageRecord>()
@@ -198,6 +201,7 @@ public class CenterStorageRecordController {
 
         RLock lock = redissonClient.getLock("lock:" + productId);
         try {
+            lock.lock();
             StorageVo storageVo = new StorageVo();
             storageVo.setTotalNum(centerStorageRecord.getTotalNum());
             storageVo.setLockedNum(centerStorageRecord.getLockNum());
@@ -225,6 +229,7 @@ public class CenterStorageRecordController {
         }
         RLock lock = redissonClient.getLock("lock:" + productId);
         try {
+            lock.lock();
             UpdateWrapper<CenterStorageRecord> rollbackWrapper = new UpdateWrapper<CenterStorageRecord>()
                     .setSql("allocated_num=allocated_num-" + prevNum).setSql("allocate_able_num=allocate_able_num+" + prevNum)
                     .ge("allocated_num", prevNum).eq("id", centerStorageRecord.getId());
