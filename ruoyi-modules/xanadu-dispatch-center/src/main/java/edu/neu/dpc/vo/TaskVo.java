@@ -67,6 +67,8 @@ public class TaskVo implements Serializable {
     @ApiModelProperty("任务状态")
     private String taskStatus;
 
+    @ApiModelProperty("是否需要发票")
+    private Boolean needInvoice;
 
     @ApiModelProperty("商品列表")
     private List<Product> products;

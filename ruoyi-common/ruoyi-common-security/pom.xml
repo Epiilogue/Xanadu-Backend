@@ -34,6 +34,13 @@
             <artifactId>ruoyi-common-redis</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>

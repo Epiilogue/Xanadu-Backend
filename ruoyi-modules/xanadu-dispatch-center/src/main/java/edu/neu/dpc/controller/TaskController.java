@@ -122,6 +122,7 @@ public class TaskController {
             TaskVo taskVo = new TaskVo();
             BeanUtils.copyProperties(orderVo, taskVo);
             BeanUtils.copyProperties(t, taskVo);
+            if(taskVo.getNeedInvoice()==null) taskVo.setNeedInvoice(false);
             taskVos.add(taskVo);
         });
         return AjaxResult.success(taskVos);

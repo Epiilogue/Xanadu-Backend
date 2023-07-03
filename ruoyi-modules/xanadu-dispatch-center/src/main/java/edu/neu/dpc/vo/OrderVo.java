@@ -56,6 +56,8 @@ public class OrderVo implements Serializable {
     @ApiModelProperty("送货地址")
     private String deliveryAddress;
 
+    @ApiModelProperty("是否需要发票")
+    private Boolean needInvoice;
 
     @ApiModelProperty("商品列表")
     private List<Product> products;

@@ -5,20 +5,23 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.security.utils.SecurityUtils;
+import edu.neu.base.constant.cc.MQTopic;
 import edu.neu.base.constant.cc.OperationTypeConstant;
 import edu.neu.base.constant.cc.OrderStatusConstant;
 import edu.neu.base.constant.cc.StockoutConstant;
 import edu.neu.cc.entity.*;
 import edu.neu.cc.feign.WareCenterStorageRecordClient;
 import edu.neu.cc.service.*;
+import edu.neu.cc.vo.DispatchMessage;
 import edu.neu.cc.vo.NewOrderVo;
 import edu.neu.cc.vo.ProductRecordsVo;
 import edu.neu.cc.vo.UnSubscribeVo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +68,8 @@ public class NewOrderController {
     @Autowired
     private RefundService refundService;
 
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     @PostMapping("/create")
     @ApiOperation("创建新订单")
@@ -97,6 +102,7 @@ public class NewOrderController {
                 if (!success) throw new ServiceException("锁定库存失败");
             });
 
+
         }
 
         order.setOrderType(OperationTypeConstant.ORDER);
@@ -104,6 +110,7 @@ public class NewOrderController {
         orderService.save(order);
         newOrder.setId(order.getId());
         newOrderService.save(newOrder);
+
 
         Long userId = SecurityUtils.getUserId();
 
@@ -144,6 +151,17 @@ public class NewOrderController {
         newOrderVo.setId(newOrder.getId());
         newOrderVo.setCreateTime(order.getCreateTime());
         newOrderVo.setStatus(order.getStatus());
+
+        //检查订单状态是不是可分配，并且是否已经指定了分站，将订单封装后发送到消息队列中，需要的信息为订单ID和分站ID
+        if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED) && newOrder.getSubstationId() != null) {
+            try {
+                DispatchMessage dispatchVo = new DispatchMessage(order.getId(), newOrder.getSubstationId());
+                MessageBuilder<DispatchMessage> builder = MessageBuilder.withPayload(dispatchVo);
+                rocketMQTemplate.syncSend(MQTopic.ORDER_TOPIC, builder.build(), 3000, 7);//发送延迟消息到消息队列，延迟两分钟
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         //完成操作后返回成功结果
         return AjaxResult.success("创建订单成功", newOrderVo);
