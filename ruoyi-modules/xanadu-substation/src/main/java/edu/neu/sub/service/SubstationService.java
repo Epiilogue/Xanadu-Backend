@@ -39,4 +39,8 @@ public interface SubstationService extends IService<Substation> {
     List<Long> getSubstationMatsers(Long substationId);
 
     int deleteManager(Long substationId, Long userId);
+
+    void sayHello();
+
+    Boolean generateSubstationStatistics();
 }
