@@ -168,6 +168,7 @@ public class OrderController {
             case OperationTypeConstant.ORDER:
                 NewOrder newOrder = newOrderService.getById(id);
                 BeanUtils.copyProperties(newOrder, orderVo);
+                orderVo.setNeedInvoice(newOrder.getInvoiceNeed() > 0);
                 orderVo.setReceiverName(newOrder.getReceiverName());
                 orderVo.setPhone(newOrder.getTelephone());
                 //如果是新订单，则获取商品列表后返回

@@ -7,6 +7,7 @@ package edu.neu.base.constant.cc;
 public class MQTopic {
 
     public static final String ORDER_TOPIC = "order-topic";
+    public static final String EMAIL_TOPIC = "email-topic";
 
 
 }

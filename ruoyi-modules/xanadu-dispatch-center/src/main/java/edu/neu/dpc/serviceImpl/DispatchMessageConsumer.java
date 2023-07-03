@@ -16,8 +16,13 @@ import edu.neu.dpc.service.ProductService;
 import edu.neu.dpc.service.TaskService;
 import edu.neu.dpc.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.common.UtilAll;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
+import org.apache.rocketmq.spring.support.RocketMQConsumerLifecycleListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
@@ -32,7 +37,7 @@ import java.util.*;
 @Component
 @Slf4j
 @RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC, consumerGroup = "order-service-consumer-group")
-public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage> {
+public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage> , RocketMQPushConsumerLifecycleListener {
 
     private static final String WARE_KEY = "wareLocation";
 
@@ -153,4 +158,9 @@ public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage
         }
     }
 
+    @Override
+    public void prepareStart(DefaultMQPushConsumer consumer) {
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_TIMESTAMP);
+        consumer.setConsumeTimestamp(UtilAll.timeMillisToHumanString3(System.currentTimeMillis()));
+    }
 }
