@@ -79,11 +79,6 @@ public class DispatchController {
     }
 
 
-    @Bean
-    public HashMap<Long, Date> getMap() {
-        return new HashMap<>();
-    }
-
 
     @GetMapping("/get/{id}")
     @ApiOperation("获取调拨单")
