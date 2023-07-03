@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,7 +68,8 @@ public class DispatchController {
     @Autowired
     SubstationClient substationClient;
 
-    Map<Long, Date> map = new HashMap<>();
+    @Autowired
+    HashMap<Long, Date> map;
 
 
     @GetMapping("/check/{id}")
@@ -75,6 +77,13 @@ public class DispatchController {
     public AjaxResult checkOrder(@PathVariable("id") Long id) {
         return ccOrderClient.checkAllArrival(id);
     }
+
+
+    @Bean
+    public HashMap<Long, Date> getMap() {
+        return new HashMap<>();
+    }
+
 
     @GetMapping("/get/{id}")
     @ApiOperation("获取调拨单")
@@ -94,7 +103,6 @@ public class DispatchController {
      * <p>
      * 还需要考虑是货到付款还是先付款再送货，若是先付款再送货则需要生成的是付款任务单，完成送货后调度为送货任务单
      */
-
 
     /**
      * 在这里需要判断任务的类型，如果是退货、收款任务的话不需要进行商品调度，如果是换货、新订任务的话则需要判断,送货任务完成收款任务后创建

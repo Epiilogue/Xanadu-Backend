@@ -42,4 +42,10 @@ public interface CenterWareClient {
     @ApiOperation("修改出库记录")
     public AjaxResult update(@RequestBody CenterOutputVo centerOutputVo);
 
+
+
+    @GetMapping("/ware/centerware/info")
+    @ApiOperation("获取仓库信息")
+    public AjaxResult info();
+
 }
