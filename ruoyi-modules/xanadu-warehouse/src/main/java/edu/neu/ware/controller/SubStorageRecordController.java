@@ -63,6 +63,7 @@ public class SubStorageRecordController {
         List<Long> idList = new ArrayList<>(longIntegerHashMap.keySet());
         RLock lock = redissonClient.getLock("subware:" + subwareId);
         try {
+            lock.lock();
             List<SubStorageRecord> list = subStorageRecordService.list(new QueryWrapper<SubStorageRecord>().eq("subware_id", subwareId).in("product_id", idList));
             //拿到所有的记录
             if (list.size() < idList.size()) {
@@ -87,6 +88,7 @@ public class SubStorageRecordController {
     AjaxResult lock(@RequestParam("subwareId") Long subwareId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         RLock lock = redissonClient.getLock("subware:" + subwareId);
         try {
+            lock.lock();
             for (Map.Entry<Long, Integer> longIntegerEntry : longIntegerHashMap.entrySet()) {
                 boolean success = subStorageRecordService.update(new UpdateWrapper<SubStorageRecord>().
                         eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey())
@@ -107,6 +109,7 @@ public class SubStorageRecordController {
     AjaxResult reduce(@RequestParam("subwareId") Long subwareId, @RequestParam("taskId") Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         RLock lock = redissonClient.getLock("subware:" + subwareId);
         try {
+            lock.lock();
             for (Map.Entry<Long, Integer> longIntegerEntry : longIntegerHashMap.entrySet()) {
                 //拿到商品名
                 String productName = subStorageRecordService.getById(longIntegerEntry.getKey()).getProductName();
@@ -133,6 +136,7 @@ public class SubStorageRecordController {
         //1.找到对应的记录，判断合法性
         RLock lock = redissonClient.getLock("subware:" + p.getSubwareId());
         try {
+            lock.lock();
             QueryWrapper<SubStorageRecord> eq = new QueryWrapper<SubStorageRecord>().eq("product_id", p.getProductId()).
                     eq("subware_id", p.getSubwareId());
             SubStorageRecord one = subStorageRecordService.getOne(eq);

@@ -28,7 +28,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
     @Override
     public List<Task> getTasksByCourierId(Long courierId) {
-        QueryWrapper<Task> eq = new QueryWrapper<Task>().eq("courier_id", courierId).eq("status", TaskStatus.ASSIGNED);
+        QueryWrapper<Task> eq = new QueryWrapper<Task>().eq("courier_id", courierId);
         return this.list(eq);
     }
 

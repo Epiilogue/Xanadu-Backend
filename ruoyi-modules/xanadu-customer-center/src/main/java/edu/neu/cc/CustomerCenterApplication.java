@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@SpringBootApplication(scanBasePackages = {"edu.neu", "com.ruoyi.common.security.handler"})
+@SpringBootApplication(scanBasePackages = {"edu.neu", "com.ruoyi"})
 @EnableFeignClients(basePackages = {"edu.neu.cc.feign"})
 @MapperScan("edu.neu.cc.mapper")
 @EnableTransactionManagement

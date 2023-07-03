@@ -27,8 +27,7 @@ spring:
 
   redis:
     database: 0
-    host: r-2zejdda9dyam2q9f2zpd.redis.rds.aliyuncs.com
-    password: 'xgs:Xgs1150840779'
+    host: 127.0.0.1
     port: 6379
   datasource:
     druid:

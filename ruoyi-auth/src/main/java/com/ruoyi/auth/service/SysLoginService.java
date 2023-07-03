@@ -2,12 +2,15 @@ package com.ruoyi.auth.service;
 
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.extra.mail.MailUtil;
-import com.ruoyi.common.core.exception.CaptchaException;
+import com.ruoyi.auth.form.EmailBody;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import com.ruoyi.common.core.constant.CacheConstants;
 import com.ruoyi.common.core.constant.Constants;
@@ -48,8 +51,9 @@ public class SysLoginService {
     @Autowired
     private RedisService redisService;
 
+
     @Autowired
-    JavaMailSender javaMailSender;
+    RocketMQTemplate rocketMQTemplate;
 
     /**
      * 登录
@@ -129,10 +133,19 @@ public class SysLoginService {
         //生成验证码，连带着用户名一起存入redis，之后直接就能找到了
         String code = RandomUtil.randomNumbers(6);
         redisService.setCacheObject(CacheConstants.EMAIL_CODE_KEY + email, code + ":" + user.getUserName(), CacheConstants.EMAIL, TimeUnit.MINUTES);
-        //发送邮件
-        Boolean sendMailSuccess = sendMail(email, code);
-        if (sendMailSuccess) return AjaxResult.success("验证码发送成功");
-        else return AjaxResult.error("验证码发送失败");
+
+        EmailBody emailBody = new EmailBody();
+        emailBody.setEmail(email);
+        emailBody.setCode(code);
+
+        try {
+            rocketMQTemplate.syncSend("email-topic", emailBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error("验证码发送失败");
+        }
+
+        return AjaxResult.success("验证码发送成功");
     }
 
     public LoginUser loginByEmail(String email, String code) {
@@ -175,21 +188,6 @@ public class SysLoginService {
     }
 
 
-    private Boolean sendMail(String email, String code) {
-        //TODO: 发送邮件，向 email 发送 code ,返回是否发送成功
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setSubject("Xanadu");
-            helper.setFrom("1023118868@qq.com");
-            helper.setText(code);
-            helper.setTo(email);
-            javaMailSender.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
 
     public void logout(String loginName) {
         recordLogService.recordLogininfor(loginName, Constants.LOGOUT, "退出成功");

@@ -158,7 +158,7 @@ public class SubwareController {
     }
 
     @GetMapping("/get/{id}")
-    @Cacheable( key = "#id")
+    @Cacheable(key = "#id")
     @ApiOperation(value = "获取分库", notes = "获取分库")
     public AjaxResult getSubware(@PathVariable Long id) {
         Subware subware = subwareService.getById(id);
@@ -174,6 +174,12 @@ public class SubwareController {
         return AjaxResult.success("获取分库列表成功", subwareList);
     }
 
+    @GetMapping("/feign/info/{id}")
+    @ApiOperation(value = "根据分库ID获取分库信息")
+    public AjaxResult info(@PathVariable("id") Long id) {
+        Subware subware = subwareService.getById(id);
+        if (subware == null) throw new ServiceException("分库不存在");
+        return AjaxResult.success(subware);
+    }
 
 }
-

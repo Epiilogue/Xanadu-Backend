@@ -168,6 +168,14 @@ public class SubstationController {
         return AjaxResult.success("删除成功");
     }
 
+    @GetMapping("/feign/getSubstation/{id}")
+    @ApiOperation(value = "获取分站的信息")
+    public AjaxResult getSubstation(@PathVariable("id") Long id) {
+        Substation substation = substationService.getById(id);
+        if (substation == null) throw new ServiceException("分站不存在");
+        return AjaxResult.success(substation);
+    }
+
 
     /**
      * 分站快递员管理，增加删除分站快递员
