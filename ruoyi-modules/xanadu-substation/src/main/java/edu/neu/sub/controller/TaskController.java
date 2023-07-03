@@ -99,6 +99,7 @@ public class TaskController {
         }
         //转化
         String data = JSON.toJSONString(taskBySubstationId.get("data"));
+        System.out.println(taskBySubstationId);
         List<TaskVo> taskVos = JSON.parseArray(data, TaskVo.class);
         if (taskVos == null || taskVos.size() == 0) {
             return AjaxResult.error("该分站没有任务");
@@ -194,6 +195,7 @@ public class TaskController {
         BeanUtils.copyProperties(taskVo, task);
         task.setCourierId(courierId);
         task.setProductsJson(JSON.toJSONString(taskVo.getProducts()));
+        task.setCreateTime(new Date());
         //插入数据库
         boolean saved = taskService.save(task);
         if (!saved) throw new RuntimeException("分配任务失败");
@@ -396,6 +398,7 @@ public class TaskController {
         //2.更新本地状态
         task.setTaskStatus(TaskStatus.COMPLETED);
         task.setReceiptId(receiptId);
+        taskService.save(task);
         //3.保存商品信息，对于不同的类型我们应当保存不同的商品信息
         List<ReceiptProduct> receiptProducts = receiptProductService.convertAndSave(receiptId, products, receipt.getState(), task.getTaskType());
         if (receiptProducts == null) throw new ServiceException("保存商品信息失败");

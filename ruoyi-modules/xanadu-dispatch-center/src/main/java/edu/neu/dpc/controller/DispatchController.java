@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -108,7 +109,7 @@ public class DispatchController {
     @ApiOperation(value = "手动调度订单,传入参数为订单id和分站id", notes = "调度订单")
     public AjaxResult dispatchOrder(@ApiParam("订单ID") @PathVariable("id") Long id,
                                     @ApiParam("子站ID") @PathVariable("substationId") Long substationId,
-                                    @ApiParam("预计出库日期") @RequestParam("outDate") Date outDate) {
+                                    @ApiParam("预计出库日期") @RequestParam("outDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date outDate) {
         //拉取订单信息，生成任务单
         AjaxResult orderResult = ccOrderClient.getOrder(id);
         //检查返回结果是否有错误
@@ -122,7 +123,9 @@ public class DispatchController {
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
         if (remoteSubwareResult == null) throw new ServiceException("获取分库ID失败");
         if (remoteSubwareResult.isError()) return remoteSubwareResult;
-        Long subwareId = (Long) remoteSubwareResult.get("data");
+//        Long subwareId = (Long) remoteSubwareResult.get("data");
+        //传回的id可能为integer类型
+        Long subwareId = remoteSubwareResult.get("data") instanceof Integer? Long.parseLong(remoteSubwareResult.get("data").toString()) :(Long) remoteSubwareResult.get("data");
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.SCHEDULED
                 , false, taskType);
@@ -229,7 +232,7 @@ public class DispatchController {
     @PutMapping("/dispatchProduct")
     @ApiOperation(value = "调度商品,传入参数为商品id和分库id,要求出库日期", notes = "调度商品")
     public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long substationId,
-                                      @ApiParam("要求出库日期") @RequestParam("requireDate") Date requireDate,
+                                      @ApiParam("要求出库日期") @RequestParam("requireDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date requireDate,
                                       @ApiParam("商品信息") Product product) {
 
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
@@ -309,7 +312,10 @@ public class DispatchController {
 
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(dispatch.getSubstationId());
         if (remoteSubwareResult.isError()) throw new ServiceException("获取分库ID失败");
-        Long subwareId = (Long) remoteSubwareResult.get("data");
+//        Long subwareId = (Long) remoteSubwareResult.get("data");
+        //传回的id可能为integer类型
+        Long subwareId = remoteSubwareResult.get("data") instanceof Integer? Long.parseLong(remoteSubwareResult.get("data").toString()) :(Long) remoteSubwareResult.get("data");
+
 
         //若是需要修改调度的数量，需要将已分配减去原来的，可分配添加上原来的，已分配添加新增的，可分配减去新增的
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(prevDispatch.getProductId(), prevDispatch.getProductNum(), dispatch.getProductNum());

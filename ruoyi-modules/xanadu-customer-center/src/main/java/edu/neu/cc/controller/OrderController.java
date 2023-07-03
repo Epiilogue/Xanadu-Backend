@@ -66,17 +66,19 @@ public class OrderController {
         Date endTime= DateUtil.parse(query.get("endTime"));    //结束时间
         String customerName= (String) query.get("customerName");
         String orderType= (String) query.get("orderType");
-        Long page= Long.parseLong(query.get("page")) ;
-        Long size= Long.parseLong(query.get("limit"));
         QueryWrapper queryWrapper=new QueryWrapper();
         queryWrapper.like(customerName!=null,"customer_name",customerName)
                 .ge(startTime!=null,"create_time",startTime)
                 .le(endTime!=null,"create_time",endTime)
-                .eq(orderType!=null && orderType!="全部","order_type",orderType);
-        if (customerId == null) {
-            return AjaxResult.success(orderService.page(new Page<>(page, size),queryWrapper));
-        } else {
-            queryWrapper.eq("customer_id", customerId);
+                .eq(orderType!=null && orderType!="全部","order_type",orderType)
+                .eq(customerId!=null,"customer_id", customerId);
+        //不分页
+        if(query.get("page")==null || query.get("limit")==null){
+            return AjaxResult.success(orderService.list(queryWrapper));
+        //分页
+        }else{
+            Long page= Long.parseLong(query.get("page")) ;
+            Long size= Long.parseLong(query.get("limit"));
             Page<Order> orderList =orderService.page(new Page<>(page, size),queryWrapper);
             if (orderList.getRecords() == null || orderList.getRecords().size() == 0) return AjaxResult.error("没有满足条件的订单");
             return AjaxResult.success(orderList);
@@ -99,9 +101,7 @@ public class OrderController {
             ajaxResult.put("order", newOrder);
         } else {
             //回显refund信息以及对应的商品信息
-            QueryWrapper<Refund> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("order_id", orderId);
-            Refund refund = refundService.getOne(queryWrapper);
+            Refund refund = refundService.getById(orderId);
             if (refund == null) return AjaxResult.error("订单不存在");
             ajaxResult.put("order", refund);
         }
@@ -176,9 +176,13 @@ public class OrderController {
         if (order == null) return AjaxResult.error("订单不存在");
         if (order.getOrderType().equals(OperationTypeConstant.UNSUBSCRIBE))
             return AjaxResult.error("该订单为退订订单,无法调度");
-        //检查订单状态是否为可分配
-        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED))
-            return AjaxResult.error("订单状态非可分配状态");
+//        //检查订单状态是否为可分配
+//        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED))
+//            return AjaxResult.error("订单状态非可分配状态");
+        //订单状态——可分配（调度）；已调度/已分配（任务单查询）
+        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED) && !order.getStatus().equals(OrderStatusConstant.DISPATCHED)
+                && !order.getStatus().equals(OrderStatusConstant.ALLOCATED))
+            return AjaxResult.error("订单不可调度或无任务单");
 
         //根据订单类型获取对应的订单信息
         OrderVo orderVo = new OrderVo();

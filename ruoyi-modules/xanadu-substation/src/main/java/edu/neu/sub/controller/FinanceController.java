@@ -61,7 +61,7 @@ public class FinanceController {
      * 前端需要传回分站ID，商品种类ID，商品种类名称，时间段,支持远程调用
      */
     @GetMapping("/getPaymentByCategoryAndTime/{substationId}")
-    public AjaxResult getPaymentByCategoryAndTime(@PathVariable("substationId") Long substationId, @RequestParam("categaryId") Integer categaryId, @RequestParam("categaryName") String categaryName,
+    public AjaxResult getPaymentByCategoryAndTime(@PathVariable("substationId") Long substationId, @RequestParam("categaryId") Integer categaryId,
                                                   @RequestParam("startTime") String startTime,
                                                   @RequestParam("endTime") String endTime,
                                                   @RequestParam(value = "productName", required = false) String productName) {
@@ -86,7 +86,17 @@ public class FinanceController {
             if (receipt.getTaskType().equals(TaskType.PAYMENT)) continue;
             QueryWrapper<ReceiptProduct> receiptProductQueryWrapper = new QueryWrapper<ReceiptProduct>().eq("receipt_id", receipt.getId());
             List<ReceiptProduct> receiptProductList = receiptProductService.list(receiptProductQueryWrapper);
-            receiptProductList = receiptProductList.stream().filter(receiptProduct -> goodIds.contains(receiptProduct.getProductId())).collect(Collectors.toList());
+            System.out.println("回执商品 "+receiptProductList);
+            System.out.println("分类下商品id "+goodIds);
+            receiptProductList = receiptProductList.stream().filter(receiptProduct -> {
+                System.out.println("回执商品id "+receiptProduct.getProductId());
+                System.out.println("回执商品id "+receiptProduct.getProductId().getClass());
+                System.out.println("回执商品id "+goodIds.get(0));
+                System.out.println("回执商品id "+goodIds.get(0).getClass());
+                System.out.println(goodIds.contains(receiptProduct.getProductId()));
+                return goodIds.contains(receiptProduct.getProductId());
+            }).collect(Collectors.toList());
+            System.out.println("回执商品 "+receiptProductList);
             if (productName != null)
                 receiptProductList = receiptProductList.stream().filter(receiptProduct -> receiptProduct.getProductName().contains(productName)).collect(Collectors.toList());
             //将过滤后的商品信息放入收据中
@@ -104,9 +114,13 @@ public class FinanceController {
                 Finance finance = productFinanceMap.get(productId);
                 //拿到保存的数据，接下来需要根据当前的记录类型与商品记录的数据进行对应的更新
                 finance.update(r, p);
+                System.out.println(finance);
             });
             //不用管收款的事情，收款由送货数据负责更新完成
         });
+        System.out.println("回执"+receiptList.toString());
+
+        System.out.println("收款map"+productFinanceMap);
         //更新，待缴额为实收额*0.9
         productFinanceMap.values().forEach(finance -> finance.setPay(finance.getActual() * 0.9));
         return AjaxResult.success(productFinanceMap.values());
@@ -118,7 +132,7 @@ public class FinanceController {
                                            @RequestParam("startTime") String startTime,
                                            @RequestParam("endTime") String endTime,
                                            @RequestParam(value = "productName", required = false) String productName) {
-        return this.getPaymentByCategoryAndTime(substationId, categaryId, categaryName, startTime, endTime, productName);
+        return this.getPaymentByCategoryAndTime(substationId, categaryId, startTime, endTime, productName);
     }
 }
 

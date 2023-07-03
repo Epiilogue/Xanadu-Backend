@@ -108,9 +108,13 @@ public class Task implements Serializable {
     @ApiModelProperty("删除标记")
     @TableField("deleted")
     @TableLogic
-    private Boolean deleted;
+    private Boolean deleted=false;
 
     public Task() {
-        deleted = false;
+
     }
+
+//    public Task() {
+//        deleted = false;
+//    }
 }
