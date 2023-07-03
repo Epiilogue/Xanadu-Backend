@@ -20,10 +20,12 @@ import edu.neu.sub.feign.TaskClient;
 import edu.neu.sub.service.*;
 import edu.neu.sub.vo.*;
 import io.swagger.annotations.ApiOperation;
+import org.aspectj.weaver.loadtime.Aj;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -151,6 +153,12 @@ public class TaskController {
         else return AjaxResult.error("删除失败");
     }
 
+    @GetMapping("/getTaskInfo")
+    @ApiOperation(value= "根据任务单id获取任务单详情")
+    public AjaxResult getTaskInfo(@RequestParam("taskId") Long taskId){
+        Task task = taskService.getById(taskId);
+        return AjaxResult.success(task);
+    }
 
     @PostMapping("/assign/{subId}/{courierId}")
     @ApiOperation(value = "分配任务给快递员,根据任务类型分配任务")
@@ -189,7 +197,6 @@ public class TaskController {
                 if (updateTaskStatus == null) throw new RuntimeException("更新任务状态失败");
                 if (updateTaskStatus.isError()) throw new RuntimeException(updateTaskStatus.getMsg());
         }
-
         taskVo.setTaskStatus(TaskStatus.ASSIGNED);
         BeanUtils.copyProperties(taskVo, task);
         task.setCourierId(courierId);
@@ -197,18 +204,48 @@ public class TaskController {
         //插入数据库
         boolean saved = taskService.save(task);
         if (!saved) throw new RuntimeException("分配任务失败");
-
         return AjaxResult.success("分配任务成功");
     }
 
-
-    @GetMapping("/getTasksByCourierId/{subId}/{courierId}")
-    @ApiOperation(value = "根据快递员ID获取所有任务记录,列表后有两个按钮，一个是填写回执，一个是查看详情，查看详情可以任务里面的商品列表")
-    public AjaxResult getTasksByCourierId(@PathVariable("courierId") Long courierId) {
+    /**
+     * 此处返回任务包括
+     * 1。已完成任务，
+     * 2.换货，送货，送货收款中已领货的任务
+     * 3.退货，收款中已分配得到任务
+     * @param courierId
+     * @return
+     */
+    @GetMapping("/getTasksByCourierId")
+    @ApiOperation(value = "根据快递员ID获取所有任务记录")
+    public AjaxResult getTasksByCourierId(@RequestParam("courierId") Long courierId) {
         List<Task> tasks = taskService.getTasksByCourierId(courierId);
+        List<Task> returnTask = new ArrayList<>();
         if (tasks == null) return AjaxResult.error("查询失败");
-        tasks.forEach(task -> task.setProducts(JSON.parseArray(task.getProductsJson(), ProductVo.class)));
-        return AjaxResult.success(tasks);
+        for(Task task: tasks){
+            System.out.println(task);
+            if(task.getTaskStatus().equals(TaskStatus.COMPLETED))
+                returnTask.add(task);
+            else if(task.getTaskType().equals(TaskType.DELIVERY)||task.getTaskType().equals(TaskType.PAYMENT_DELIVERY)||task.getTaskType().equals(TaskType.EXCHANGE)){
+                if(task.getTaskStatus().equals(TaskStatus.RECEIVED)){
+                    returnTask.add(task);
+                }
+            }else {
+                if(task.getTaskStatus().equals(TaskStatus.ASSIGNED))
+                    returnTask.add(task);
+            }
+
+        }
+        returnTask.forEach(task -> task.setProducts(JSON.parseArray(task.getProductsJson(), ProductVo.class)));
+        return AjaxResult.success(returnTask);
+    }
+
+    @GetMapping("/updateTaskStatus")
+    @ApiOperation(value = "根据任务Id修改任务状态")
+    public AjaxResult updateTaskStatus(@RequestParam("taskId")Long taskId){
+        Task task = taskService.getById(taskId);
+        task.setTaskStatus("执行完成");
+        taskService.updateById(task);
+        return AjaxResult.success("修改成功");
     }
 
     //对于不同的任务类型，需要执行不同的操作，比如付款单，需要付款，退货单不需要取货可以直接录入回执，送货换货就需要取货
