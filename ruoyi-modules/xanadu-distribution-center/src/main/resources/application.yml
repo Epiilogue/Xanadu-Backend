@@ -3,6 +3,12 @@ server:
   servlet:
     context-path: /
 
+rocketmq:
+  producer:
+    group: product-service-producer-group
+    send-message-timeout: 5000
+  name-server: 39.106.145.84:9876
+
 spring:
   application:
     name: xanadu-dbc
@@ -24,7 +30,8 @@ spring:
       secret-key: XCeZznP1jS1qQVoF6ZWuCJxjdr3uRC
       oss:
         endpoint: oss-cn-beijing.aliyuncs.com
-
+  elasticsearch:
+    uris: 39.106.145.84:9200
   redis:
     database: 0
     host: 127.0.0.1

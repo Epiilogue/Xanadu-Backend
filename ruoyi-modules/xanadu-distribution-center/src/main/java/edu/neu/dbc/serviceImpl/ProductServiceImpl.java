@@ -15,6 +15,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -53,7 +54,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public Boolean insertNewProdyct(Product product) {
         IndexRequest indexRequest = new IndexRequest(PRODUCT_INDEX);
         indexRequest.id(product.getId().toString());
-        indexRequest.source(product);
+        indexRequest.source(JSON.toJSONString(product), XContentType.JSON);
         try {
             restHighLevelClient.index(indexRequest, COMMON_OPTIONS);
         } catch (Exception e) {
@@ -83,7 +84,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
      */
     public Boolean updateProduct(Product product) {
         UpdateRequest updateRequest = new UpdateRequest(PRODUCT_INDEX, product.getId().toString());
-        updateRequest.doc(product);
+        updateRequest.doc(JSON.toJSONString(product), XContentType.JSON);
         try {
             restHighLevelClient.update(updateRequest, COMMON_OPTIONS);
         } catch (IOException e) {
@@ -98,9 +99,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
      */
     public List<Product> queryProducts(String content) throws IOException {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder = sourceBuilder.query(QueryBuilders.matchQuery("name", content)).query(QueryBuilders.matchQuery("comment", content));
+        sourceBuilder.query(QueryBuilders.matchQuery("name", content)).query(QueryBuilders.matchQuery("comment", content));
         SearchRequest searchRequest = new SearchRequest(new String[]{PRODUCT_INDEX}, sourceBuilder);
-        System.out.println(searchRequest.buildDescription());
+        System.out.println(searchRequest);
         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, COMMON_OPTIONS);
         SearchHit[] hits = searchResponse.getHits().getHits();
         ArrayList<Product> products = new ArrayList<>();
