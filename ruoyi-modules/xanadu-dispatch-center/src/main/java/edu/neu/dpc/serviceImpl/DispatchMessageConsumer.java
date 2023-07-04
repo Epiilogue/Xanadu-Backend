@@ -34,9 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@Component
+//@Component
 @Slf4j
-@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC, consumerGroup = "order-service-consumer-group")
+//@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC, consumerGroup = "order-service-consumer-group")
 public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage> , RocketMQPushConsumerLifecycleListener {
 
     private static final String WARE_KEY = "wareLocation";

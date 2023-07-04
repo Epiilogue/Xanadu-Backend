@@ -39,7 +39,7 @@ public class SupplyController {
 
     @GetMapping("/listToSettlement")
     @ApiOperation("与供应商结算,获取结算列表")
-    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId") Long productId,
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId",required = false) Long productId,
                                  @RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         // 把String转换成Data类型数据
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d HH:mm:ss");
@@ -83,7 +83,7 @@ public class SupplyController {
         //提交结算
         List<Supply> supplies = settlementVos.stream().map(settlementVo -> {
             Supply supply = new Supply();
-            supply.setDeleted(true);
+            supply.setDeleted(false);
             BeanUtils.copyProperties(settlementVo, supply);
             supply.setTime(new Date());
             return supply;

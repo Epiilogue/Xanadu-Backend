@@ -40,8 +40,31 @@ public class InvoiceController {
     @ApiOperation("获取发票信息")
     @CrossOrigin
     public AjaxResult list() {
-        startPage();
         List<Invoice> invoiceList = invoiceService.list();
+        if(invoiceList == null){
+            return AjaxResult.error("暂无发票信息");
+        }
+        return AjaxResult.success(invoiceList);
+    }
+
+
+    @GetMapping("/listByState/{state}")
+    @ApiOperation("筛选登记和未登记的发票")
+    @CrossOrigin
+    public AjaxResult listByState(@PathVariable String state) {
+        QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("registration", state);
+        List<Invoice> invoiceList =  invoiceService.list(queryWrapper);
+        return AjaxResult.success(invoiceList);
+    }
+
+
+    @GetMapping("/listByReceipt")
+    @ApiOperation("筛选未领用和已登记的发票")
+    @CrossOrigin
+    public AjaxResult listByReceipt() {
+        QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("substation_id", "暂无信息")
+                .eq("registration","已登记");
+        List<Invoice> invoiceList =  invoiceService.list(queryWrapper);
         return AjaxResult.success(invoiceList);
     }
 
@@ -115,6 +138,15 @@ public class InvoiceController {
         startPage();
         Invoice invoice = invoiceService.getById(id);
         return AjaxResult.success(invoice);
+    }
+
+    @GetMapping("/getTotalId/{subId}")
+    @ApiOperation("获取发票信息")
+    @CrossOrigin
+    public AjaxResult getTotalId(@PathVariable String subId) {
+        QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("substation_id", subId);
+        Invoice invoice = invoiceService.getOne(queryWrapper);
+        return AjaxResult.success(invoice.getId());
     }
 
     @PostMapping("/update")

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.MimeMessage;
 
 @Service
-@RocketMQMessageListener(topic = "email-topic", consumerGroup = "user-service-producer-group")
+//@RocketMQMessageListener(topic = "email-topic", consumerGroup = "user-service-producer-group")
 public class MessageExtConsumer implements RocketMQListener<EmailBody> {
 
     @Autowired

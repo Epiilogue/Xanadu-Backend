@@ -60,10 +60,6 @@ public class Supply implements Serializable {
     @TableField("total_amount")
     private Double totalAmount;
 
-    @ApiModelProperty("总计金额")
-    @TableField("amount")
-    private Double amount;
-
     @ApiModelProperty("日期")
     @TableField("time")
     private Date time;
