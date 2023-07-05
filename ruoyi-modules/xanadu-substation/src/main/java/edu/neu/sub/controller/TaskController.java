@@ -245,7 +245,7 @@ public class TaskController {
     @ApiOperation(value = "根据任务Id修改任务状态")
     public AjaxResult updateTaskStatus(@RequestParam("taskId")Long taskId){
         Task task = taskService.getById(taskId);
-        task.setTaskStatus("执行完成");
+        task.setTaskStatus(TaskStatus.DELIVERED);
         taskService.updateById(task);
         return AjaxResult.success("修改成功");
     }
