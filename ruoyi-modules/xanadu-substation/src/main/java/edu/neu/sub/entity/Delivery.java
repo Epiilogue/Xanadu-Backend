@@ -26,7 +26,6 @@ import lombok.Setter;
 @ApiModel(value = "Delivery对象", description = "投递费结算")
 //待完成任务数，已完成总任务数，今日完成数，今日待结配送费，计算公式,平均满意度
 public class Delivery implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
 

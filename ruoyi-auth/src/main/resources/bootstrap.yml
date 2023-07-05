@@ -12,7 +12,7 @@ rocketmq:
   producer:
     group: user-service-producer-group
     send-message-timeout: 5000
-  name-server: localhost:9876
+  name-server: 39.106.145.84:9876
 
 # Spring
 spring:

@@ -68,7 +68,8 @@ public class DeliveryController {
         //2.组装时间范围，从当日0点到当前时间
         @SuppressWarnings("deprecation")
         Date startTime = new Date(now.getYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
+        delivery.setCourierId(courierId);
+        delivery.setSubstationId(substationId);
         QueryWrapper<Receipt> todayReceiptQueryWrapper = new QueryWrapper<Receipt>().eq("courier_id", courierId).between("create_time", startTime, now);
         List<Receipt> list = receiptService.list(todayReceiptQueryWrapper);
         delivery.setTodayFinishedTask(list.size());

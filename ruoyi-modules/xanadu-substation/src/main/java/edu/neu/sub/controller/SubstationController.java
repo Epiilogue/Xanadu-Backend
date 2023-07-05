@@ -116,7 +116,7 @@ public class SubstationController {
 
 
     @PostMapping("/add")
-    @ApiOperation(value = "添加分站,")
+    @ApiOperation(value = "添加分站")
     public AjaxResult add(@RequestBody Substation substation) {
         //添加分站，需要注意的是分站仓库是一对一
         //分站和管理人是多对多
@@ -235,6 +235,7 @@ public class SubstationController {
             throw new ServiceException("该报表不存在");
         }
         dailyReport.setIsSettled(true);
+        dailyReportService.updateById(dailyReport);
         return AjaxResult.success("修改成功");
     }
 

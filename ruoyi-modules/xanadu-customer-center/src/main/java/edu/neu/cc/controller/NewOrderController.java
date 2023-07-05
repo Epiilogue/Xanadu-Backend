@@ -145,7 +145,9 @@ public class NewOrderController {
         operation.setCustomerId(order.getCustomerId());
         operation.setTotalAmount(order.getTotalAmount());
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
-        operationService.save(operation);
+
+        //发送到消息队列
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
 
         //填充newOrderID等字段,返回给前端
         newOrderVo.setId(newOrder.getId());
@@ -207,7 +209,10 @@ public class NewOrderController {
         operation.setCustomerId(order.getCustomerId());
         operation.setTotalAmount(order.getTotalAmount());
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
-        operationService.save(operation);
+
+        //发送到消息队列
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+
         return AjaxResult.success("撤销订单成功");
     }
 
@@ -284,6 +289,15 @@ public class NewOrderController {
         //发起远程调用，获取新的状态
         ProductRecordsVo result = wareCenterStorageRecordClient.check(productIdNumberMap);
 
+        //更新后之前的库存都解锁了，需要重新锁定库存
+        if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED)) {
+            productIdNumberMap.forEach((productId, number) -> {
+                Boolean lock = wareCenterStorageRecordClient.lock(productId, number);
+                if (!lock) throw new ServiceException("退订失败，库存锁定失败");
+            });
+        }
+
+        //如果退货后不缺货了，需要删除掉之前所有的未提交的缺货记录，订单状态改为已分配，并重新锁定库存
         if (!result.getIsLack() && order.getStatus().equals(OrderStatusConstant.OUT_OF_STOCK)) {
             //删除所有原来的未提交的缺货记录
             stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
@@ -294,7 +308,6 @@ public class NewOrderController {
                 if (!lock) throw new ServiceException("退订失败，库存锁定失败");
             });
         }
-
         orderService.updateById(order);//更新原订单
         //更新原订单的商品记录
         Map<Long, Integer> idNumberMap = result.getProductIdNumberMap();
@@ -308,6 +321,19 @@ public class NewOrderController {
                 productService.updateById(product);
             }
         });
+
+        //生成操作记录,记录订单退订操作
+        Operation operation = new Operation();
+        operation.setOrderId(unsubscribeOrder.getId());
+        operation.setOperatorType(OperationTypeConstant.UNSUBSCRIBE);
+        operation.setUserId(userId);
+        operation.setCustomerId(unsubscribeOrder.getCustomerId());
+        operation.setTotalAmount(unsubscribeOrder.getTotalAmount());
+        operation.setNumbers(unsubscribeOrder.getNumbers());//number是订单中商品的总数
+
+        //发送到消息队列
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+
         //退订成功
         return AjaxResult.success("退订成功");
     }
