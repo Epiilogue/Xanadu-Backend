@@ -1,4 +1,4 @@
-package edu.neu.dpc.serviceImpl;
+package edu.neu.dpc.listener;
 
 import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.core.exception.ServiceException;
@@ -22,13 +22,11 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
-import org.apache.rocketmq.spring.support.RocketMQConsumerLifecycleListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.domain.geo.GeoLocation;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +35,7 @@ import java.util.*;
 @Component
 @Slf4j
 @RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC, consumerGroup = "order-service-consumer-group")
-public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage> , RocketMQPushConsumerLifecycleListener {
+public class DispatchListener implements RocketMQListener<DispatchMessage> , RocketMQPushConsumerLifecycleListener {
 
     private static final String WARE_KEY = "wareLocation";
 
