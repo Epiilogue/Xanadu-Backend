@@ -25,6 +25,12 @@ spring:
       discovery:
         # 服务注册地址
         server-addr: 127.0.0.1:8848
+    sentinel:
+      # 取消控制台懒加载
+      eager: true
+      transport:
+        # 控制台地址
+        dashboard: 127.0.0.1:8187
   redis:
     database: 0
     host: 127.0.0.1
