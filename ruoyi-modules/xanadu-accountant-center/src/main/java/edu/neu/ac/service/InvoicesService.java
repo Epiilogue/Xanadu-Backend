@@ -8,8 +8,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 分站发票管理 服务类
  * </p>
  *
- * @author Gaosong Xu
- * @since 2023-06-23 09:35:39
+ * @author jin Zhang
+ * @since 2023-06-26 10:34:41
  */
 public interface InvoicesService extends IService<Invoices> {
 

@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>xanadu-accountant-center</artifactId>
+    <artifactId>xanadu-admin</artifactId>
 
     <dependencies>
         <!-- SpringCloud Alibaba Nacos -->

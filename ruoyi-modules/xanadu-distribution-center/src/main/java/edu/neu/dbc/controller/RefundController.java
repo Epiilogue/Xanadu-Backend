@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import static com.ruoyi.common.core.utils.PageUtils.startPage;
 
 /**
  * <p>
@@ -70,6 +71,7 @@ public class RefundController {
     @GetMapping("/list")
     @ApiOperation("查询所有历史退货安排")
     public AjaxResult list() {
+        //TODO: 2023/6/2 11:14 修改为查询出库记录
         return AjaxResult.success(refundService.list());
     }
 
@@ -88,9 +90,15 @@ public class RefundController {
                                     @ApiParam("商品ID") @RequestParam("productId") Long productId,
                                     @ApiParam("开始时间") @RequestParam("startTime") Date startTime,
                                     @ApiParam("结束时间") @RequestParam("endTime") Date endTime) {
-        if (startTime == null || endTime == null) return AjaxResult.error("时间范围为空");
-        if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
-        if (supplierId == null && productId == null) return AjaxResult.error("供应商ID或商品ID为空");
+        if (startTime == null || endTime == null) {
+            return AjaxResult.error("时间范围为空");
+        }
+        if (startTime.after(endTime)) {
+            return AjaxResult.error("开始时间不能大于结束时间");
+        }
+        if (supplierId == null && productId == null) {
+            return AjaxResult.error("供应商ID或商品ID为空");
+        }
 
         Product product;
         Supplier supplier;

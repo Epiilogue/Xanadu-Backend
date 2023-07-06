@@ -1,6 +1,6 @@
-package edu.neu.ac.mapper;
+package edu.neu.auth.mapper;
 
-import edu.neu.ac.entity.Supply;
+import edu.neu.auth.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,9 +10,9 @@ import org.apache.ibatis.annotations.Mapper;
  * </p>
  *
  * @author jin Zhang
- * @since 2023-06-26 10:34:41
+ * @since 2023-06-25 10:59:21
  */
 @Mapper
-public interface SupplyMapper extends BaseMapper<Supply> {
+public interface UserMapper extends BaseMapper<User> {
 
 }

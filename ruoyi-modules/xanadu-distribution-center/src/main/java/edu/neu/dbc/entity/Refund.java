@@ -64,6 +64,7 @@ public class Refund implements Serializable {
     @TableField("refund_count")
     private Integer refundCount;
 
+
     @ApiModelProperty("退货状态")
     @TableField("status")
     private String status;
@@ -76,4 +77,6 @@ public class Refund implements Serializable {
     @ApiModelProperty("退货时间")
     @TableField("refund_time")
     private Date refundTime;
+
+
 }
