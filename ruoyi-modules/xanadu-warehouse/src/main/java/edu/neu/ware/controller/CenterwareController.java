@@ -5,12 +5,17 @@ import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.ware.entity.Centerware;
 import edu.neu.ware.service.CenterwareService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -61,6 +66,12 @@ public class CenterwareController {
             return AjaxResult.error("中心仓库信息不存在");
         }
         return AjaxResult.success(centerware);
+    }
+
+    @ApiOperation("获取中心仓库信息列表,feign调用")
+    @GetMapping("/feign/info")
+    public Centerware getCenterInfo() {
+        return centerwareService.getById(1);
     }
 }
 

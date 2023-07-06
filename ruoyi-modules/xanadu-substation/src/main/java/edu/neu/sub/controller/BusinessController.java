@@ -3,11 +3,14 @@ package edu.neu.sub.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.TaskStatus;
 import edu.neu.base.constant.cc.TaskType;
 import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.ReceiptProduct;
+import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.OrderClient;
 import edu.neu.sub.service.ReceiptService;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.collections4.map.HashedMap;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 提供业务报表分析的所有数据信息
@@ -46,6 +50,7 @@ public class BusinessController {
         if (ajaxResult == null) return AjaxResult.error("获取失败");
         return ajaxResult;
     }
+
     /**
      * 分站配送情况分析
      * 是按条件查询出一年或一个月分站完成任务的情况，送货付款任务数、送货商品数量、送货付款金额
@@ -87,6 +92,68 @@ public class BusinessController {
         record.refundNumber = list.stream().filter(r -> !r.getTaskType().equals(TaskType.PAYMENT)).mapToInt(Receipt::getRefundNum).sum();
         record.refundAmount = list.stream().filter(r -> !r.getTaskType().equals(TaskType.PAYMENT)).mapToDouble(Receipt::getOutputMoney).sum();
         return AjaxResult.success(record);
+    }
+
+    @GetMapping("/getSubstationDeliveryInfo")
+    @ApiOperation(value = "数据大屏使用")
+    public AjaxResult getSubstationDeliveryInfo() {
+        @Data
+        class Record {
+            Long subId;
+            Double deliveryAmount;//收款金额
+            Long totalOrders;//总订单数
+            Long delivered;//配送订单数
+            Long paymentDelivered;//送货付款订单数
+        }
+        List<Record> records = new ArrayList<>();
+        //1.根据时间段以及分站ID拿到所有的收据信息
+        List<Receipt> receiptList = receiptService.list();
+        if (receiptList == null || receiptList.size() == 0) return AjaxResult.error("不存在记录");
+        List<Long> subIds = receiptList.stream()
+                .map(Receipt::getSubId)
+                .distinct()
+                .collect(Collectors.toList());
+        //已换货订单
+        Map<Long, Long> exchangedCounts = receiptList.stream()
+                .filter(receipt -> receipt.getTaskType().equals(TaskType.EXCHANGE))
+                .collect(Collectors.groupingBy(Receipt::getSubId, Collectors.counting()));
+        // 配送订单数
+        Map<Long, Long> deliveryCounts = receiptList.stream()
+                .filter(receipt -> receipt.getTaskType().equals(TaskType.DELIVERY))
+                .collect(Collectors.groupingBy(Receipt::getSubId, Collectors.counting()));
+        //送货收款订单
+        Map<Long, Long> paymentDeliveryCounts = receiptList.stream()
+                .filter(receipt -> receipt.getTaskType().equals(TaskType.PAYMENT_DELIVERY))
+                .collect(Collectors.groupingBy(Receipt::getSubId, Collectors.counting()));
+        //退货订单数
+        Map<Long, Long> returnCounts = receiptList.stream()
+                .filter(receipt -> receipt.getTaskType().equals(TaskType.RETURN))
+                .collect(Collectors.groupingBy(Receipt::getSubId, Collectors.counting()));
+        //收款订单数
+        Map<Long, Long> paymentCounts = receiptList.stream()
+                .filter(receipt -> receipt.getTaskType().equals(TaskType.PAYMENT_DELIVERY))
+                .collect(Collectors.groupingBy(Receipt::getSubId, Collectors.counting()));
+        // 分库收款金额
+        Map<Long, Double> paymentAmounts = receiptList.stream()
+                .filter(receipt -> receipt.getTaskType().equals(TaskType.PAYMENT_DELIVERY) || receipt.getTaskType().equals(TaskType.PAYMENT))
+                .collect(Collectors.groupingBy(Receipt::getSubId, Collectors.summingDouble(Receipt::getInputMoney)));
+        for (Long subId : subIds) {
+            Record record = new Record();
+            Long payment = paymentCounts.getOrDefault(subId, 0L);
+            Long delivery = deliveryCounts.getOrDefault(subId, 0L);
+            Long paymentDelivery = paymentDeliveryCounts.getOrDefault(subId, 0L);
+            Long returned = returnCounts.getOrDefault(subId, 0L);
+            Long exchange = exchangedCounts.getOrDefault(subId, 0L);
+            Long total = paymentDelivery + payment + delivery + returned + exchange;
+            record.deliveryAmount = paymentAmounts.getOrDefault(subId, 0.0);
+            record.subId = subId;
+            record.totalOrders = total;
+            record.delivered = delivery;
+            record.paymentDelivered = paymentDelivery;
+            records.add(record);
+        }
+
+        return AjaxResult.success(records);
     }
 
     /**

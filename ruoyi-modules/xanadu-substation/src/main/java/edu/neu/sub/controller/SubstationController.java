@@ -6,27 +6,19 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
-import com.ruoyi.system.api.domain.SysRole;
 import com.ruoyi.system.api.domain.SysUser;
-import edu.neu.base.constant.cc.ReceiptStatus;
-import edu.neu.base.constant.cc.TaskType;
 import edu.neu.base.constant.cc.UserRoles;
 import edu.neu.sub.entity.DailyReport;
-import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.Substation;
-import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.OrderClient;
+import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.service.DailyReportService;
 import edu.neu.sub.service.ReceiptService;
 import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -63,6 +55,8 @@ public class SubstationController {
     @Autowired
     RemoteUserService remoteUserService;
 
+    @Autowired
+    SubwareClient subwareClient;
 
     @GetMapping("/infoByUser/{userId}")
     @ApiOperation(value = "根据用户id获取分站信息")
@@ -82,6 +76,18 @@ public class SubstationController {
             return AjaxResult.success("当前用户没有管理任何分站");
         }
         return AjaxResult.success(substationList);
+    }
+
+    @GetMapping("/listAllStations")
+    @ApiOperation(value = "获取所有分站以及中心仓库信息")
+    public AjaxResult listAllStations() {
+        List<Substation> substationList = substationService.list();
+        Object center = subwareClient.getCenterInfo();
+        AjaxResult ajaxResult = new AjaxResult();
+        ajaxResult.put("sub", substationList);
+        ajaxResult.put("center", center);
+        return ajaxResult;
+
     }
 
 
