@@ -38,6 +38,10 @@ public class TokenController {
         return R.ok(tokenService.createToken(userInfo));
     }
 
+    @GetMapping("getUserInfo/{username}")
+    public AjaxResult getUserInfoByUsername(@PathVariable("username")String username){
+        return null;
+    }
     @CrossOrigin
     @GetMapping("getEmailCode/{email}")
     public AjaxResult loginByEmail(@PathVariable("email") String email) {

@@ -46,8 +46,6 @@ public class BusinessController {
         if (ajaxResult == null) return AjaxResult.error("获取失败");
         return ajaxResult;
     }
-
-
     /**
      * 分站配送情况分析
      * 是按条件查询出一年或一个月分站完成任务的情况，送货付款任务数、送货商品数量、送货付款金额

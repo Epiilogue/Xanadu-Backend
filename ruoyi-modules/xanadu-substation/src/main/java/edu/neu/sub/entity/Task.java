@@ -105,16 +105,16 @@ public class Task implements Serializable {
     @TableField("receipt_id")
     private Long receiptId;
 
+    @TableField("need_invoice")
+    @ApiModelProperty("是否需要发票")
+    private Boolean needInvoice;
+
     @ApiModelProperty("删除标记")
     @TableField("deleted")
     @TableLogic
-    private Boolean deleted=false;
+    private Boolean deleted = false;
 
     public Task() {
-
+        deleted = false;
     }
-
-//    public Task() {
-//        deleted = false;
-//    }
 }

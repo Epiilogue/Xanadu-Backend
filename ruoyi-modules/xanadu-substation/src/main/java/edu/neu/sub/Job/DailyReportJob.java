@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DailyReportJob extends QuartzJobBean {
-    private final SubstationService studentService;
+    private final SubstationService substationService;
 
     @Autowired
-    public DailyReportJob(SubstationService studentService) {
-        this.studentService = studentService;
+    public DailyReportJob(SubstationService substationService) {
+        this.substationService = substationService;
     }
 
     @Override
     @SuppressWarnings("all")
     protected void executeInternal(JobExecutionContext jobExecutionContext)
             throws JobExecutionException {
-       studentService.generateSubstationStatistics();
+        substationService.generateSubstationStatistics();
     }
 }

@@ -3,7 +3,6 @@ package edu.neu.ac.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
@@ -17,8 +16,8 @@ import lombok.Setter;
  * 发票记录
  * </p>
  *
- * @author Gaosong Xu
- * @since 2023-06-23 09:35:39
+ * @author jin Zhang
+ * @since 2023-06-26 10:34:41
  */
 @Getter
 @Setter
@@ -30,48 +29,35 @@ public class Invoice implements Serializable {
 
     @ApiModelProperty("ID")
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Integer id;
 
-    @ApiModelProperty("分站ID")
-    @TableField("substation_id")
-    private Long substationId;
+    @ApiModelProperty("开始号码")
+    @TableField("start_number")
+    private String startNumber;
 
-    @ApiModelProperty("发票号")
-    @TableField("invoice_number")
-    private String invoiceNumber;
+    @ApiModelProperty("结束号码")
+    @TableField("end_number")
+    private String endNumber;
 
-    @ApiModelProperty("发票状态")
-    @TableField("state")
-    private String state;
+    @ApiModelProperty("登记状态")
+    @TableField("registration")
+    private String registration;
 
     @ApiModelProperty("批次")
     @TableField("batch")
-    private String batch;
+    private int batch;
 
-    @ApiModelProperty("订单号")
-    @TableField("order_id")
-    private Long orderId;
+    @ApiModelProperty("本数")
+    @TableField("total")
+    private int total;
 
-    @ApiModelProperty("金额")
-    @TableField("amount")
-    private Double amount;
+    @ApiModelProperty("分站id")
+    @TableField("substation_id")
+    private String substationId;
 
-    @ApiModelProperty("使用人姓名")
-    @TableField("user")
-    private String user;
-
-    @ApiModelProperty("领用人姓名")
-    @TableField("employee")
-    private String employee;
-
-    @ApiModelProperty("更新日期")
-    @TableField("update_time")
-    private Date updateTime;
-
-    @ApiModelProperty("是否已删除")
-    @TableField("deleted")
-    @TableLogic
-    private Boolean deleted;
+    @ApiModelProperty("发票生成日期")
+    @TableField("time")
+    private Date time;
 
 
 }

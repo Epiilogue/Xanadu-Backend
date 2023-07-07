@@ -1,7 +1,11 @@
 # Tomcat
 server:
   port: 8089
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 # Spring
 spring: 
   application:
@@ -28,7 +32,7 @@ spring:
       eager: true
       transport:
         # 控制台地址
-        dashboard: 127.0.0.1:8718
+        dashboard: 127.0.0.1:8187
       # nacos配置持久化
       datasource:
         ds1:
@@ -39,6 +43,14 @@ spring:
             data-type: json
             rule-type: gw-flow
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            exposedHeaders: "Content-Disposition,Content-Type,Cache-Control"
       discovery:
         locator:
           lowerCaseServiceId: true

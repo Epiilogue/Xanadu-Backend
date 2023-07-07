@@ -2,12 +2,17 @@
 server:
   port: 9200
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
 rocketmq:
   producer:
     group: user-service-producer-group
     send-message-timeout: 5000
-  name-server: localhost:9876
+  name-server: 39.106.145.84:9876
 
 # Spring
 spring:
@@ -42,4 +47,9 @@ spring:
         # 共享配置
         shared-configs:
           - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-
+    sentinel:
+      # 取消控制台懒加载
+      eager: true
+      transport:
+        # 控制台地址
+        dashboard: 127.0.0.1:8187

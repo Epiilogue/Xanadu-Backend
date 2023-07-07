@@ -3,11 +3,10 @@ package edu.neu.ac.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import java.io.Serializable;
 import java.util.Date;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -15,11 +14,11 @@ import lombok.Setter;
 
 /**
  * <p>
- *
+ * 
  * </p>
  *
- * @author Gaosong Xu
- * @since 2023-06-23 09:35:39
+ * @author jin Zhang
+ * @since 2023-06-26 10:34:41
  */
 @Getter
 @Setter
@@ -32,10 +31,6 @@ public class Supply implements Serializable {
     @ApiModelProperty("ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    @ApiModelProperty("商品ID")
-    @TableId(value = "product_id")
-    private Long productId;
 
     @ApiModelProperty("供应商ID")
     @TableField("supplier_id")
@@ -69,12 +64,14 @@ public class Supply implements Serializable {
     @TableField("time")
     private Date time;
 
-    @ApiModelProperty("删除标记")
+    @ApiModelProperty("是否结算")
     @TableField("deleted")
-    private Boolean deleted;
+    @TableLogic
+    private boolean deleted;
 
-    // settle_type
     @ApiModelProperty("退款还是支出")
-    @TableField("settle_type")
+    @TableField("settleType")
     private String settleType;
+
+
 }

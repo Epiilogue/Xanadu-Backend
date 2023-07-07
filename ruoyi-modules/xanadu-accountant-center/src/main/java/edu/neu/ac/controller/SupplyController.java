@@ -11,28 +11,25 @@ import edu.neu.ac.vo.SettlementVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * <p>
- * 前端控制器
+ *  前端控制器
  * </p>
  *
- * @author Gaosong Xu
- * @since 2023-06-23 09:35:39
+ * @author jin Zhang
+ * @since 2023-06-26 09:58:23
  */
 @RestController
 @RequestMapping("/ac/supply")
-@Transactional
 public class SupplyController {
-
-
     @Autowired
     SettleClient settleClient;
 
@@ -42,9 +39,20 @@ public class SupplyController {
 
     @GetMapping("/listToSettlement")
     @ApiOperation("与供应商结算,获取结算列表")
-    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId") Long productId,
-                                 @RequestParam("startTime") Date startTime, @RequestParam("endTime") Date endTime) {
-        AjaxResult ajaxResult = settleClient.settlement(supplierId, productId, startTime, endTime);
+    public AjaxResult settlement(@RequestParam(value = "supplierId") Long supplierId, @RequestParam(value = "productId",required = false) Long productId,
+                                 @RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        // 把String转换成Data类型数据
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d HH:mm:ss");
+        Date startTimeToData;
+        Date endTimeToData;
+        try {
+            startTimeToData = sdf.parse(startTime);
+            endTimeToData = sdf.parse(endTime);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        AjaxResult ajaxResult = settleClient.settlement(supplierId, productId, startTimeToData, endTimeToData);
         if (ajaxResult == null) return AjaxResult.error("获取结算订单失败");
         if (ajaxResult.isError()) return AjaxResult.error(ajaxResult.getMsg());
         List<SettlementVo> settlementVos = JSON.parseArray(JSON.toJSONString(ajaxResult.get("data")), SettlementVo.class);
