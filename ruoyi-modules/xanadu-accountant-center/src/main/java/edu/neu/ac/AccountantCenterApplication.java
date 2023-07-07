@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * @author 86131
  */
-@SpringBootApplication(scanBasePackages = {"edu.neu", "com.ruoyi.common.security.handler"})
+@SpringBootApplication(scanBasePackages = {"edu.neu", "com.ruoyi"})
 @EnableFeignClients(basePackages = {"edu.neu.ac.feign"})
 @MapperScan("edu.neu.ac.mapper")
 @EnableTransactionManagement

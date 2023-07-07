@@ -71,7 +71,6 @@ public class RefundController {
     @GetMapping("/list")
     @ApiOperation("查询所有历史退货安排")
     public AjaxResult list() {
-        //TODO: 2023/6/2 11:14 修改为查询出库记录
         return AjaxResult.success(refundService.list());
     }
 
