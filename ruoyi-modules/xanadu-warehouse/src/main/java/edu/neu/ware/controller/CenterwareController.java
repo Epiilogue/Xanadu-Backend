@@ -3,7 +3,9 @@ package edu.neu.ware.controller;
 
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.ware.entity.Centerware;
+import edu.neu.ware.entity.Subware;
 import edu.neu.ware.service.CenterwareService;
+import edu.neu.ware.service.SubwareService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,8 @@ public class CenterwareController {
     @Autowired
     private CenterwareService centerwareService;
 
+    @Autowired
+    private SubwareService subwareService;
 
     @PostMapping("/edit")
     @CacheEvict(allEntries = true)
@@ -66,6 +70,17 @@ public class CenterwareController {
             return AjaxResult.error("中心仓库信息不存在");
         }
         return AjaxResult.success(centerware);
+    }
+
+    @GetMapping("/listAllStations")
+    @ApiOperation(value = "获取所有分站以及中心仓库信息")
+    public AjaxResult listAllStations() {
+        List<Subware> subList = subwareService.list();
+        Centerware center = centerwareService.getById(1);
+        AjaxResult ajaxResult = new AjaxResult();
+        ajaxResult.put("sub", subList);
+        ajaxResult.put("center", center);
+        return ajaxResult;
     }
 
     @ApiOperation("获取中心仓库信息列表,feign调用")

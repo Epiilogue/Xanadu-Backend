@@ -87,7 +87,6 @@ public class SubstationController {
         ajaxResult.put("sub", substationList);
         ajaxResult.put("center", center);
         return ajaxResult;
-
     }
 
 
