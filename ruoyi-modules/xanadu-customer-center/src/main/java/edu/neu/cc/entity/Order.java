@@ -55,7 +55,7 @@ public class Order implements Serializable {
     private Date deadline;
 
     @ApiModelProperty("涉及的金额")
-    @TableField("total_amount")
+    @TableField("total_amout")
     private Double totalAmount;
 
 
