@@ -73,6 +73,18 @@ public class OrderController {
 
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
     @GetMapping(value={"/list/{customerId}","/list"})
+    public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId) {
+        if (customerId == null) {
+            return AjaxResult.success(orderService.list());
+        } else {
+            List<Order> orderList = orderService.list(new QueryWrapper<Order>().eq("customer_id", customerId));
+            if (orderList == null || orderList.size() == 0) return AjaxResult.error("该客户没有订单");
+            return AjaxResult.success(orderList);
+        }
+    }
+
+    @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
+//    @GetMapping(value={"/list/{customerId}","/list"})
     @CrossOrigin
     public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId,@RequestParam Map<String, String> query) {
         //设置查询条件
@@ -112,11 +124,15 @@ public class OrderController {
             //回显neworder信息以及对应的商品信息
             NewOrder newOrder = newOrderService.getById(orderId);
             if (newOrder == null) return AjaxResult.error("订单不存在");
+            Order order = orderService.getById(orderId);
+            ajaxResult.put("origin", order);
             ajaxResult.put("order", newOrder);
         } else {
             //回显refund信息以及对应的商品信息
             Refund refund = refundService.getById(orderId);
             if (refund == null) return AjaxResult.error("订单不存在");
+            Order order = orderService.getById(orderId);
+            ajaxResult.put("origin", order);
             ajaxResult.put("order", refund);
         }
         //获取商品列表回传

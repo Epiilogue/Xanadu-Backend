@@ -119,6 +119,8 @@ public class RefundController {
         order.setOrderType(OperationTypeConstant.EXCHANGE);
         //插入换货数据库
         orderService.save(order);
+        refund.setId(order.getId());
+        refund.setOrderId(preOrder.getId());
         refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
         refund.setSubstationId(substationId);
@@ -212,11 +214,6 @@ public class RefundController {
                 }
             }
         }
-        products.forEach(p -> {
-            //插入商品记录
-            p.setOrderId(order.getId());
-            if (!productService.save(p)) throw new ServiceException("插入商品记录异常");
-        });
 
         order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
         order.setOrderType(OperationTypeConstant.RETURN);
@@ -229,6 +226,7 @@ public class RefundController {
             if (!productService.save(p)) throw new ServiceException("插入商品记录异常");
         });
 
+        refund.setId(order.getId());
         refund.setOrderId(preOrder.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
         refund.setSubstationId(substationId);

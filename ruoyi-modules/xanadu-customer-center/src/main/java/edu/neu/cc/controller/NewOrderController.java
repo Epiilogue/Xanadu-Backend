@@ -268,7 +268,8 @@ public class NewOrderController {
         //生成一条refund记录
         Refund refund = new Refund();
         BeanUtils.copyProperties(unSubscribeVo, refund);
-        refund.setOrderId(unsubscribeOrder.getId());
+        refund.setId(unsubscribeOrder.getId());
+        refund.setOrderId(order.getId());
         refundService.save(refund);//插入退订记录
 
         //插入商品

@@ -1,6 +1,7 @@
 package edu.neu.sub.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.TaskType;
@@ -17,6 +18,7 @@ import org.bouncycastle.cms.Recipient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +75,7 @@ public class FinanceController {
         if (goodIdsRes.isError()) return AjaxResult.error(goodIdsRes.getMsg());
         //忽略警告
         @SuppressWarnings("unchecked")
-        List<Long> goodIds = (List) goodIdsRes.get("data");
+        List<Long> goodIds = JSON.parseArray(JSON.toJSONString(goodIdsRes.get("data")),Long.class);
         if (goodIds == null || goodIds.size() == 0) return AjaxResult.error("该分类下没有商品");
         Substation substation = substationService.getById(substationId);
         if (substation == null) return AjaxResult.error("分站不存在");
@@ -86,17 +88,7 @@ public class FinanceController {
             if (receipt.getTaskType().equals(TaskType.PAYMENT)) continue;
             QueryWrapper<ReceiptProduct> receiptProductQueryWrapper = new QueryWrapper<ReceiptProduct>().eq("receipt_id", receipt.getId());
             List<ReceiptProduct> receiptProductList = receiptProductService.list(receiptProductQueryWrapper);
-            System.out.println("回执商品 "+receiptProductList);
-            System.out.println("分类下商品id "+goodIds);
-            receiptProductList = receiptProductList.stream().filter(receiptProduct -> {
-                System.out.println("回执商品id "+receiptProduct.getProductId());
-                System.out.println("回执商品id "+receiptProduct.getProductId().getClass());
-                System.out.println("回执商品id "+goodIds.get(0));
-                System.out.println("回执商品id "+goodIds.get(0).getClass());
-                System.out.println(goodIds.contains(receiptProduct.getProductId()));
-                return goodIds.contains(receiptProduct.getProductId());
-            }).collect(Collectors.toList());
-            System.out.println("回执商品 "+receiptProductList);
+            receiptProductList = receiptProductList.stream().filter(receiptProduct -> goodIds.contains(receiptProduct.getProductId())).collect(Collectors.toList());
             if (productName != null)
                 receiptProductList = receiptProductList.stream().filter(receiptProduct -> receiptProduct.getProductName().contains(productName)).collect(Collectors.toList());
             //将过滤后的商品信息放入收据中
@@ -118,9 +110,6 @@ public class FinanceController {
             });
             //不用管收款的事情，收款由送货数据负责更新完成
         });
-        System.out.println("回执"+receiptList.toString());
-
-        System.out.println("收款map"+productFinanceMap);
         //更新，待缴额为实收额*0.9
         productFinanceMap.values().forEach(finance -> finance.setPay(finance.getActual() * 0.9));
         return AjaxResult.success(productFinanceMap.values());

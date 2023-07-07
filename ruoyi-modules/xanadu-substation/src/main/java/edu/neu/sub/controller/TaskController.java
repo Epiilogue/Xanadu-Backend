@@ -69,6 +69,7 @@ public class TaskController {
     RemoteUserService remoteUserService;
 
 
+
     @GetMapping("/listByUserId/{userId}")
     @ApiOperation(value = "获取子站所有任务记录,对应所有任务页面")
     public AjaxResult listByUserId(@PathVariable("userId") Long userId) {
