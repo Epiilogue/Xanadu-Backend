@@ -138,6 +138,7 @@ public class CustomerController {
     /*
      * 用户列表查询
      * */
+    @SuppressWarnings("all")
     @GetMapping("/query/{page}/{size}")
     public AjaxResult searchList(@PathVariable("page") Long page, @PathVariable("size") Long size,@RequestParam Map<String, String> query) {
         //设置查询条件

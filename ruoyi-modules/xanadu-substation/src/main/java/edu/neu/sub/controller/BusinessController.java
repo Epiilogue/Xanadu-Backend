@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,8 +44,8 @@ public class BusinessController {
      * @param number    前几名
      */
     @GetMapping("/listTopProduct/{number}")
-    public AjaxResult listTopProducts(@RequestParam("startTime") Date startTime,
-                                      @RequestParam("endTime") Date endTime,
+    public AjaxResult listTopProducts(@RequestParam("startTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
+                                      @RequestParam("endTime")@DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
                                       @RequestParam("number") Integer number) {
         AjaxResult ajaxResult = orderClient.listTopProducts(startTime, endTime, number);
         if (ajaxResult == null) return AjaxResult.error("获取失败");

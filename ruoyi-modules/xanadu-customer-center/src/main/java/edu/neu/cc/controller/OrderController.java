@@ -299,10 +299,11 @@ public class OrderController {
     public AjaxResult listTopProducts(@RequestParam("startTime") Date startTime,
                                       @RequestParam("endTime") Date endTime,
                                       @RequestParam("number") Integer number) {
+
+        List<Order> orders = orderService.list(new QueryWrapper<Order>().between("create_time", startTime, endTime).eq("order_type",OperationTypeConstant.ORDER));
         //查询一段时间范围内订购数量最多的前number个商品，返回商品列表，里面需要有商品数量
         //直接去找范围内的新订单，然后找到里面所有的订单ID，然后取商品表查找，最后统计以productVo列表返回
-        List<NewOrder> newOrders = newOrderService.list(new QueryWrapper<NewOrder>().between("create_time", startTime, endTime));
-        List<Long> orderIds = newOrders.stream().map(NewOrder::getId).collect(Collectors.toList());
+        List<Long> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
         Map<Long, ProductVo> longProductVoHashMap = new HashMap<>();
         List<Product> products = productService.list(new QueryWrapper<Product>().in("order_id", orderIds));
         products.forEach(product -> {
