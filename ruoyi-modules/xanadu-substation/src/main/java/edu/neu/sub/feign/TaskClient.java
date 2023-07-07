@@ -27,7 +27,7 @@ public interface TaskClient {
     public AjaxResult getTaskBySubstationId(@PathVariable("id") Long id);
 
 
-    @PostMapping("/feign/createDeliveryTask")
+    @PostMapping("/dpc/dispatch/feign/createDeliveryTask")
     @ApiOperation(value = "创建送货任务单,需要调度商品以及保存相关的商品信息")
     public AjaxResult createDeliveryTask(@ApiParam("订单ID") @RequestParam("orderId") Long orderId,
                                          @ApiParam("分站ID") @RequestParam("substationId") Long substationId,

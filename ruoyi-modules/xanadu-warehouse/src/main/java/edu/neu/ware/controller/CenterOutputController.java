@@ -301,7 +301,9 @@ public class CenterOutputController {
         if (substationClientSubstationId.isError()) return AjaxResult.error("修改失败,未找到该分站");
         //分库ID可以直接由分站获取
         AjaxResult subwareIdResult = substationClient.getSubwareId(centerOutputVo.getSubstationId());
-        centerOutputVo.setSubwareId((Long) subwareIdResult.get("data"));
+        //传回的id可能为integer类型
+        Long subwareId = subwareIdResult.get("data") instanceof Integer? Long.parseLong(subwareIdResult.get("data").toString()) :(Long) subwareIdResult.get("data");
+        centerOutputVo.setSubwareId(subwareId);
         //修改信息
         BeanUtils.copyProperties(centerOutputVo, centerOutput);
         //更新

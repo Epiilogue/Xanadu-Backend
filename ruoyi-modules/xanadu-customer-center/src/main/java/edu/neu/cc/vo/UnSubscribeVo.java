@@ -24,7 +24,7 @@ public class UnSubscribeVo implements Serializable {
     private String reason;
 
     @ApiModelProperty("操作类型(退货，换货，退订)")
-    private Integer operationType;
+    private String operationType;
 
     @ApiModelProperty("退换货状态")
     private String status;

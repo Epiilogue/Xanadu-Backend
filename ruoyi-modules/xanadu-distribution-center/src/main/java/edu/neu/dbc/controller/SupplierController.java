@@ -2,6 +2,8 @@ package edu.neu.dbc.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.entity.PurchaseRecord;
@@ -57,6 +59,20 @@ public class SupplierController {
             return AjaxResult.error("供应商不存在");
         }
         return AjaxResult.success(supplier);
+    }
+
+    @GetMapping("/list/{pageNum}/{pageSize}")
+    @ApiOperation("分页查询供应商")
+    public AjaxResult pageList(@PathVariable Long pageNum, @PathVariable Long pageSize) {
+        return AjaxResult.success(supplierService.page(new Page<>(pageNum,pageSize)));
+    }
+
+    @GetMapping("/query/{pageNum}/{pageSize}")
+    @ApiOperation("根据姓名、地址查询供应商")
+    public AjaxResult query(@PathVariable Long pageNum, @PathVariable Long pageSize,@RequestParam(value = "name" ,required=false) String name,@RequestParam(value = "address" ,required=false) String address) {
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.like(name!=null,"name",name).like(address!=null,"address",address);
+        return AjaxResult.success(supplierService.page(new Page<>(pageNum,pageSize),queryWrapper));
     }
 
     @PostMapping("/add")

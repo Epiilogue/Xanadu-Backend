@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Map;
 
-@FeignClient(value = "xanadu-ware", contextId = "WareCenterStorageRecordClient")
+@FeignClient(value = "xanadu-ware", url = "/ware/centerStorageRecord",contextId = "WareCenterStorageRecordClient")
 @Component
 public interface WareCenterStorageRecordClient {
     @GetMapping("/ware/centerStorageRecord/feign/getStorage/{productId}")

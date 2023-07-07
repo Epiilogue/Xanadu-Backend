@@ -1,6 +1,7 @@
 package edu.neu.cc.controller;
 
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -10,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -28,21 +31,22 @@ public class OperationController {
 
     @GetMapping("/list/{pageNum}/{pageSize}")
     @ApiOperation("查询所有的操作记录,如果携带参数则按照参数查找，否则查询所有")
-    public AjaxResult list(@RequestParam("userId") Long userId,
+    public AjaxResult list(@RequestParam(value="userId",required = false) Long userId,
+                           @RequestParam(value="startTime",required = false) String startTime,
+                           @RequestParam(value="endTime",required = false) String endTime,
                            @PathVariable(value = "pageNum", required = false) Integer pageNum,
                            @PathVariable(value = "pageSize", required = false) Integer pageSize) {
+        Date start= DateUtil.parse(startTime); //起始时间
+        Date end= DateUtil.parse(endTime);    //结束时间
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.ge(start!=null,"create_time",start)
+                .le(end!=null,"create_time",end)
+                .eq(userId!=null,"user_id",userId);
         if (pageNum == null || pageSize == null) {
             //查询所有
-            if (userId != null) {
-                return AjaxResult.success(operationService.list(new QueryWrapper<Operation>().eq("user_id", userId)));
-            }
-            return AjaxResult.success(operationService.list());
+            return AjaxResult.success(operationService.list(queryWrapper));
         }
-        //分页查询
-        if (userId != null) {
-            return AjaxResult.success(operationService.page(new Page<>(pageNum, pageSize), new QueryWrapper<Operation>().eq("user_id", userId)));
-        }
-        return AjaxResult.success(operationService.page(new Page<>(pageNum, pageSize)));
+        return AjaxResult.success(operationService.page(new Page<>(pageNum, pageSize),queryWrapper));
     }
 
 

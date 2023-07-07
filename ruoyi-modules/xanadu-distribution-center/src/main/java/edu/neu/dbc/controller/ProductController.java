@@ -1,6 +1,7 @@
 package edu.neu.dbc.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Product;
@@ -43,6 +44,18 @@ public class ProductController {
     @GetMapping("/list/{pageNum}/{pageSize}")
     @ApiOperation("获取商品列表,分页查询")
     public AjaxResult list(@PathVariable Long pageNum, @PathVariable Long pageSize) {
+        Page<Product> page = productService.page(new Page<>(pageNum,pageSize));
+        return AjaxResult.success(page);
+    }
+
+    /*
+     * 获取列表,分页查询
+     * */
+    @GetMapping("/query/{pageNum}/{pageSize}")
+    @ApiOperation("获取供应商商品列表")
+    public AjaxResult query(@PathVariable Long pageNum, @PathVariable Long pageSize,@RequestParam("supplierId") String supplierId) {
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.eq(supplierId!=null,"supplier_id",supplierId);
         Page<Product> page = productService.page(new Page<>(pageNum,pageSize));
         return AjaxResult.success(page);
     }

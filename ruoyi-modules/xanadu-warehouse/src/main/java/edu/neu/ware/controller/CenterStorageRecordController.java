@@ -3,6 +3,7 @@ package edu.neu.ware.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 
@@ -90,6 +91,12 @@ public class CenterStorageRecordController {
         return AjaxResult.success(centerStorageRecords);
     }
 
+    //获取列表
+    @GetMapping("/list/{pageNum}/{pageSize}")
+    @ApiOperation("获取中心仓库中的所有商品库存")
+    public AjaxResult pageList(@PathVariable Long pageNum,@PathVariable Long pageSize) {
+        return AjaxResult.success(centerStorageRecordService.page(new Page<>(pageNum, pageSize)));
+    }
 
     @GetMapping("/feign/getTotalStorage/{productId}")
     @ApiOperation("获取商品总库存")

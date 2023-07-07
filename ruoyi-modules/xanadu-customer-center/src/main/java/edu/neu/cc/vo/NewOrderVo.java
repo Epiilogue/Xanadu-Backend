@@ -92,6 +92,9 @@ public class NewOrderVo  implements Serializable {
     @TableField("numbers")
     private Integer numbers;
 
+    @ApiModelProperty("新订类型")
+    @TableField("new_Type")
+    private String newType;
 
 
 }

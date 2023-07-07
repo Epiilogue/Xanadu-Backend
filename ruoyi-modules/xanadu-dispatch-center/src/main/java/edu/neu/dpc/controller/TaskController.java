@@ -45,6 +45,30 @@ public class TaskController {
     CCOrderClient ccOrderClient;
 
 
+    @ApiOperation("根据子站ID获取所有的任务列表")
+    @GetMapping("/list")
+    public AjaxResult list() {
+        List<Task> list = taskService.list();
+        if (list == null || list.size() == 0) return AjaxResult.error("查询任务失败");
+        ArrayList<TaskVo> taskVos = new ArrayList<>();
+        list.forEach(t -> {
+            Long orderId = t.getOrderId();
+            AjaxResult orderResult = ccOrderClient.getOrder(orderId);
+            //检查返回结果是否有错误,如果有错误则不生成vo
+            if (orderResult.isError()) return;
+            //获取订单信息
+            Object data = orderResult.get("data");
+            //转为OrderVo
+            OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
+            //拼接为TaskVo
+            TaskVo taskVo = new TaskVo();
+            BeanUtils.copyProperties(orderVo, taskVo);
+            BeanUtils.copyProperties(t, taskVo);
+            taskVos.add(taskVo);
+        });
+        return AjaxResult.success(taskVos);
+    }
+
     @GetMapping("/feign/getOrderIdByTaskId/{taskId}")
     @ApiOperation("根据任务id获取订单id")
     @Cacheable(key = "#taskId")
@@ -81,7 +105,10 @@ public class TaskController {
                     break;
                 case TaskStatus.COMPLETED:
                     //需要判断订单类型，如果是收款订单就没有必要更新订单状态了
-                    if (task.getTaskType().equals(TaskType.PAYMENT)) break;
+                    if (task.getTaskType().equals(TaskType.PAYMENT)){
+                        success=true;
+                        break;
+                    }
                     success = ccOrderClient.batchUpdateStatus(OrderStatusConstant.FINISHED, Collections.singletonList(orderId));
                     break;
                 case TaskStatus.PARTIAL_COMPLETED:

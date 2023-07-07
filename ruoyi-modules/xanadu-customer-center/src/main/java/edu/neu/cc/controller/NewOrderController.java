@@ -136,6 +136,11 @@ public class NewOrderController {
                     stockoutService.save(stockout);
                 }
             });
+        }else {
+            products.forEach(product -> {
+                product.setOrderId(order.getId());
+                if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
+            });
         }
         //生成操作记录,记录订单创建操作
         Operation operation = new Operation();
@@ -263,7 +268,8 @@ public class NewOrderController {
         //生成一条refund记录
         Refund refund = new Refund();
         BeanUtils.copyProperties(unSubscribeVo, refund);
-        refund.setOrderId(unsubscribeOrder.getId());
+        refund.setId(unsubscribeOrder.getId());
+        refund.setOrderId(order.getId());
         refundService.save(refund);//插入退订记录
 
         //插入商品

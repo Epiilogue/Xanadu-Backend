@@ -57,7 +57,7 @@ public class SubStorageRecordController {
     }
 
 
-    @GetMapping("/feign/check")
+    @PostMapping("/feign/check")
     @ApiOperation(value = "检查商品是否数量都充足")
     AjaxResult check(@RequestParam("subwareId") Long subwareId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         List<Long> idList = new ArrayList<>(longIntegerHashMap.keySet());
@@ -104,7 +104,7 @@ public class SubStorageRecordController {
         }
     }
 
-    @PostMapping("/ware/subStorageRecord/feign/reduce")
+    @PostMapping("/feign/reduce")
     @ApiOperation(value = "减少库存")
     AjaxResult reduce(@RequestParam("subwareId") Long subwareId, @RequestParam("taskId") Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap) {
         RLock lock = redissonClient.getLock("subware:" + subwareId);

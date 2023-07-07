@@ -119,6 +119,8 @@ public class RefundController {
         order.setOrderType(OperationTypeConstant.EXCHANGE);
         //插入换货数据库
         orderService.save(order);
+        refund.setId(order.getId());
+        refund.setOrderId(preOrder.getId());
         refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
         refund.setSubstationId(substationId);
@@ -145,6 +147,11 @@ public class RefundController {
                     //插入缺货记录
                     stockoutService.save(stockout);
                 }
+            });
+        }else{
+            products.forEach(product -> {
+                product.setOrderId(order.getId());
+                if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
             });
         }
         //生成操作记录,记录订单创建操作
@@ -193,10 +200,10 @@ public class RefundController {
             if (!p.getRefundAble()) throw new ServiceException("存在商品不允许退货");
         });
         //需要检查是否已经进行过退货换货操作了，如果已经进行过了，不允许再次进行退货换货操作
-        
+
         if (refundService.getOne(new QueryWrapper<Refund>().eq("order_id", preOrder.getId())) != null)
            throw new ServiceException("已经进行过退货换货操作了，不允许再次进行退货换货操作");
-        
+
         //拿到原来的订单商品
         List<Product> productList = productService.list(new QueryWrapper<Product>().eq("order_id", refundVo.getOrderId()));
         //检查对应商品数量是不是小于退货数量，超过了不允许换
@@ -207,16 +214,19 @@ public class RefundController {
                 }
             }
         }
+
+        order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+        order.setOrderType(OperationTypeConstant.RETURN);
+        //插入订单数据库
+        orderService.save(order);
+
         products.forEach(p -> {
             //插入商品记录
             p.setOrderId(order.getId());
             if (!productService.save(p)) throw new ServiceException("插入商品记录异常");
         });
 
-        order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
-        order.setOrderType(OperationTypeConstant.RETURN);
-        //插入订单数据库
-        orderService.save(order);
+        refund.setId(order.getId());
         refund.setOrderId(preOrder.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
         refund.setSubstationId(substationId);

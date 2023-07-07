@@ -4,6 +4,7 @@ package edu.neu.ware.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Map;
 public class ProductRecordsVo implements Serializable {
 
     // 商品ID和缺货数量的键值对
-    Map<Long, Integer> productIdNumberMap;
+    Map<Long, Integer> productIdNumberMap=new HashMap<>();
 
     // 是否缺货
     Boolean isLack;

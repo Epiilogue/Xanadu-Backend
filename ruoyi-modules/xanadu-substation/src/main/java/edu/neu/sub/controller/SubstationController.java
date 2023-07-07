@@ -68,6 +68,16 @@ public class SubstationController {
         return AjaxResult.success(substation);
     }
 
+    @GetMapping("/infoById/{subId}")
+    @ApiOperation(value = "根据分站id获取分站信息")
+    public AjaxResult infoById(@PathVariable("subId") Long subId) {
+        Substation substation = substationService.getById(subId);
+        if (substation == null) {
+            return AjaxResult.error("分站不存在");
+        }
+        return AjaxResult.success(substation);
+    }
+
     @GetMapping("/listAll")
     @ApiOperation(value = "分站列表,查找所有的,管理员专用，如果登录用户是管理员的话直接请求该接口")
     public AjaxResult listAll() {
@@ -133,8 +143,10 @@ public class SubstationController {
         if (substationService.getOne(addressEq) != null) throw new ServiceException("同地址下已有分站");
         substationService.save(substation);
         //需要添加管理员与分站的关系，我们默认此时提交的id里不会存在有已经管理别的分站的ID
-        Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
-        if (result == 0 || result != substation.getAdminIds().size()) throw new ServiceException("添加库管员失败");
+        if(substation.getAdminIds()!=null && substation.getAdminIds().size()!=0){
+            Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
+            if (result == 0 || result != substation.getAdminIds().size()) throw new ServiceException("添加库管员失败");
+        }
         return AjaxResult.success("添加成功");
     }
 
@@ -154,7 +166,9 @@ public class SubstationController {
             throw new ServiceException("不允许更新分库");
         substationService.updateById(substation);
         substationService.removeMasters(substation.getId());
-        substationService.addMasters(substation.getId(), substation.getAdminIds());
+        if(substation.getAdminIds()!=null && substation.getAdminIds().size()!=0){
+            substationService.addMasters(substation.getId(), substation.getAdminIds());
+        }
         return AjaxResult.success("更新成功");
     }
 
@@ -200,7 +214,7 @@ public class SubstationController {
         return AjaxResult.success(userList);
     }
 
-    @PostMapping("/addCourier/{substationId}}")
+    @PostMapping("/addCourier/{substationId}")
     @ApiOperation(value = "批量添加分站快递员")
     public AjaxResult addCourier(@PathVariable("substationId") Long substationId, @RequestBody List<Long> courierIds) {
         //添加分站快递员，需要注意的是分站快递员是一对多

@@ -54,7 +54,7 @@ spring:
         # 主库数据源
         master:
           username: root
-          password: xgs1150840779
+          password: 123456
           url: jdbc:mysql://localhost:3306/xanadu_ware?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
           driver-class-name: com.mysql.cj.jdbc.Driver
           # 从库数据源
@@ -75,3 +75,7 @@ mybatis-plus:
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
       logic-delete-field: deleted # 逻辑删除字段(默认为 deleted)
+logging:
+  level:
+    edu.neu.ware:
+      info
