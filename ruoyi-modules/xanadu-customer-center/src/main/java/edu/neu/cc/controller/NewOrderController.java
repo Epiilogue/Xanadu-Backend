@@ -104,7 +104,8 @@ public class NewOrderController {
 
 
         }
-
+        Long userId = SecurityUtils.getUserId();
+        order.setUserId(userId);
         order.setOrderType(OperationTypeConstant.ORDER);
         //插入订单数据库
         orderService.save(order);
@@ -112,7 +113,6 @@ public class NewOrderController {
         newOrderService.save(newOrder);
 
 
-        Long userId = SecurityUtils.getUserId();
 
 
         //插入对应的数据表，保存相关记录

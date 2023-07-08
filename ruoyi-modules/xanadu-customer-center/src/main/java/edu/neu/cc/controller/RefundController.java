@@ -118,6 +118,9 @@ public class RefundController {
         else order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
         order.setOrderType(OperationTypeConstant.EXCHANGE);
         //插入换货数据库
+        Long userId = SecurityUtils.getUserId();
+        order.setUserId(userId);
+
         orderService.save(order);
         refund.setId(order.getId());
         refund.setOrderId(preOrder.getId());
@@ -126,7 +129,7 @@ public class RefundController {
         refund.setSubstationId(substationId);
 
         refundService.save(refund);
-        Long userId = SecurityUtils.getUserId();
+
         //插入对应的数据表，保存相关记录
         if (productRecordsVo.getIsLack()) {
             //生成缺货记录
@@ -155,7 +158,7 @@ public class RefundController {
             });
         }
         //生成操作记录,记录订单创建操作
-        Operation operation = new Operation(order.getId(), order.getCustomerId(), order.getId(),
+        Operation operation = new Operation(userId, order.getCustomerId(), order.getId(),
                 OperationTypeConstant.EXCHANGE, order.getNumbers(), order.getTotalAmount());
         operationService.save(operation);
         //填充newOrderID等字段,返回给前端
@@ -214,7 +217,9 @@ public class RefundController {
                 }
             }
         }
-
+        //插入换货数据库
+        Long userId = SecurityUtils.getUserId();
+        order.setUserId(userId);
         order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
         order.setOrderType(OperationTypeConstant.RETURN);
         //插入订单数据库
@@ -231,10 +236,16 @@ public class RefundController {
         refund.setOperationType(OperationTypeConstant.RETURN);
         refund.setSubstationId(substationId);
         refundService.save(refund);
-
         refundVo.setId(order.getId());
         refundVo.setCreateTime(order.getCreateTime());
         refundVo.setStatus(order.getStatus());
+        //生成操作并插入
+
+        //生成操作记录,记录订单创建操作
+        Operation operation = new Operation(userId, order.getCustomerId(), order.getId(),
+                OperationTypeConstant.RETURN, order.getNumbers(), order.getTotalAmount());
+        operationService.save(operation);
+
         return AjaxResult.success("创建退货订单成功", refundVo);
     }
 
