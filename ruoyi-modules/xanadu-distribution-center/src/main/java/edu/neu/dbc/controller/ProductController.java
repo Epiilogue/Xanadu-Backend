@@ -1,12 +1,14 @@
 package edu.neu.dbc.controller;
 
 
+import cn.hutool.db.sql.Order;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Categary;
 import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.entity.Supplier;
+import edu.neu.dbc.feign.OrderClient;
 import edu.neu.dbc.service.CategaryService;
 import edu.neu.dbc.service.ProductService;
 import edu.neu.dbc.service.SupplierService;
@@ -45,6 +47,9 @@ public class ProductController {
 
     @Autowired
     SupplierService supplierService;
+
+    @Autowired
+    OrderClient orderClient;
 
     /*
      * 获取列表,分页查询
@@ -136,6 +141,9 @@ public class ProductController {
             @CacheEvict(key = "'listAll'")
     })
     public AjaxResult delete(@PathVariable Integer id) {
+        //删除前需要检查是否已经购买过了，如果存在订单则不允许删除
+        AjaxResult ajaxResult=orderClient.checkDeleteProduct(id);
+        if (ajaxResult.isError()) return ajaxResult;
         boolean deleted = productService.removeById(id);
         if (deleted) {
             return AjaxResult.success("商品删除成功");

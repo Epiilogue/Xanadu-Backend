@@ -320,5 +320,13 @@ public class OrderController {
     }
 
 
+    @GetMapping("/feign/checkDeleteProduct/{id}")
+    AjaxResult checkDeleteProduct(@PathVariable("id") Integer id){
+        QueryWrapper<Product> queryWrapper = new QueryWrapper<Product>().eq("product_id", id);
+        long count = productService.count(queryWrapper);
+        if (count > 0) return AjaxResult.error("该商品已被下单，无法删除");
+        return AjaxResult.success();
+    }
+
 }
 
