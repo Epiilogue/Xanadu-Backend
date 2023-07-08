@@ -8,6 +8,7 @@ import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.entity.PurchaseRecord;
 import edu.neu.dbc.entity.Supplier;
+import edu.neu.dbc.service.ProductService;
 import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.SupplierService;
 import io.swagger.annotations.ApiOperation;
@@ -42,6 +43,8 @@ public class SupplierController {
 
     @Autowired
     PurchaseRecordService purchaseRecordService;
+    @Autowired
+    ProductService productService;
 
 
     @GetMapping("/listAll")
@@ -100,6 +103,11 @@ public class SupplierController {
         QueryWrapper<PurchaseRecord> purchaseRecordQueryWrapper = new QueryWrapper<PurchaseRecord>().eq("supplier_id", id);
         if (purchaseRecordService.count(purchaseRecordQueryWrapper) > 0) {
             return AjaxResult.error("该供应商有过采购记录，无法删除");
+        }
+        //还需要找到是否存在商品由该供货商供货，如果存在，也不能删除
+        QueryWrapper<Product> productQueryWrapper = new QueryWrapper<Product>().eq("supplier_id", id);
+        if (productService.count(productQueryWrapper) > 0) {
+            return AjaxResult.error("该供应商有过商品供货，无法删除");
         }
         return AjaxResult.success(supplierService.removeById(id));
     }

@@ -58,6 +58,15 @@ public class ProductController {
     @ApiOperation("获取商品列表,分页查询")
     public AjaxResult list(@PathVariable Long pageNum, @PathVariable Long pageSize) {
         Page<Product> page = productService.page(new Page<>(pageNum, pageSize));
+        page.getRecords().forEach(
+                product -> {
+                  //填充分类名称
+                    Categary firstCategary = categaryService.getById(product.getFirstCategray());
+                    Categary secondCategary = categaryService.getById(product.getSecondCategray());
+                    product.setFirstName(firstCategary.getCategory());
+                    product.setSecondName(secondCategary.getCategory());
+                }
+        );
         return AjaxResult.success(page);
     }
 
@@ -142,7 +151,7 @@ public class ProductController {
     })
     public AjaxResult delete(@PathVariable Integer id) {
         //删除前需要检查是否已经购买过了，如果存在订单则不允许删除
-        AjaxResult ajaxResult=orderClient.checkDeleteProduct(id);
+        AjaxResult ajaxResult = orderClient.checkDeleteProduct(id);
         if (ajaxResult.isError()) return ajaxResult;
         boolean deleted = productService.removeById(id);
         if (deleted) {
