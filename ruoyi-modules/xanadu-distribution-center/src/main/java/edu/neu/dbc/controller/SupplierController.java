@@ -44,9 +44,9 @@ public class SupplierController {
     PurchaseRecordService purchaseRecordService;
 
 
-    @GetMapping("/list")
+    @GetMapping("/listAll")
     @ApiOperation("查询所有供应商")
-    public AjaxResult list() {
+    public AjaxResult listAll() {
         return AjaxResult.success(supplierService.list());
     }
 
