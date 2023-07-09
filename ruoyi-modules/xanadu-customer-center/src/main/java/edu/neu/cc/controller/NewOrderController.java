@@ -267,6 +267,10 @@ public class NewOrderController {
             Product product = new Product();
             product.setOrderId(unsubscribeOrder.getId());
             product.setProductId(productId);
+            //在products找到对应的商品信息填入
+            Product prev = products.stream().filter(p-> p.getProductId().equals(productId)).findFirst().get();
+            product.setPrice(prev.getPrice());
+            product.setProductName(prev.getProductName());
             product.setNumber(number);
             product.setPrice(productIdPriceMap.get(productId));
             productService.save(product);
