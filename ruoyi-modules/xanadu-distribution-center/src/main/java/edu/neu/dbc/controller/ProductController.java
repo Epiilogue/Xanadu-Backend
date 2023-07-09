@@ -2,6 +2,7 @@ package edu.neu.dbc.controller;
 
 
 import cn.hutool.db.sql.Order;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -12,18 +13,30 @@ import edu.neu.dbc.feign.OrderClient;
 import edu.neu.dbc.service.CategaryService;
 import edu.neu.dbc.service.ProductService;
 import edu.neu.dbc.service.SupplierService;
+import edu.neu.dbc.vo.InfoVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import lombok.Data;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -50,6 +63,11 @@ public class ProductController {
 
     @Autowired
     OrderClient orderClient;
+
+    @Autowired
+    RestTemplate restTemplate;
+
+
 
     /*
      * 获取列表,分页查询
@@ -81,7 +99,6 @@ public class ProductController {
         Page<Product> page = productService.page(new Page<>(pageNum, pageSize));
         return AjaxResult.success(page);
     }
-
     @GetMapping("/listAll")
     @ApiOperation("获取所有商品")
     @Cacheable(key = "'listAll'")
@@ -97,6 +114,15 @@ public class ProductController {
         return AjaxResult.success(products);
     }
 
+    @GetMapping("/crawler/{keyword}")
+    @ApiOperation("爬虫爬取商品数据")
+    public Map crawler(@ApiParam("商品关键字") @PathVariable String keyword){
+        keyword  = keyword.trim();
+        String url = "http://localhost:8299/xanadu/search/"+keyword;
+        ResponseEntity<String> getResult = restTemplate.getForEntity(url, String.class);
+        Map map = JSON.parseObject(getResult.getBody(), Map.class);
+        return map;
+    }
 
     @PostMapping("/add")
     @ApiOperation("添加商品")
