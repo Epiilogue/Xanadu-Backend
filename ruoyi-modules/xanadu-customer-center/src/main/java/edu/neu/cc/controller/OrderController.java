@@ -27,6 +27,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,7 +58,6 @@ public class OrderController {
 
     @Autowired
     private StockoutService stockoutService;
-
     @ApiOperation("获取已完成订单列表,数据大屏使用")
     @GetMapping("/listAll")
     public AjaxResult listAll(){

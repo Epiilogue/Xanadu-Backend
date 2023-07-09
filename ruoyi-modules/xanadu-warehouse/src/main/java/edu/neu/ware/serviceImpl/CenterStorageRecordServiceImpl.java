@@ -1,5 +1,6 @@
 package edu.neu.ware.serviceImpl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import edu.neu.ware.entity.CenterInput;
 import edu.neu.ware.entity.CenterStorageRecord;
 import edu.neu.ware.mapper.CenterStorageRecordMapper;
@@ -38,4 +39,46 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
         if (insert == 0) return null;
         return centerStorageRecord;
     }
+
+    @Override
+    public void createProduct(String name, Long productId, Double price) {
+        if (name == null || productId == null || price == null) return;
+        //创建商品
+        //注意幂等性，先查一下有没有相同id的商品
+        QueryWrapper<CenterStorageRecord> queryWrapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord record = this.getOne(queryWrapper);
+        if (record != null) return;//已经存在该商品，不需要创建
+        CenterStorageRecord centerStorageRecord = new CenterStorageRecord();
+        centerStorageRecord.setProductId(productId);
+        centerStorageRecord.setProductName(name);
+        centerStorageRecord.setProductPrice(price);
+        centerStorageRecord.setCreateTime(new Date());
+        centerStorageRecord.setUpdateTime(new Date());
+        centerStorageRecordMapper.insert(centerStorageRecord);
+    }
+
+    @Override
+    public void updateProduct(String name, Long productId, Double price) {
+        //更新商品
+        if (name == null || productId == null || price == null) return;
+        //注意幂等性，先查一下有没有相同id的商品
+        QueryWrapper<CenterStorageRecord> queryWrapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord record = this.getOne(queryWrapper);
+        if (record == null) return;//不存在该商品，不需要更新
+        record.setProductName(name);
+        record.setProductPrice(price);
+        record.setUpdateTime(new Date());
+        this.updateById(record);
+    }
+
+    @Override
+    public void deleteProduct(Long productId) {
+        //注意幂等性，先查一下有没有相同id的商品
+        QueryWrapper<CenterStorageRecord> record = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        CenterStorageRecord centerStorageRecord = this.getOne(record);
+        if (centerStorageRecord == null) return;//不存在该商品，不需要删除
+        this.removeById(centerStorageRecord.getId());
+    }
+
+
 }

@@ -3,6 +3,10 @@ server:
   servlet:
     context-path: /
 
+rocketmq:
+  name-server: 39.106.145.84:9876
+
+
 spring:
   application:
     name: xanadu-ware
@@ -54,7 +58,7 @@ spring:
         # 主库数据源
         master:
           username: root
-          password: 123456
+          password: xgs1150840779
           url: jdbc:mysql://localhost:3306/xanadu_ware?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
           driver-class-name: com.mysql.cj.jdbc.Driver
           # 从库数据源
