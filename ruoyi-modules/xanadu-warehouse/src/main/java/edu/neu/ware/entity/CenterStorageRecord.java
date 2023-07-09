@@ -73,6 +73,7 @@ public class CenterStorageRecord implements Serializable {
 
     public CenterStorageRecord() {
         //所有的Integer类型都填0
+        this.allocateAbleNum = 0;
         this.allocatedNum = 0;
         this.refundNum = 0;
         this.lockNum = 0;

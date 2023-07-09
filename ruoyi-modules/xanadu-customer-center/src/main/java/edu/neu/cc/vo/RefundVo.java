@@ -63,7 +63,7 @@ public class RefundVo implements java.io.Serializable
 
     @ApiModelProperty("操作类型(退货，换货)")
     @TableField("operation_type")
-    private Integer operationType;
+    private String operationType;
 
     @ApiModelProperty("需要换货的商品列表")
     List<Product> products;

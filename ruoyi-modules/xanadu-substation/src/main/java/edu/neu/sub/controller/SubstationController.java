@@ -6,27 +6,19 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
-import com.ruoyi.system.api.domain.SysRole;
 import com.ruoyi.system.api.domain.SysUser;
-import edu.neu.base.constant.cc.ReceiptStatus;
-import edu.neu.base.constant.cc.TaskType;
 import edu.neu.base.constant.cc.UserRoles;
 import edu.neu.sub.entity.DailyReport;
-import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.Substation;
-import edu.neu.sub.entity.Task;
 import edu.neu.sub.feign.OrderClient;
+import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.service.DailyReportService;
 import edu.neu.sub.service.ReceiptService;
 import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -63,6 +55,8 @@ public class SubstationController {
     @Autowired
     RemoteUserService remoteUserService;
 
+    @Autowired
+    SubwareClient subwareClient;
 
     @GetMapping("/infoByUser/{userId}")
     @ApiOperation(value = "根据用户id获取分站信息")
@@ -70,6 +64,16 @@ public class SubstationController {
         Substation substation = substationService.getByManagerId(userId);
         if (substation == null) {
             throw new ServiceException("该用户尚未管理分站");
+        }
+        return AjaxResult.success(substation);
+    }
+
+    @GetMapping("/infoById/{subId}")
+    @ApiOperation(value = "根据分站id获取分站信息")
+    public AjaxResult infoById(@PathVariable("subId") Long subId) {
+        Substation substation = substationService.getById(subId);
+        if (substation == null) {
+            return AjaxResult.error("分站不存在");
         }
         return AjaxResult.success(substation);
     }
@@ -82,6 +86,17 @@ public class SubstationController {
             return AjaxResult.success("当前用户没有管理任何分站");
         }
         return AjaxResult.success(substationList);
+    }
+
+    @GetMapping("/listAllStations")
+    @ApiOperation(value = "获取所有分站以及中心仓库信息")
+    public AjaxResult listAllStations() {
+        List<Substation> substationList = substationService.list();
+        Object center = subwareClient.getCenterInfo();
+        AjaxResult ajaxResult = new AjaxResult();
+        ajaxResult.put("sub", substationList);
+        ajaxResult.put("center", center);
+        return ajaxResult;
     }
 
 
@@ -128,8 +143,10 @@ public class SubstationController {
         if (substationService.getOne(addressEq) != null) throw new ServiceException("同地址下已有分站");
         substationService.save(substation);
         //需要添加管理员与分站的关系，我们默认此时提交的id里不会存在有已经管理别的分站的ID
-        Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
-        if (result == 0 || result != substation.getAdminIds().size()) throw new ServiceException("添加库管员失败");
+        if(substation.getAdminIds()!=null && substation.getAdminIds().size()!=0){
+            Integer result = substationService.addMasters(substation.getId(), substation.getAdminIds());
+            if (result == 0 || result != substation.getAdminIds().size()) throw new ServiceException("添加库管员失败");
+        }
         return AjaxResult.success("添加成功");
     }
 
@@ -149,7 +166,9 @@ public class SubstationController {
             throw new ServiceException("不允许更新分库");
         substationService.updateById(substation);
         substationService.removeMasters(substation.getId());
-        substationService.addMasters(substation.getId(), substation.getAdminIds());
+        if(substation.getAdminIds()!=null && substation.getAdminIds().size()!=0){
+            substationService.addMasters(substation.getId(), substation.getAdminIds());
+        }
         return AjaxResult.success("更新成功");
     }
 
@@ -195,7 +214,7 @@ public class SubstationController {
         return AjaxResult.success(userList);
     }
 
-    @PostMapping("/addCourier/{substationId}}")
+    @PostMapping("/addCourier/{substationId}")
     @ApiOperation(value = "批量添加分站快递员")
     public AjaxResult addCourier(@PathVariable("substationId") Long substationId, @RequestBody List<Long> courierIds) {
         //添加分站快递员，需要注意的是分站快递员是一对多

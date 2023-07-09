@@ -6,9 +6,10 @@ package edu.neu.base.constant.cc;
  */
 public class MQTopic {
 
-    public static final String ORDER_TOPIC = "order-topic";
-    public static final String EMAIL_TOPIC = "email-topic";
+    public static final String ORDER_TOPIC = "order-topic-xgs";
+    public static final String EMAIL_TOPIC = "email-topic-xgs";
 
-    public static final String OPERATION_TOPIC = "operation-topic";
+    public static final String OPERATION_TOPIC = "operation-topic-xgs";
 
+    public static final String PRODUCT_TOPIC = "product-topic-xgs";
 }

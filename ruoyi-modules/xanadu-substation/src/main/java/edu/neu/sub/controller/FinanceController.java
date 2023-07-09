@@ -1,6 +1,7 @@
 package edu.neu.sub.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.base.constant.cc.TaskType;
@@ -17,6 +18,7 @@ import org.bouncycastle.cms.Recipient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class FinanceController {
      * 前端需要传回分站ID，商品种类ID，商品种类名称，时间段,支持远程调用
      */
     @GetMapping("/getPaymentByCategoryAndTime/{substationId}")
-    public AjaxResult getPaymentByCategoryAndTime(@PathVariable("substationId") Long substationId, @RequestParam("categaryId") Integer categaryId, @RequestParam("categaryName") String categaryName,
+    public AjaxResult getPaymentByCategoryAndTime(@PathVariable("substationId") Long substationId, @RequestParam("categaryId") Integer categaryId,
                                                   @RequestParam("startTime") String startTime,
                                                   @RequestParam("endTime") String endTime,
                                                   @RequestParam(value = "productName", required = false) String productName) {
@@ -73,7 +75,7 @@ public class FinanceController {
         if (goodIdsRes.isError()) return AjaxResult.error(goodIdsRes.getMsg());
         //忽略警告
         @SuppressWarnings("unchecked")
-        List<Long> goodIds = (List) goodIdsRes.get("data");
+        List<Long> goodIds = JSON.parseArray(JSON.toJSONString(goodIdsRes.get("data")),Long.class);
         if (goodIds == null || goodIds.size() == 0) return AjaxResult.error("该分类下没有商品");
         Substation substation = substationService.getById(substationId);
         if (substation == null) return AjaxResult.error("分站不存在");
@@ -104,6 +106,7 @@ public class FinanceController {
                 Finance finance = productFinanceMap.get(productId);
                 //拿到保存的数据，接下来需要根据当前的记录类型与商品记录的数据进行对应的更新
                 finance.update(r, p);
+                System.out.println(finance);
             });
             //不用管收款的事情，收款由送货数据负责更新完成
         });
@@ -118,7 +121,7 @@ public class FinanceController {
                                            @RequestParam("startTime") String startTime,
                                            @RequestParam("endTime") String endTime,
                                            @RequestParam(value = "productName", required = false) String productName) {
-        return this.getPaymentByCategoryAndTime(substationId, categaryId, categaryName, startTime, endTime, productName);
+        return this.getPaymentByCategoryAndTime(substationId, categaryId, startTime, endTime, productName);
     }
 }
 

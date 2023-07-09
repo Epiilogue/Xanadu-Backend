@@ -6,8 +6,7 @@
     <select id="listOperationResult" resultType="edu.neu.cc.vo.OperationResultVo" >
         select cp.product_id             as productId,
                cp.product_categary       as productType,
-               cp.product_name           as productName,
-               sum(numbers)              as number,
+               sum(cp.number)            as number,
                count(1)                  as count,
                sum(cp.price * cp.number) as amount,
                cc_order.order_type       as orderType
@@ -16,6 +15,6 @@
                       on cc_order.id = cp.order_id
         where cc_order.create_time between #{startTime} and #{endTime}
           and cc_order.user_id = #{userId}
-        group by cp.product_categary, cp.product_name, cc_order.order_type
+        group by cp.product_categary, cp.product_name, cc_order.order_type, cp.product_id
     </select>
 </mapper>

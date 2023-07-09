@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
 import com.ruoyi.auth.form.EmailBody;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.base.constant.cc.MQTopic;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +140,7 @@ public class SysLoginService {
         emailBody.setCode(code);
 
         try {
-            rocketMQTemplate.syncSend("email-topic", emailBody);
+            rocketMQTemplate.syncSend(MQTopic.EMAIL_TOPIC, emailBody);
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.error("验证码发送失败");

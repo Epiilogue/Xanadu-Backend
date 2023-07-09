@@ -15,4 +15,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface CenterStorageRecordService extends IService<CenterStorageRecord> {
 
     CenterStorageRecord createProduct(CenterInput productId);
+
+    void createProduct(String name,Long productId,Double price);
+
+    void updateProduct(String name,Long productId,Double price);
+
+    void deleteProduct(Long productId);
+
 }

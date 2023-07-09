@@ -99,5 +99,11 @@ public class Product implements Serializable {
     @TableField("max_count")
     private Integer maxCount;
 
+    @TableField(exist = false)
+    private String firstName;
+
+    @TableField(exist = false)
+    private String secondName;
+
 
 }

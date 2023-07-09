@@ -3,8 +3,10 @@ package edu.neu.cc.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.common.core.constant.HttpStatus;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -25,9 +27,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Gaosong Xu
@@ -52,7 +58,6 @@ public class OrderController {
 
     @Autowired
     private StockoutService stockoutService;
-
     @ApiOperation("获取已完成订单列表,数据大屏使用")
     @GetMapping("/listAll")
     public AjaxResult listAll(){
@@ -67,13 +72,41 @@ public class OrderController {
 
 
     @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
-    @GetMapping("/list/{customerId}")
+    @GetMapping(value={"/list/{customerId}","/list"})
     public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId) {
         if (customerId == null) {
             return AjaxResult.success(orderService.list());
         } else {
             List<Order> orderList = orderService.list(new QueryWrapper<Order>().eq("customer_id", customerId));
             if (orderList == null || orderList.size() == 0) return AjaxResult.error("该客户没有订单");
+            return AjaxResult.success(orderList);
+        }
+    }
+
+    @ApiOperation("根据客户ID，获取订单列表，如果客户ID为空，则获取所有订单列表")
+//    @GetMapping(value={"/list/{customerId}","/list"})
+    @CrossOrigin
+    public AjaxResult getOrderListByCustomerId(@PathVariable(required = false) Long customerId,@RequestParam Map<String, String> query) {
+        //设置查询条件
+        Date startTime= DateUtil.parse(query.get("beginTime")); //起始时间
+        Date endTime= DateUtil.parse(query.get("endTime"));    //结束时间
+        String customerName= (String) query.get("customerName");
+        String orderType= (String) query.get("orderType");
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.like(customerName!=null,"customer_name",customerName)
+                .ge(startTime!=null,"create_time",startTime)
+                .le(endTime!=null,"create_time",endTime)
+                .eq(orderType!=null && orderType!="全部","order_type",orderType)
+                .eq(customerId!=null,"customer_id", customerId);
+        //不分页
+        if(query.get("page")==null || query.get("limit")==null){
+            return AjaxResult.success(orderService.list(queryWrapper));
+        //分页
+        }else{
+            Long page= Long.parseLong(query.get("page")) ;
+            Long size= Long.parseLong(query.get("limit"));
+            Page<Order> orderList =orderService.page(new Page<>(page, size),queryWrapper);
+            if (orderList.getRecords() == null || orderList.getRecords().size() == 0) return AjaxResult.error("没有满足条件的订单");
             return AjaxResult.success(orderList);
         }
     }
@@ -91,11 +124,15 @@ public class OrderController {
             //回显neworder信息以及对应的商品信息
             NewOrder newOrder = newOrderService.getById(orderId);
             if (newOrder == null) return AjaxResult.error("订单不存在");
+            Order order = orderService.getById(orderId);
+            ajaxResult.put("origin", order);
             ajaxResult.put("order", newOrder);
         } else {
             //回显refund信息以及对应的商品信息
             Refund refund = refundService.getById(orderId);
             if (refund == null) return AjaxResult.error("订单不存在");
+            Order order = orderService.getById(orderId);
+            ajaxResult.put("origin", order);
             ajaxResult.put("order", refund);
         }
         //获取商品列表回传
@@ -204,9 +241,13 @@ public class OrderController {
         if (order == null) return AjaxResult.error("订单不存在");
         if (order.getOrderType().equals(OperationTypeConstant.UNSUBSCRIBE))
             return AjaxResult.error("该订单为退订订单,无法调度");
-        //检查订单状态是否为可分配
-        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED))
-            return AjaxResult.error("订单状态非可分配状态");
+//        //检查订单状态是否为可分配
+//        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED))
+//            return AjaxResult.error("订单状态非可分配状态");
+        //订单状态——可分配（调度）；已调度/已分配（任务单查询）
+        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED) && !order.getStatus().equals(OrderStatusConstant.DISPATCHED)
+                && !order.getStatus().equals(OrderStatusConstant.ALLOCATED))
+            return AjaxResult.error("订单不可调度或无任务单");
 
         //根据订单类型获取对应的订单信息
         OrderVo orderVo = new OrderVo();
@@ -258,10 +299,11 @@ public class OrderController {
     public AjaxResult listTopProducts(@RequestParam("startTime") Date startTime,
                                       @RequestParam("endTime") Date endTime,
                                       @RequestParam("number") Integer number) {
+
+        List<Order> orders = orderService.list(new QueryWrapper<Order>().between("create_time", startTime, endTime).eq("order_type",OperationTypeConstant.ORDER));
         //查询一段时间范围内订购数量最多的前number个商品，返回商品列表，里面需要有商品数量
         //直接去找范围内的新订单，然后找到里面所有的订单ID，然后取商品表查找，最后统计以productVo列表返回
-        List<NewOrder> newOrders = newOrderService.list(new QueryWrapper<NewOrder>().between("create_time", startTime, endTime));
-        List<Long> orderIds = newOrders.stream().map(NewOrder::getId).collect(Collectors.toList());
+        List<Long> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
         Map<Long, ProductVo> longProductVoHashMap = new HashMap<>();
         List<Product> products = productService.list(new QueryWrapper<Product>().in("order_id", orderIds));
         products.forEach(product -> {
@@ -277,6 +319,14 @@ public class OrderController {
         return AjaxResult.success(longProductVoHashMap.values().stream().sorted(Comparator.comparing(ProductVo::getNumber).reversed()).limit(number).collect(Collectors.toList()));
     }
 
+
+    @GetMapping("/feign/checkDeleteProduct/{id}")
+    AjaxResult checkDeleteProduct(@PathVariable("id") Integer id){
+        QueryWrapper<Product> queryWrapper = new QueryWrapper<Product>().eq("product_id", id);
+        long count = productService.count(queryWrapper);
+        if (count > 0) return AjaxResult.error("该商品已被下单，无法删除");
+        return AjaxResult.success();
+    }
 
 }
 

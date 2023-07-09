@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@SpringBootApplication(scanBasePackages = {"edu.neu","com.ruoyi.common.security.handler"})
+@SpringBootApplication(scanBasePackages = {"edu.neu","com.ruoyi"})
 @EnableFeignClients(basePackages = {"edu.neu"})
 @MapperScan("edu.neu.dpc.mapper")
 @EnableTransactionManagement
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class DispatchCenterApplication{
     public static void main(String[] args) {
         //启动spring
+        System.setProperty("rocketmq.client.logUseSlf4j", "true");
         org.springframework.boot.SpringApplication.run(DispatchCenterApplication.class, args);
     }
 }

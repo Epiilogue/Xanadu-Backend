@@ -27,6 +27,8 @@ public interface SubwareClient {
     @ApiOperation(value = "减少库存")
     AjaxResult reduce(@RequestParam("subwareId") Long subwareId, @RequestParam("taskId") Long taskId, @RequestBody HashMap<Long, Integer> longIntegerHashMap);
 
+    @GetMapping("/ware/centerware/feign/info")
+    public Object getCenterInfo();
 
     @PostMapping("/ware/subOutput/feign/refund")
     @ApiOperation("分库退货,由分站登记处选择退货出库，直接出库就行，不需要选择数量增加复杂度")

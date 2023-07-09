@@ -85,7 +85,11 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+        <groupId>edu.neu.xanadu</groupId>
+        <artifactId>xanadu_base</artifactId>
+        <version>0.0.1</version>
+        </dependency>
     </dependencies>
 	
     <build>

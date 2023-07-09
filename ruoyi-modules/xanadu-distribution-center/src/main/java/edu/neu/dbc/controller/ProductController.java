@@ -1,11 +1,17 @@
 package edu.neu.dbc.controller;
 
 
+import cn.hutool.db.sql.Order;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import edu.neu.dbc.entity.Categary;
 import edu.neu.dbc.entity.Product;
+import edu.neu.dbc.entity.Supplier;
+import edu.neu.dbc.feign.OrderClient;
 import edu.neu.dbc.service.CategaryService;
 import edu.neu.dbc.service.ProductService;
+import edu.neu.dbc.service.SupplierService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -17,11 +23,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  * 前端控制器
  * </p>
-
+ *
  * @author Gaosong Xu
  * @since 2023-06-02 11:12:09
  */
@@ -37,13 +45,40 @@ public class ProductController {
     @Autowired
     CategaryService categaryService;
 
+    @Autowired
+    SupplierService supplierService;
+
+    @Autowired
+    OrderClient orderClient;
+
     /*
      * 获取列表,分页查询
      * */
     @GetMapping("/list/{pageNum}/{pageSize}")
     @ApiOperation("获取商品列表,分页查询")
     public AjaxResult list(@PathVariable Long pageNum, @PathVariable Long pageSize) {
-        Page<Product> page = productService.page(new Page<>(pageNum,pageSize));
+        Page<Product> page = productService.page(new Page<>(pageNum, pageSize));
+        page.getRecords().forEach(
+                product -> {
+                  //填充分类名称
+                    Categary firstCategary = categaryService.getById(product.getFirstCategray());
+                    Categary secondCategary = categaryService.getById(product.getSecondCategray());
+                    product.setFirstName(firstCategary.getCategory());
+                    product.setSecondName(secondCategary.getCategory());
+                }
+        );
+        return AjaxResult.success(page);
+    }
+
+    /*
+     * 获取列表,分页查询
+     * */
+    @GetMapping("/query/{pageNum}/{pageSize}")
+    @ApiOperation("获取供应商商品列表")
+    public AjaxResult query(@PathVariable Long pageNum, @PathVariable Long pageSize, @RequestParam("supplierId") String supplierId) {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq(supplierId != null, "supplier_id", supplierId);
+        Page<Product> page = productService.page(new Page<>(pageNum, pageSize));
         return AjaxResult.success(page);
     }
 
@@ -52,7 +87,14 @@ public class ProductController {
     @Cacheable(key = "'listAll'")
     @ApiResponse(code = 200, message = "获取成功")
     public AjaxResult listAll() {
-        return AjaxResult.success(productService.list());
+        List<Product> products = productService.list();
+        products.forEach(product -> {
+            Categary firstCategary = categaryService.getById(product.getFirstCategray());
+            Categary secondCategary = categaryService.getById(product.getSecondCategray());
+            product.setFirstName(firstCategary.getCategory());
+            product.setSecondName(secondCategary.getCategory());
+        });
+        return AjaxResult.success(products);
     }
 
 
@@ -60,6 +102,9 @@ public class ProductController {
     @ApiOperation("添加商品")
     @CacheEvict(key = "'listAll'")
     public AjaxResult add(@RequestBody Product product) {
+        //需要校验，1.不为空，2.供应商ID存在
+        Supplier supplier = supplierService.getById(product.getSupplierId());
+        if (supplier == null) return AjaxResult.error("供应商不存在");
         boolean saved = productService.save(product);
         if (saved) {
             return AjaxResult.success(product);
@@ -75,6 +120,10 @@ public class ProductController {
         if (product == null) {
             return AjaxResult.error("商品不存在");
         }
+        Categary firstCategary = categaryService.getById(product.getFirstCategray());
+        Categary secondCategary = categaryService.getById(product.getSecondCategray());
+        product.setFirstName(firstCategary.getCategory());
+        product.setSecondName(secondCategary.getCategory());
         return AjaxResult.success(product);
     }
 
@@ -85,6 +134,8 @@ public class ProductController {
             @CacheEvict(key = "'listAll'")
     })
     public AjaxResult update(@RequestBody Product product) {
+        Supplier supplier = supplierService.getById(product.getSupplierId());
+        if (supplier == null) return AjaxResult.error("供应商不存在");
         boolean updated = productService.updateById(product);
         if (updated) {
             return AjaxResult.success("商品更新成功");
@@ -99,6 +150,9 @@ public class ProductController {
             @CacheEvict(key = "'listAll'")
     })
     public AjaxResult delete(@PathVariable Integer id) {
+        //删除前需要检查是否已经购买过了，如果存在订单则不允许删除
+        AjaxResult ajaxResult = orderClient.checkDeleteProduct(id);
+        if (ajaxResult.isError()) return ajaxResult;
         boolean deleted = productService.removeById(id);
         if (deleted) {
             return AjaxResult.success("商品删除成功");

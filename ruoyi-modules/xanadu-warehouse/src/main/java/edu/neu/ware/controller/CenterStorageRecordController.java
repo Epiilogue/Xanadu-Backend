@@ -3,6 +3,7 @@ package edu.neu.ware.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 
@@ -70,12 +71,22 @@ public class CenterStorageRecordController {
         if (productIdMap == null || productIdMap.size() == 0) return null;
         ProductRecordsVo productRecordsVo = new ProductRecordsVo();
         List<CenterStorageRecord> centerStorageRecords = centerStorageRecordService.listByIds(new ArrayList<>(productIdMap.keySet()));
+
         centerStorageRecords.forEach(centerStorageRecord -> {
             if (centerStorageRecord.getAllocateAbleNum() < productIdMap.get(centerStorageRecord.getProductId())) {
                 productRecordsVo.addProductRecord(centerStorageRecord.getProductId(),
                         productIdMap.get(centerStorageRecord.getProductId()) - centerStorageRecord.getAllocateAbleNum());
             }
         });
+        //检查是否有商品仓库里没有，如果这样的话需要将缺货数量设置为全部
+        if (centerStorageRecords.size() != productIdMap.size()) {
+            List<Long> productIds = centerStorageRecords.stream().map(CenterStorageRecord::getProductId).collect(Collectors.toList());
+            productIdMap.keySet().forEach(productId -> {
+                if (!productIds.contains(productId)) {
+                    productRecordsVo.addProductRecord(productId, productIdMap.get(productId));
+                }
+            });
+        }
         //如果没有记录被添加到缺货map则说明不缺货
         productRecordsVo.setIsLack(productRecordsVo.getProductIdNumberMap().size() != 0);
         return productRecordsVo;
@@ -90,6 +101,12 @@ public class CenterStorageRecordController {
         return AjaxResult.success(centerStorageRecords);
     }
 
+    //获取列表
+    @GetMapping("/list/{pageNum}/{pageSize}")
+    @ApiOperation("获取中心仓库中的所有商品库存")
+    public AjaxResult pageList(@PathVariable Long pageNum,@PathVariable Long pageSize) {
+        return AjaxResult.success(centerStorageRecordService.page(new Page<>(pageNum, pageSize)));
+    }
 
     @GetMapping("/feign/getTotalStorage/{productId}")
     @ApiOperation("获取商品总库存")

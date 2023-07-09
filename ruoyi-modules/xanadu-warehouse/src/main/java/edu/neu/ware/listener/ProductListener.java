@@ -1,29 +1,47 @@
-package edu.neu.dbc.listener;
+package edu.neu.ware.listener;
+
 
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.annotation.*;
 import edu.neu.base.constant.cc.MQTopic;
-import edu.neu.dbc.entity.Product;
-import edu.neu.dbc.service.ProductService;
+import edu.neu.ware.service.CenterStorageRecordService;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/**
- * canal 同步变化后会更新到
- */
 @Component
-@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "product-canal-group")
+@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "ware-canal-group")
 public class ProductListener implements RocketMQListener<String> {
 
     @Autowired
-    ProductService productService;
+    CenterStorageRecordService centerStorageRecordService;
+
+
+    @Getter
+    @Setter
+    @TableName("dbc_product")
+    @ApiModel(value = "Product对象", description = "")
+    public static class Product implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private Long id;
+        private String name;
+        private Double price;
+    }
+
 
     @Override
     public void onMessage(String msg) {
@@ -46,15 +64,15 @@ public class ProductListener implements RocketMQListener<String> {
         switch (sqlType) {
             case "UPDATE":
                 for (Product product : products)
-                    productService.updateProduct(product);
+                    centerStorageRecordService.updateProduct(product.getName(),product.getId(),product.getPrice());
                 break;
             case "INSERT":
                 for (Product product : products)
-                    productService.insertNewProdyct(product);
+                    centerStorageRecordService.createProduct(product.getName(),product.getId(),product.getPrice());
                 break;
             case "DELETE":
                 for (Product product : products)
-                    productService.deleteProduct(product.getId());
+                    centerStorageRecordService.deleteProduct(product.getId());
                 break;
             default:
                 System.out.println("不同步的消息类型：" + sqlType);

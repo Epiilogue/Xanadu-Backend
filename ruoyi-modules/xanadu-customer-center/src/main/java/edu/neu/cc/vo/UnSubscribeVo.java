@@ -24,7 +24,7 @@ public class UnSubscribeVo implements Serializable {
     private String reason;
 
     @ApiModelProperty("操作类型(退货，换货，退订)")
-    private Integer operationType;
+    private String operationType;
 
     @ApiModelProperty("退换货状态")
     private String status;
@@ -44,7 +44,7 @@ public class UnSubscribeVo implements Serializable {
         return total;
     }
 
-    public Integer getTotalNumbers(Map<Long, Integer> productIdNumberMap) {
+    public Integer getTotalNumbers() {
         int total = 0;
         for (Map.Entry<Long, Integer> entry : productsMap.entrySet()) {
             Integer numbers = entry.getValue();
