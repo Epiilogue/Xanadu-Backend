@@ -250,7 +250,7 @@ public class NewOrderController {
         Order unsubscribeOrder = new Order();
         unsubscribeOrder.setCustomerId(order.getCustomerId());
         unsubscribeOrder.setTotalAmount(unSubscribeVo.getTotalAmount(productIdPriceMap));
-
+        unsubscribeOrder.setNumbers(unSubscribeVo.getTotalNumbers());
         unsubscribeOrder.setUserId(userId);
         unsubscribeOrder.setStatus(OrderStatusConstant.INVALID);//无效订单
         unsubscribeOrder.setOrderType(OperationTypeConstant.UNSUBSCRIBE);//退订订单
@@ -276,8 +276,10 @@ public class NewOrderController {
                 if (!unlock) throw new ServiceException("退订失败，库存解锁失败");
             }
         });
+
+        Integer numbers = order.getNumbers();
         //更新原订单状态，例如商品数量、总价等，更新商品数量，更新缺货记录，添加操作记录
-        order.setNumbers(order.getNumbers() - unsubscribeOrder.getNumbers());
+        order.setNumbers(numbers - unsubscribeOrder.getNumbers());
         order.setTotalAmount(order.getTotalAmount() - unsubscribeOrder.getTotalAmount());
 
         //更新map,productIdNumberMap存的是新的order中商品的数量
