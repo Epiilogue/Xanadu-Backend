@@ -188,12 +188,6 @@ public class NewOrderController {
         //撤销订单,删除订单以及相关的缺货记录、商品记录
         //删除订单
         orderService.removeById(orderId);
-
-/*
-        newOrderService.removeById(orderId);
-        productService.remove(new QueryWrapper<Product>().eq("order_id", orderId));
-*/
-
         //删除缺货记录，只有状态为未提交才允许删除
         stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
         //如果订单为可分配状态，还需要撤销锁定的库存
