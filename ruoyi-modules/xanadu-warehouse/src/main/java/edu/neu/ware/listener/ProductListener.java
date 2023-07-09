@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-@RocketMQMessageListener(topic = "product-topic", consumerGroup = "ware-canal-group")
+@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "ware-canal-group")
 public class ProductListener implements RocketMQListener<String> {
 
     @Autowired

@@ -64,7 +64,10 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
         //注意幂等性，先查一下有没有相同id的商品
         QueryWrapper<CenterStorageRecord> queryWrapper = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
         CenterStorageRecord record = this.getOne(queryWrapper);
-        if (record == null) return;//不存在该商品，不需要更新
+        if (record == null) {
+            this.createProduct(name, productId, price);//不存在该商品，需要创建
+            return;
+        }
         record.setProductName(name);
         record.setProductPrice(price);
         record.setUpdateTime(new Date());

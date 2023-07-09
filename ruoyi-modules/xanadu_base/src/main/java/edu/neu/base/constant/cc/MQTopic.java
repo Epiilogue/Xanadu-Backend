@@ -11,4 +11,5 @@ public class MQTopic {
 
     public static final String OPERATION_TOPIC = "operation-topic-xgs";
 
+    public static final String PRODUCT_TOPIC = "product-topic-xgs";
 }
