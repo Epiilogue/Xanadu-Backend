@@ -113,8 +113,6 @@ public class NewOrderController {
         newOrderService.save(newOrder);
 
 
-
-
         //插入对应的数据表，保存相关记录
         if (productRecordsVo.getIsLack()) {
             //生成缺货记录
@@ -136,7 +134,7 @@ public class NewOrderController {
                     stockoutService.save(stockout);
                 }
             });
-        }else {
+        } else {
             products.forEach(product -> {
                 product.setOrderId(order.getId());
                 if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
@@ -152,7 +150,7 @@ public class NewOrderController {
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
 
         //发送到消息队列
-        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC, operation);
 
         //填充newOrderID等字段,返回给前端
         newOrderVo.setId(newOrder.getId());
@@ -190,12 +188,14 @@ public class NewOrderController {
         //撤销订单,删除订单以及相关的缺货记录、商品记录
         //删除订单
         orderService.removeById(orderId);
-        //删除newOrder
+
+/*
         newOrderService.removeById(orderId);
-/*        //删除商品记录
         productService.remove(new QueryWrapper<Product>().eq("order_id", orderId));
+*/
+
         //删除缺货记录，只有状态为未提交才允许删除
-        stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));*/
+        stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
         //如果订单为可分配状态，还需要撤销锁定的库存
         if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED)) {
             //获取订单中的商品ID和数量
@@ -216,7 +216,7 @@ public class NewOrderController {
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
 
         //发送到消息队列
-        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC, operation);
 
         return AjaxResult.success("撤销订单成功");
     }
@@ -341,7 +341,7 @@ public class NewOrderController {
         operation.setNumbers(unsubscribeOrder.getNumbers());//number是订单中商品的总数
 
         //发送到消息队列
-        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC, operation);
 
         //退订成功
         return AjaxResult.success("退订成功");
