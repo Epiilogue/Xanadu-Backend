@@ -16,6 +16,6 @@
                       on cc_order.id = cp.order_id
         where cc_order.create_time between #{startTime} and #{endTime}
           and cc_order.user_id = #{userId}
-        group by cp.product_categary, cp.product_name, cc_order.order_type
+        group by cp.product_categary, cp.product_name, cc_order.order_type,cp.product_id
     </select>
 </mapper>

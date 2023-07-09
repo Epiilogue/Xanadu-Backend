@@ -44,7 +44,7 @@ public class UnSubscribeVo implements Serializable {
         return total;
     }
 
-    public Integer getTotalNumbers(Map<Long, Integer> productIdNumberMap) {
+    public Integer getTotalNumbers() {
         int total = 0;
         for (Map.Entry<Long, Integer> entry : productsMap.entrySet()) {
             Integer numbers = entry.getValue();
