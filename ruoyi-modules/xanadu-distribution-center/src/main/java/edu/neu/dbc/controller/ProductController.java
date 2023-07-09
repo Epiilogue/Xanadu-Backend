@@ -5,6 +5,7 @@ import cn.hutool.db.sql.Order;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.exc.IgnoredPropertyException;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import edu.neu.dbc.entity.Categary;
 import edu.neu.dbc.entity.Product;
@@ -68,7 +69,6 @@ public class ProductController {
     RestTemplate restTemplate;
 
 
-
     /*
      * 获取列表,分页查询
      * */
@@ -78,7 +78,7 @@ public class ProductController {
         Page<Product> page = productService.page(new Page<>(pageNum, pageSize));
         page.getRecords().forEach(
                 product -> {
-                  //填充分类名称
+                    //填充分类名称
                     Categary firstCategary = categaryService.getById(product.getFirstCategray());
                     Categary secondCategary = categaryService.getById(product.getSecondCategray());
                     product.setFirstName(firstCategary.getCategory());
@@ -99,6 +99,7 @@ public class ProductController {
         Page<Product> page = productService.page(new Page<>(pageNum, pageSize));
         return AjaxResult.success(page);
     }
+
     @GetMapping("/listAll")
     @ApiOperation("获取所有商品")
     @Cacheable(key = "'listAll'")
@@ -116,11 +117,16 @@ public class ProductController {
 
     @GetMapping("/crawler/{keyword}")
     @ApiOperation("爬虫爬取商品数据")
-    public Map crawler(@ApiParam("商品关键字") @PathVariable String keyword){
-        keyword  = keyword.trim();
-        String url = "http://localhost:8299/xanadu/search/"+keyword;
+    @SuppressWarnings("all")
+    public Map crawler(@ApiParam("商品关键字") @PathVariable String keyword) {
+        keyword = keyword.trim();
+        String url = "http://localhost:8299/xanadu/search/" + keyword;
         ResponseEntity<String> getResult = restTemplate.getForEntity(url, String.class);
-        Map map = JSON.parseObject(getResult.getBody(), Map.class);
+        Map map = null;
+        try {
+            map = JSON.parseObject(getResult.getBody(), Map.class);
+        } catch (Exception e) {
+        }
         return map;
     }
 
@@ -187,7 +193,7 @@ public class ProductController {
             @CacheEvict(key = "'get'+#id"),
             @CacheEvict(key = "'listAll'")
     })
-    public AjaxResult delete(@PathVariable Integer id) {
+    public AjaxResult delete(@PathVariable Long id) {
         //删除前需要检查是否已经购买过了，如果存在订单则不允许删除
         AjaxResult ajaxResult = orderClient.checkDeleteProduct(id);
         if (ajaxResult.isError()) return ajaxResult;
