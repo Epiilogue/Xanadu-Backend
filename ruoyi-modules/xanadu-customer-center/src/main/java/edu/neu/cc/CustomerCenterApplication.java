@@ -18,5 +18,6 @@ public class CustomerCenterApplication {
     public static void main(String[] args) {
         //启动Spring
         org.springframework.boot.SpringApplication.run(CustomerCenterApplication.class, args);
+        System.setProperty("rocketmq.client.logUseSlf4j", "true");
     }
 }

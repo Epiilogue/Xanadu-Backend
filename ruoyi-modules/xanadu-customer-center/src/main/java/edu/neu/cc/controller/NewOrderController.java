@@ -113,8 +113,6 @@ public class NewOrderController {
         newOrderService.save(newOrder);
 
 
-
-
         //插入对应的数据表，保存相关记录
         if (productRecordsVo.getIsLack()) {
             //生成缺货记录
@@ -136,7 +134,7 @@ public class NewOrderController {
                     stockoutService.save(stockout);
                 }
             });
-        }else {
+        } else {
             products.forEach(product -> {
                 product.setOrderId(order.getId());
                 if (!productService.save(product)) throw new ServiceException("插入商品记录异常");
@@ -152,7 +150,7 @@ public class NewOrderController {
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
 
         //发送到消息队列
-        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC, operation);
 
         //填充newOrderID等字段,返回给前端
         newOrderVo.setId(newOrder.getId());
@@ -190,10 +188,6 @@ public class NewOrderController {
         //撤销订单,删除订单以及相关的缺货记录、商品记录
         //删除订单
         orderService.removeById(orderId);
-        //删除newOrder
-        newOrderService.removeById(orderId);
-        //删除商品记录
-        productService.remove(new QueryWrapper<Product>().eq("order_id", orderId));
         //删除缺货记录，只有状态为未提交才允许删除
         stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
         //如果订单为可分配状态，还需要撤销锁定的库存
@@ -216,7 +210,7 @@ public class NewOrderController {
         operation.setNumbers(order.getNumbers());//number是订单中商品的总数
 
         //发送到消息队列
-        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC, operation);
 
         return AjaxResult.success("撤销订单成功");
     }
@@ -256,11 +250,7 @@ public class NewOrderController {
         Order unsubscribeOrder = new Order();
         unsubscribeOrder.setCustomerId(order.getCustomerId());
         unsubscribeOrder.setTotalAmount(unSubscribeVo.getTotalAmount(productIdPriceMap));
-
-        Integer totalNumbers = unSubscribeVo.getTotalNumbers(productIdNumberMap);
-        if (Objects.equals(totalNumbers, order.getNumbers())) return AjaxResult.error("退订数量不能等于订购数量");
-        unsubscribeOrder.setNumbers(totalNumbers);
-
+        unsubscribeOrder.setNumbers(unSubscribeVo.getTotalNumbers());
         unsubscribeOrder.setUserId(userId);
         unsubscribeOrder.setStatus(OrderStatusConstant.INVALID);//无效订单
         unsubscribeOrder.setOrderType(OperationTypeConstant.UNSUBSCRIBE);//退订订单
@@ -277,6 +267,10 @@ public class NewOrderController {
             Product product = new Product();
             product.setOrderId(unsubscribeOrder.getId());
             product.setProductId(productId);
+            //在products找到对应的商品信息填入
+            Product prev = products.stream().filter(p-> p.getProductId().equals(productId)).findFirst().get();
+            product.setPrice(prev.getPrice());
+            product.setProductName(prev.getProductName());
             product.setNumber(number);
             product.setPrice(productIdPriceMap.get(productId));
             productService.save(product);
@@ -286,22 +280,16 @@ public class NewOrderController {
                 if (!unlock) throw new ServiceException("退订失败，库存解锁失败");
             }
         });
+
+        Integer numbers = order.getNumbers();
         //更新原订单状态，例如商品数量、总价等，更新商品数量，更新缺货记录，添加操作记录
-        order.setNumbers(order.getNumbers() - unsubscribeOrder.getNumbers());
+        order.setNumbers(numbers - unsubscribeOrder.getNumbers());
         order.setTotalAmount(order.getTotalAmount() - unsubscribeOrder.getTotalAmount());
 
-        //更新map
+        //更新map,productIdNumberMap存的是新的order中商品的数量
         unSubscribeVo.getProductsMap().forEach((productId, number) -> productIdNumberMap.put(productId, productIdNumberMap.get(productId) - number));
         //发起远程调用，获取新的状态
         ProductRecordsVo result = wareCenterStorageRecordClient.check(productIdNumberMap);
-
-        //更新后之前的库存都解锁了，需要重新锁定库存
-        if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED)) {
-            productIdNumberMap.forEach((productId, number) -> {
-                Boolean lock = wareCenterStorageRecordClient.lock(productId, number);
-                if (!lock) throw new ServiceException("退订失败，库存锁定失败");
-            });
-        }
 
         //如果退货后不缺货了，需要删除掉之前所有的未提交的缺货记录，订单状态改为已分配，并重新锁定库存
         if (!result.getIsLack() && order.getStatus().equals(OrderStatusConstant.OUT_OF_STOCK)) {
@@ -314,6 +302,21 @@ public class NewOrderController {
                 if (!lock) throw new ServiceException("退订失败，库存锁定失败");
             });
         }
+        //如果退货后仍然缺货，说明之前也肯定缺货，但是会有商品不缺货了，我们需要删除所有的stockout记录，然后重新插入缺货记录
+        if (result.getIsLack() && order.getStatus().equals(OrderStatusConstant.OUT_OF_STOCK)) {
+            //删除所有原来的未提交的缺货记录
+            stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
+            //重新插入缺货记录
+            productIdNumberMap.forEach((productId, number) -> {
+                Stockout stockout = new Stockout();
+                stockout.setOrderId(orderId);
+                stockout.setProductId(productId);
+                stockout.setNeedNumbers(result.getProductIdNumberMap().get(productId));
+                stockout.setStatus(StockoutConstant.UNCOMMITTED);
+                stockoutService.save(stockout);
+            });
+        }
+
         orderService.updateById(order);//更新原订单
         //更新原订单的商品记录
         Map<Long, Integer> idNumberMap = result.getProductIdNumberMap();
@@ -338,7 +341,7 @@ public class NewOrderController {
         operation.setNumbers(unsubscribeOrder.getNumbers());//number是订单中商品的总数
 
         //发送到消息队列
-        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC,operation);
+        rocketMQTemplate.syncSend(MQTopic.OPERATION_TOPIC, operation);
 
         //退订成功
         return AjaxResult.success("退订成功");

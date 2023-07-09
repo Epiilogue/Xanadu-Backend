@@ -131,6 +131,18 @@ public class ProductController {
         //需要校验，1.不为空，2.供应商ID存在
         Supplier supplier = supplierService.getById(product.getSupplierId());
         if (supplier == null) return AjaxResult.error("供应商不存在");
+        //不允许商品名为空
+        if (product.getName() == null) return AjaxResult.error("商品名不能为空");
+        //不允许商品名重复
+        QueryWrapper<Product> queryWrapper = new QueryWrapper<Product>().eq("name", product.getName());
+        Product one = productService.getOne(queryWrapper);
+        if (one != null) return AjaxResult.error("商品名重复");
+        //不允许分类为空
+        if (product.getFirstCategray() == null || product.getSecondCategray() == null) {
+            return AjaxResult.error("分类不能为空");
+        }
+        //不允许商品价格空
+        if (product.getPrice() == null) return AjaxResult.error("商品价格不能为空");
         boolean saved = productService.save(product);
         if (saved) {
             return AjaxResult.success(product);
