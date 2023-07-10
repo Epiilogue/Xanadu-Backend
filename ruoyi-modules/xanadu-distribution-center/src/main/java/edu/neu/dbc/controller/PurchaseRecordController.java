@@ -22,6 +22,7 @@ import edu.neu.dbc.service.PurchaseRecordService;
 import edu.neu.dbc.service.RefundService;
 import edu.neu.dbc.service.SupplierService;
 import edu.neu.dbc.vo.*;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -108,6 +109,15 @@ public class PurchaseRecordController {
         return AjaxResult.success("确认采购到货成功");
     }
 
+    @GetMapping("/delete/{id}")
+    @ApiOperation("删除采购单")
+    public AjaxResult deletePurchase(@PathVariable Long id) {
+        boolean deleted = purchaseRecordService.removeById(id);
+        if (deleted) {
+            return AjaxResult.success("删除成功");
+
+        } else return AjaxResult.error("删除失败");
+    }
 
     @PostMapping("/generatePurchaseOrder")
     @ApiOperation("生成采购单")
