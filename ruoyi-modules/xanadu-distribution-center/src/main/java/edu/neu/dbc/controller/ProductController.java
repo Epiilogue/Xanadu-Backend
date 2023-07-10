@@ -163,7 +163,7 @@ public class ProductController {
     @GetMapping("/get/{id}")
     @ApiOperation("获取商品")
     @Cacheable(key = "'get'+#id")
-    public AjaxResult get(@PathVariable Integer id) {
+    public AjaxResult get(@PathVariable("id") Long id) {
         Product product = productService.getById(id);
         if (product == null) {
             return AjaxResult.error("商品不存在");
@@ -208,5 +208,18 @@ public class ProductController {
         return AjaxResult.error("商品删除失败");
     }
 
+    @GetMapping("/feign/remoteGet/{id}")
+    @ApiOperation("获取商品")
+    public Product remoteGet(@PathVariable("id") Long id) {
+        Product product = productService.getById(id);
+        if (product == null) {
+            return new Product();
+        }
+        Categary firstCategary = categaryService.getById(product.getFirstCategray());
+        Categary secondCategary = categaryService.getById(product.getSecondCategray());
+        product.setFirstName(firstCategary.getCategory());
+        product.setSecondName(secondCategary.getCategory());
+        return product;
+    }
 }
 

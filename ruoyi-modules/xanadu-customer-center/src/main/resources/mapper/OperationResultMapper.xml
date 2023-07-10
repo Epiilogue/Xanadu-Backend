@@ -5,7 +5,6 @@
 
     <select id="listOperationResult" resultType="edu.neu.cc.vo.OperationResultVo" >
         select cp.product_id             as productId,
-               cp.product_categary       as productType,
                sum(cp.number)            as number,
                count(1)                  as count,
                sum(cp.price * cp.number) as amount,
