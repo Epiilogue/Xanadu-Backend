@@ -112,7 +112,8 @@ public class SubStorageRecordController {
             lock.lock();
             for (Map.Entry<Long, Integer> longIntegerEntry : longIntegerHashMap.entrySet()) {
                 //拿到商品名
-                String productName = subStorageRecordService.getById(longIntegerEntry.getKey()).getProductName();
+                QueryWrapper<SubStorageRecord> queryWrapper = new QueryWrapper<SubStorageRecord>().eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey());
+                String productName = subStorageRecordService.getOne(queryWrapper).getProductName();
                 boolean success = subStorageRecordService.update(new UpdateWrapper<SubStorageRecord>().
                         eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey()).ge("allocated_num", longIntegerEntry.getValue())
                         .setSql("allocated_num=allocated_num-" + longIntegerEntry.getValue()).
