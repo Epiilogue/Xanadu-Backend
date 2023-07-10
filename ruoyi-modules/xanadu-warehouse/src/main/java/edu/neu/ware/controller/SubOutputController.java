@@ -129,13 +129,10 @@ public class SubOutputController {
         //找到所有分库已经出库的记录，按照仓库id聚合，然后返回为一个map，key为仓库名，value为仓库出库量
         QueryWrapper<SubOutput> eq = new QueryWrapper<SubOutput>().eq("status", InputOutputStatus.OUTPUT);
         List<SubOutput> list = subOutputService.list(eq);
-        Map<Long, List<SubOutput>> collect = list.stream().collect(Collectors.groupingBy(SubOutput::getId));
+        Map<Long, List<SubOutput>> collect = list.stream().collect(Collectors.groupingBy(SubOutput::getSubwareId));
         HashMap<String, Integer> resultMap = new HashMap<>();
         collect.forEach((k, v) -> {
-            //拿到仓库id
-            Long subwareId = v.get(0).getSubwareId();
-            //拿到仓库名
-            Subware subware = subwareService.getById(subwareId);
+            Subware subware = subwareService.getById(k);
             String subwareName = subware.getName();
             //拿到仓库出库量
             Integer outputNum = v.stream().mapToInt(SubOutput::getOutputNum).sum();
