@@ -79,13 +79,15 @@ public class LackRecordController {
         return AjaxResult.success(allLackRecordVo);
     }
 
-    @GetMapping("/getAllLackRecord")
+    @GetMapping("/getAllLackRecord/{isCheck}")
     @ApiOperation("获取所有缺货记录")
-    public AjaxResult getAllLackRecord() {
+    public AjaxResult getAllLackRecord(@PathVariable(value = "isCheck",required = false) Boolean isCheck) {
+        if(isCheck==null)isCheck=true;
         List<Product> products = productService.list();
         if (products == null || products.size() == 0) return AjaxResult.error("没有商品");
+        Boolean finalIsCheck = isCheck;
         List<AllLackRecordVo> allLackRecordVos = products.stream().
-                map(product -> getLackRecordById(product, true)).
+                map(product -> getLackRecordById(product, finalIsCheck)).
                 filter(Objects::nonNull).
                 collect(java.util.stream.Collectors.toList());
         if (allLackRecordVos.size() == 0) return AjaxResult.error("没有缺货记录");

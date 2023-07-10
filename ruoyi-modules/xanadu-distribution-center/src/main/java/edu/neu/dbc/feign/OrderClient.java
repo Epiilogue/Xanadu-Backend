@@ -13,5 +13,5 @@ public interface OrderClient {
     @PostMapping("/cc/order/feign/batchUpdateStatus")
     public Boolean batchUpdateStatus(@RequestParam("status") String status, @RequestBody List<Long> orderIdList);
     @GetMapping("/cc/order/feign/checkDeleteProduct/{id}")
-    AjaxResult checkDeleteProduct(@PathVariable("id") Integer id);
+    AjaxResult checkDeleteProduct(@PathVariable("id") Long id);
 }
