@@ -241,13 +241,7 @@ public class OrderController {
         if (order == null) return AjaxResult.error("订单不存在");
         if (order.getOrderType().equals(OperationTypeConstant.UNSUBSCRIBE))
             return AjaxResult.error("该订单为退订订单,无法调度");
-//        //检查订单状态是否为可分配
-//        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED))
-//            return AjaxResult.error("订单状态非可分配状态");
-        //订单状态——可分配（调度）；已调度/已分配（任务单查询）
-        if (!order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED) && !order.getStatus().equals(OrderStatusConstant.DISPATCHED)
-                && !order.getStatus().equals(OrderStatusConstant.ALLOCATED))
-            return AjaxResult.error("订单不可调度或无任务单");
+
 
         //根据订单类型获取对应的订单信息
         OrderVo orderVo = new OrderVo();
