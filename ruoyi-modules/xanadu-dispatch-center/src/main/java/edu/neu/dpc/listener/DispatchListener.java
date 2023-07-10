@@ -34,8 +34,8 @@ import java.util.*;
 
 @Component
 @Slf4j
-@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC, consumerGroup = "order-service-consumer-group")
-public class DispatchListener implements RocketMQListener<DispatchMessage> , RocketMQPushConsumerLifecycleListener {
+@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC,consumerGroup = "order-service-consumer-group")
+public class DispatchListener implements RocketMQListener<DispatchMessage>{
 
     private static final String WARE_KEY = "wareLocation";
 
@@ -74,6 +74,7 @@ public class DispatchListener implements RocketMQListener<DispatchMessage> , Roc
     @SuppressWarnings("all")
     public void onMessage(DispatchMessage dispatchMessage) {
         //拿到调度的订单id号以及目标分站id，我们还是需要查询一下订单是否被撤销，因为客户可能会撤销订单
+        System.out.println(dispatchMessage);
         Long id = dispatchMessage.getOrderId();
         Long substationId = dispatchMessage.getSubstationId();
         try {
@@ -154,11 +155,5 @@ public class DispatchListener implements RocketMQListener<DispatchMessage> , Roc
             //如果出现异常,自动调度失败
             log.error("调度失败", e);
         }
-    }
-
-    @Override
-    public void prepareStart(DefaultMQPushConsumer consumer) {
-        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_TIMESTAMP);
-        consumer.setConsumeTimestamp(UtilAll.timeMillisToHumanString3(System.currentTimeMillis()));
     }
 }

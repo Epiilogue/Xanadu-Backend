@@ -149,6 +149,10 @@ public class ProductController {
         }
         //不允许商品价格空
         if (product.getPrice() == null) return AjaxResult.error("商品价格不能为空");
+        //最大库存至少为安全库存两倍
+        if (product.getMaxCount() < product.getSafeStock() * 2) {
+            return AjaxResult.success("最大库存至少为安全库存两倍");
+        }
         boolean saved = productService.save(product);
         if (saved) {
             return AjaxResult.success(product);
