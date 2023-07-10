@@ -94,7 +94,7 @@ public class SubStorageRecordController {
                         eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey())
                         .setSql("allocated_num=allocated_num+" + longIntegerEntry.getValue()).
                         setSql("allocate_able_num=allocate_able_num-" + longIntegerEntry.getValue()).
-                        gt("allocate_able_num", longIntegerEntry.getValue()));
+                        ge("allocate_able_num", longIntegerEntry.getValue()));
                 if (!success) throw new RuntimeException("分配商品库存失败");
             }
 
@@ -114,7 +114,7 @@ public class SubStorageRecordController {
                 //拿到商品名
                 String productName = subStorageRecordService.getById(longIntegerEntry.getKey()).getProductName();
                 boolean success = subStorageRecordService.update(new UpdateWrapper<SubStorageRecord>().
-                        eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey())
+                        eq("subware_id", subwareId).eq("product_id", longIntegerEntry.getKey()).ge("allocated_num", longIntegerEntry.getValue())
                         .setSql("allocated_num=allocated_num-" + longIntegerEntry.getValue()).
                         setSql("total_num=total_num-" + longIntegerEntry.getValue()));
                 if (!success) throw new RuntimeException("分配商品库存失败");
