@@ -1,17 +1,17 @@
 /*
- Navicat MySQL Data Transfer
+ Navicat Premium Data Transfer
 
  Source Server         : localhost_3306
  Source Server Type    : MySQL
- Source Server Version : 50719
+ Source Server Version : 50719 (5.7.19-log)
  Source Host           : localhost:3306
  Source Schema         : xanadu_cc
 
  Target Server Type    : MySQL
- Target Server Version : 50719
+ Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 12/06/2023 12:12:13
+ Date: 10/07/2023 11:11:43
 */
 
 SET NAMES utf8mb4;
@@ -31,10 +31,10 @@ CREATE TABLE `cc_customer`  (
   `telephone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '电话号码',
   `organization` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '工作单位',
   `postcode` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮政编码',
-  `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否被删除',
+  `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT 0 COMMENT '是否被删除',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `index_id`(`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for cc_new_order
@@ -52,7 +52,7 @@ CREATE TABLE `cc_new_order`  (
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   `new_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '订购类型（先付款后送货，先送货后付款）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for cc_operation
@@ -68,7 +68,7 @@ CREATE TABLE `cc_operation`  (
   `numbers` int(10) NULL DEFAULT NULL COMMENT '操作商品数量',
   `total_amount` double(20, 2) NULL DEFAULT NULL COMMENT '操作金额',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cc_order
@@ -76,16 +76,17 @@ CREATE TABLE `cc_operation`  (
 DROP TABLE IF EXISTS `cc_order`;
 CREATE TABLE `cc_order`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-  `user_id` bigint(20) NOT NULL COMMENT '操作人ID',
   `customer_id` bigint(20) NOT NULL COMMENT '客户ID',
   `create_time` datetime NOT NULL COMMENT '创建日期',
   `order_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '订单类型',
   `deadline` date NULL DEFAULT NULL COMMENT '要求完成日期',
-  `numbers` int(10) NULL DEFAULT NULL COMMENT '涉及的商品数量',
+  `numbers` int(20) NULL DEFAULT NULL COMMENT '涉及的商品数量',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '订单状态',
   `total_amout` double(20, 2) NULL DEFAULT NULL COMMENT '涉及的金额',
+  `user_id` bigint(20) NULL DEFAULT NULL COMMENT '操作员工ID',
+  `deleted` tinyint(1) NULL DEFAULT 0 COMMENT '删除标记',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cc_product
@@ -103,7 +104,7 @@ CREATE TABLE `cc_product`  (
   `refund_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以退货',
   `change_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以换货',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cc_refund
@@ -114,11 +115,10 @@ CREATE TABLE `cc_refund`  (
   `order_id` bigint(20) NULL DEFAULT NULL COMMENT '操作订单ID',
   `reason` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '原因',
   `operation_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '操作类型(退货，换货，退订)',
-  `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '退换货状态',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cc_stockout
@@ -132,8 +132,8 @@ CREATE TABLE `cc_stockout`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建客服',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '缺货状态',
-  `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
+  `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT 0 COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

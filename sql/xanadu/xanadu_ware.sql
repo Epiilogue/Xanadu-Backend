@@ -1,17 +1,17 @@
 /*
- Navicat MySQL Data Transfer
+ Navicat Premium Data Transfer
 
  Source Server         : localhost_3306
  Source Server Type    : MySQL
- Source Server Version : 50719
+ Source Server Version : 50719 (5.7.19-log)
  Source Host           : localhost:3306
  Source Schema         : xanadu_ware
 
  Target Server Type    : MySQL
- Target Server Version : 50719
+ Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 30/06/2023 10:46:36
+ Date: 10/07/2023 11:10:19
 */
 
 SET NAMES utf8mb4;
@@ -74,12 +74,12 @@ CREATE TABLE `ware_center_storage_record`  (
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `allocated_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '已分配的商品数量',
-  `refund_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '退货的商品数量',
-  `total_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '总计商品数量',
-  `lock_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '下单锁定的商品数量',
+  `allocated_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT 00000000000000000000 COMMENT '已分配的商品数量',
+  `refund_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT 00000000000000000000 COMMENT '退货的商品数量',
+  `total_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT 00000000000000000000 COMMENT '总计商品数量',
+  `lock_num` int(20) UNSIGNED ZEROFILL NULL DEFAULT 00000000000000000000 COMMENT '下单锁定的商品数量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 74 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ware_centerware
@@ -158,9 +158,9 @@ CREATE TABLE `ware_sub_storage_record`  (
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品价格',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `allocated_num` int(20) NULL DEFAULT NULL COMMENT '已分配数量',
-  `refund_num` int(20) NULL DEFAULT NULL COMMENT '退货产品数量',
-  `total_num` int(20) NULL DEFAULT NULL COMMENT '总计产品数量',
+  `allocated_num` int(20) NULL DEFAULT 0 COMMENT '已分配数量',
+  `refund_num` int(20) NULL DEFAULT 0 COMMENT '退货产品数量',
+  `total_num` int(20) NULL DEFAULT 0 COMMENT '总计产品数量',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

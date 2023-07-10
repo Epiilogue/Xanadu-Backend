@@ -1,17 +1,17 @@
 /*
- Navicat MySQL Data Transfer
+ Navicat Premium Data Transfer
 
  Source Server         : localhost_3306
  Source Server Type    : MySQL
- Source Server Version : 50719
+ Source Server Version : 50719 (5.7.19-log)
  Source Host           : localhost:3306
  Source Schema         : xanadu_dpc
 
  Target Server Type    : MySQL
- Target Server Version : 50719
+ Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 14/06/2023 15:39:35
+ Date: 10/07/2023 11:11:57
 */
 
 SET NAMES utf8mb4;
@@ -64,6 +64,7 @@ CREATE TABLE `dpc_task`  (
   `task_status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务单状态',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
   `task_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务类型',
+  `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
