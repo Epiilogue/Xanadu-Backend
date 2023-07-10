@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
@@ -34,7 +35,7 @@ import java.util.*;
 
 @Component
 @Slf4j
-@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC,consumerGroup = "order-service-consumer-group")
+@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC,consumerGroup = "order-service-consumer-group",messageModel= MessageModel.BROADCASTING)
 public class DispatchListener implements RocketMQListener<DispatchMessage>{
 
     private static final String WARE_KEY = "wareLocation";

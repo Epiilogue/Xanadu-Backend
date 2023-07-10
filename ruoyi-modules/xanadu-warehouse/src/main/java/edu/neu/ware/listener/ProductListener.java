@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "ware-canal-group")
+@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "ware-group",messageModel= MessageModel.BROADCASTING)
 public class ProductListener implements RocketMQListener<String> {
 
     @Autowired
@@ -45,9 +46,6 @@ public class ProductListener implements RocketMQListener<String> {
 
     @Override
     public void onMessage(String msg) {
-        if (!JSONUtil.isJson(msg)) {
-            return;
-        }
         System.out.println(msg);
         JSONObject msgJsonObject = JSON.parseObject(msg);
         //检查一下改变的表的信息来源，如果不是product表就不用管了

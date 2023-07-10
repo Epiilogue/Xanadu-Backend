@@ -70,7 +70,8 @@ public class CenterStorageRecordController {
         //如果不缺货，返回null
         if (productIdMap == null || productIdMap.size() == 0) return null;
         ProductRecordsVo productRecordsVo = new ProductRecordsVo();
-        List<CenterStorageRecord> centerStorageRecords = centerStorageRecordService.listByIds(new ArrayList<>(productIdMap.keySet()));
+        QueryWrapper<CenterStorageRecord> queryWrapper = new QueryWrapper<CenterStorageRecord>().in("product_id", productIdMap.keySet());
+        List<CenterStorageRecord> centerStorageRecords = centerStorageRecordService.list(queryWrapper);
 
         centerStorageRecords.forEach(centerStorageRecord -> {
             if (centerStorageRecord.getAllocateAbleNum() < productIdMap.get(centerStorageRecord.getProductId())) {
@@ -104,7 +105,7 @@ public class CenterStorageRecordController {
     //获取列表
     @GetMapping("/list/{pageNum}/{pageSize}")
     @ApiOperation("获取中心仓库中的所有商品库存")
-    public AjaxResult pageList(@PathVariable Long pageNum,@PathVariable Long pageSize) {
+    public AjaxResult pageList(@PathVariable Long pageNum, @PathVariable Long pageSize) {
         return AjaxResult.success(centerStorageRecordService.page(new Page<>(pageNum, pageSize)));
     }
 
