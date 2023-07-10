@@ -454,9 +454,23 @@ public class TaskController {
         boolean isSuccess = pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType(), subwareId);
         if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
         //5.更新远程状态
+        String status = convertStatus(receipt.getState());
         AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), receipt.getState());
         if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
         return AjaxResult.success("回执单填写成功");
+    }
+
+    private String convertStatus(String state) {
+        switch (state) {
+            case ReceiptStatus.COMPLETED:
+                return TaskStatus.COMPLETED;
+            case ReceiptStatus.FAILED:
+                return TaskStatus.FAILED;
+            case ReceiptStatus.PARTIAL_COMPLETED:
+                return TaskStatus.PARTIAL_COMPLETED;
+            default:
+                return null;
+        }
     }
 
     /**
