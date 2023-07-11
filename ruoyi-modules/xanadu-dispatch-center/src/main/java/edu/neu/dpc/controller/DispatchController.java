@@ -233,18 +233,19 @@ public class DispatchController {
     @ApiOperation(value = "调度商品,传入参数为商品id和分库id,要求出库日期", notes = "调度商品")
     public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long subwareId,
                                       @ApiParam("要求出库日期") @RequestParam("requireDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date requireDate,
-                                      @ApiParam("商品信息") Product product) {
+                                      @ApiParam("商品信息")@RequestBody Product product) {
+
         //根据subwareId获取分站id,可能不存在
         Long substationId = substationClient.getSubstationBySubwareId(subwareId);
 
         //构造并保存调度单
-        Dispatch dispatch = new Dispatch(null, subwareId, null, product.getId(), product.getNumber(), product.getProductName(),
+        Dispatch dispatch = new Dispatch(null, subwareId, null, product.getProductId(), product.getNumber(), product.getProductName(),
                 product.getProductCategary(), requireDate, Dispatch.NOT_OUTPUT, substationId, false);
 
         boolean success = dispatchService.save(dispatch);
         //尝试修改库存，调度需要从可分配库存中减去对应的数量，添加到已分配库存中，后续从已分配库存中减去对应的数量
         if (!success) throw new RuntimeException("保存调度单失败");
-        AjaxResult unlock = centerWareClient.dispatch(product.getId(), product.getNumber(), "unlock");
+        AjaxResult unlock = centerWareClient.dispatch(product.getProductId(), product.getNumber(), "unlock");
         if (unlock.isError()) throw new ServiceException("可分配库存不足");
 
         CenterOutputVo centerOutputVo = new CenterOutputVo(dispatch.getId(), null, dispatch.getProductId(), dispatch.getProductName(), product.getPrice(),
