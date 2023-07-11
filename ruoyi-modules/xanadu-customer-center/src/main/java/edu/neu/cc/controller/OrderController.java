@@ -243,13 +243,9 @@ public class OrderController {
     public AjaxResult getOrderById(@PathVariable("id") Long id) {
         Order order = orderService.getById(id);
         if (order == null) return AjaxResult.error("订单不存在");
-        if (order.getOrderType().equals(OperationTypeConstant.UNSUBSCRIBE))
-            return AjaxResult.error("该订单为退订订单,无法调度");
-
         //根据订单类型获取对应的订单信息
         OrderVo orderVo = new OrderVo();
         BeanUtils.copyProperties(order, orderVo);
-
         //根据订单类型获取对应的订单信息
         switch (order.getOrderType()) {
             case OperationTypeConstant.ORDER:
