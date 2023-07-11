@@ -11,7 +11,7 @@
  Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 10/07/2023 11:11:57
+ Date: 11/07/2023 14:46:36
 */
 
 SET NAMES utf8mb4;
@@ -34,7 +34,13 @@ CREATE TABLE `dpc_dispatch`  (
   `deleted` tinyint(1) NULL DEFAULT NULL COMMENT '软删除',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of dpc_dispatch
+-- ----------------------------
+INSERT INTO `dpc_dispatch` VALUES (1, 1, 7, 2, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', '2023-07-13 00:00:00', '未出库', '电脑', 1, 0, 7);
+INSERT INTO `dpc_dispatch` VALUES (2, 1, 9, 2, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', '2023-07-13 00:00:00', '未出库', '玩具', 1, 0, 7);
 
 -- ----------------------------
 -- Table structure for dpc_product
@@ -54,6 +60,12 @@ CREATE TABLE `dpc_product`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of dpc_product
+-- ----------------------------
+INSERT INTO `dpc_product` VALUES (37, 20, 1, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 2, 405.01, '电脑', NULL);
+INSERT INTO `dpc_product` VALUES (38, 20, 1, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 2, 800.02, '玩具', NULL);
+
+-- ----------------------------
 -- Table structure for dpc_task
 -- ----------------------------
 DROP TABLE IF EXISTS `dpc_task`;
@@ -66,6 +78,11 @@ CREATE TABLE `dpc_task`  (
   `task_type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '任务类型',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of dpc_task
+-- ----------------------------
+INSERT INTO `dpc_task` VALUES (1, 20, 7, '已完成', 0, '送货收款', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
