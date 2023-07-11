@@ -212,12 +212,13 @@ public class CenterOutputController {
                 //说明初始化，此时需要查询总库存量以及供应商的名称
                 supplierName = supplierNames.getOrDefault(centerOutput.getSupplierId(), "未知供应商");
                 inventoryVo.setSupplierName(supplierName);
-                Integer storage = centerStorageRecordService.getById(centerOutput.getProductId()).getTotalNum();
+                Integer storage = centerStorageRecordService.getByProductId(centerOutput.getProductId()).getTotalNum();
                 inventoryVo.setTotalNum(storage);
                 inventoryVo.setDate(date);
             }
             inventoryVo.setNumber(inventoryVo.getNumber() + centerOutput.getOutputNum());
             inventoryVo.setTotalPrice(inventoryVo.getTotalPrice() + centerOutput.getOutputNum() * centerOutput.getProductPrice());
+            longInventoryHashMap.put(centerOutput.getProductId(), inventoryVo);
         });
 
 
