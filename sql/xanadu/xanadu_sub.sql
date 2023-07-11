@@ -1,17 +1,17 @@
 /*
- Navicat MySQL Data Transfer
+ Navicat Premium Data Transfer
 
  Source Server         : localhost_3306
  Source Server Type    : MySQL
- Source Server Version : 50719
+ Source Server Version : 50719 (5.7.19-log)
  Source Host           : localhost:3306
  Source Schema         : xanadu_sub
 
  Target Server Type    : MySQL
- Target Server Version : 50719
+ Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 28/06/2023 12:07:52
+ Date: 10/07/2023 11:09:42
 */
 
 SET NAMES utf8mb4;
@@ -168,7 +168,7 @@ DROP TABLE IF EXISTS `sub_task`;
 CREATE TABLE `sub_task`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '任务单ID',
   `customer_id` bigint(20) NOT NULL COMMENT '客户ID',
-  `customer_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '收件人姓名',
+  `receiver_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '收件人姓名',
   `phone` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '收件人电话',
   `delivery_address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '送货地址',
   `order_id` bigint(20) NOT NULL COMMENT '订单ID',
@@ -182,6 +182,8 @@ CREATE TABLE `sub_task`  (
   `products_json` varchar(2048) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '商品列表json字符串',
   `sub_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
+  `need_invoice` tinyint(1) NULL DEFAULT NULL COMMENT '是否需要发票',
+  `receipt_id` bigint(20) NULL DEFAULT NULL COMMENT '回执ID',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '任务单' ROW_FORMAT = DYNAMIC;
 

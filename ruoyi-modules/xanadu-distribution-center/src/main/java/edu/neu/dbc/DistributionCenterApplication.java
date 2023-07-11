@@ -9,8 +9,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
-@SpringBootApplication(exclude = {UtilAutoConfiguration.class}, scanBasePackages = {"edu.neu","com.ruoyi.common.security.handler"})
-@EnableFeignClients(basePackages = {"edu.neu.dbc.feign","com.ruoyi.system.api"})
+@SpringBootApplication(exclude = {UtilAutoConfiguration.class}, scanBasePackages = {"edu.neu","com.ruoyi"})
+@EnableFeignClients(basePackages = {"edu.neu.dbc.feign","com.ruoyi"})
 @EnableTransactionManagement
 @EnableDiscoveryClient
 @EnableCaching

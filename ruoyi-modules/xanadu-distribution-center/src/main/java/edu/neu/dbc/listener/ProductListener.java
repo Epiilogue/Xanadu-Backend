@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import edu.neu.base.constant.cc.MQTopic;
 import edu.neu.dbc.entity.Product;
 import edu.neu.dbc.service.ProductService;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import java.util.List;
  * canal 同步变化后会更新到
  */
 @Component
-@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "product-canal-group")
+@RocketMQMessageListener(topic = MQTopic.PRODUCT_TOPIC, consumerGroup = "product-canal-service-group",messageModel= MessageModel.BROADCASTING)
 public class ProductListener implements RocketMQListener<String> {
 
     @Autowired

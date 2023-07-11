@@ -1,17 +1,17 @@
 /*
- Navicat MySQL Data Transfer
+ Navicat Premium Data Transfer
 
  Source Server         : localhost_3306
  Source Server Type    : MySQL
- Source Server Version : 50719
+ Source Server Version : 50719 (5.7.19-log)
  Source Host           : localhost:3306
  Source Schema         : xanadu_dbc
 
  Target Server Type    : MySQL
- Target Server Version : 50719
+ Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 15/06/2023 16:17:14
+ Date: 10/07/2023 11:11:50
 */
 
 SET NAMES utf8mb4;
@@ -22,12 +22,12 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `dbc_categary`;
 CREATE TABLE `dbc_categary`  (
-  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT '大类ID',
-  `parent_id` int(10) NULL DEFAULT 0 COMMENT '父节点ID',
-  `level` int(8) NULL DEFAULT NULL COMMENT '节点层级',
+  `id` int(20) NOT NULL AUTO_INCREMENT COMMENT '大类ID',
+  `parent_id` int(20) NULL DEFAULT 0 COMMENT '父节点ID',
+  `level` int(8) NULL DEFAULT NULL COMMENT '节点层级（0或者1）',
   `category` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '分类名称',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dbc_lack_record
@@ -69,7 +69,7 @@ CREATE TABLE `dbc_product`  (
   `safe_stock` int(10) NULL DEFAULT NULL COMMENT '安全库存量',
   `max_count` int(10) NULL DEFAULT NULL COMMENT '货物最大库存量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dbc_purchase_record
@@ -119,12 +119,12 @@ CREATE TABLE `dbc_supplier`  (
   `name` char(30) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT '供销商名字',
   `address` char(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT 'NULL' COMMENT '供销商地址',
   `contact_person` char(30) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT '供销商联系人',
-  `phone` char(11) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT '供销商电话号码',
+  `phone` char(32) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT '供销商电话号码',
   `bank_account` char(30) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT '供销商银行账户',
   `remarks` char(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT 'NULL' COMMENT '备注',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

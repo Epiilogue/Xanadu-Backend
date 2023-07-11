@@ -19,6 +19,7 @@ import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/sub/substation")
+@Transactional
 public class SubstationController {
     //分站的增删改查方法，需要制定管理人以及附属仓库，都是一对一关系
 

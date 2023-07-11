@@ -55,7 +55,9 @@ public class TaskController {
             Long orderId = t.getOrderId();
             AjaxResult orderResult = ccOrderClient.getOrder(orderId);
             //检查返回结果是否有错误,如果有错误则不生成vo
-            if (orderResult.isError()) return;
+            if (orderResult.isError()) {
+                return;
+            }
             //获取订单信息
             Object data = orderResult.get("data");
             //转为OrderVo

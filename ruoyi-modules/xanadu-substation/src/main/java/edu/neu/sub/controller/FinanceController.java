@@ -16,6 +16,7 @@ import edu.neu.sub.service.SubstationService;
 import org.aspectj.lang.annotation.DeclareWarning;
 import org.bouncycastle.cms.Recipient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.stream.Stream;
  */
 @RestController
 @RequestMapping("/sub/finance")
+@Transactional
 public class FinanceController {
     /**
      * 录入时间段、商品种类查询条件，查询本分站一段时间内每种商品的送货收款情况，以及总的收款退款金额。

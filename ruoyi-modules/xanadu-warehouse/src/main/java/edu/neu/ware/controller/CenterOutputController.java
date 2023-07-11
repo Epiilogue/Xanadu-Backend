@@ -267,6 +267,7 @@ public class CenterOutputController {
             inventoryVo.setNumber(inventoryVo.getNumber() + centerOutput.getOutputNum());
             inventoryVo.setOperatorId(centerOutput.getOperatorId());
             inventoryVo.setTotalPrice(inventoryVo.getTotalPrice() + centerOutput.getOutputNum() * centerOutput.getProductPrice());
+            longInventoryHashMap.put(centerOutput.getProductId(),inventoryVo);
         });
         return AjaxResult.success(longInventoryHashMap.values());
     }

@@ -4,6 +4,7 @@ package com.ruoyi.auth.service;
 import com.ruoyi.auth.form.EmailBody;
 import edu.neu.base.constant.cc.MQTopic;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.MimeMessage;
 
 @Service
-@RocketMQMessageListener(topic = MQTopic.EMAIL_TOPIC, consumerGroup = "user-service-producer-group")
+@RocketMQMessageListener(topic = MQTopic.EMAIL_TOPIC, consumerGroup = "user-service-producer-group",messageModel= MessageModel.BROADCASTING)
 public class MessageExtConsumer implements RocketMQListener<EmailBody> {
 
     @Autowired

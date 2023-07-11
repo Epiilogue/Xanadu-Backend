@@ -13,6 +13,7 @@ import edu.neu.sub.service.SubstationService;
 import edu.neu.sub.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -32,6 +33,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/sub/delivery")
+@Transactional
 public class DeliveryController {
     @Autowired
     ReceiptService receiptService;

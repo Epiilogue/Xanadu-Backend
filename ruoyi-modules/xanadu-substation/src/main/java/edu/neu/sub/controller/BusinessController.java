@@ -16,6 +16,7 @@ import lombok.Data;
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * 提供业务报表分析的所有数据信息
  */
 @RestController
+@Transactional
 public class BusinessController {
 
     @Autowired

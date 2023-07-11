@@ -9,19 +9,17 @@ import edu.neu.base.constant.cc.InputOutputType;
 import edu.neu.ware.entity.CenterInput;
 import edu.neu.ware.entity.SubOutput;
 import edu.neu.ware.entity.SubStorageRecord;
+import edu.neu.ware.entity.Subware;
 import edu.neu.ware.feign.SubstationClient;
-import edu.neu.ware.service.CenterInputService;
-import edu.neu.ware.service.CenterStorageRecordService;
-import edu.neu.ware.service.SubOutputService;
-import edu.neu.ware.service.SubStorageRecordService;
+import edu.neu.ware.service.*;
 import edu.neu.ware.vo.CenterInputVo;
 import edu.neu.ware.vo.PendingProductVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -47,6 +45,8 @@ public class SubOutputController {
     CenterInputService centerInputService;
     @Autowired
     SubstationClient substationClient;
+    @Autowired
+    SubwareService subwareService;
 
     @GetMapping("/list/{type}")
     @ApiOperation("分库出库记录查看,需要选择出库类型是 领货出库 或者是 退货出库,此处需要做成两个不同的字段表格，一个头是配送出库数量，一个是退货数量")
@@ -120,6 +120,25 @@ public class SubOutputController {
         boolean save = centerInputService.save(centerInput);
         if (!save) throw new ServiceException("提交中心仓库退货记录失败");
         return AjaxResult.success("确认退货出库成功");
+    }
+
+
+    @ApiOperation("各分库出库量统计")
+    @GetMapping("/analysis")
+    public AjaxResult analysis() {
+        //找到所有分库已经出库的记录，按照仓库id聚合，然后返回为一个map，key为仓库名，value为仓库出库量
+        QueryWrapper<SubOutput> eq = new QueryWrapper<SubOutput>().eq("status", InputOutputStatus.OUTPUT);
+        List<SubOutput> list = subOutputService.list(eq);
+        Map<Long, List<SubOutput>> collect = list.stream().collect(Collectors.groupingBy(SubOutput::getSubwareId));
+        HashMap<String, Integer> resultMap = new HashMap<>();
+        collect.forEach((k, v) -> {
+            Subware subware = subwareService.getById(k);
+            String subwareName = subware.getName();
+            //拿到仓库出库量
+            Integer outputNum = v.stream().mapToInt(SubOutput::getOutputNum).sum();
+            resultMap.put(subwareName, outputNum);
+        });
+        return AjaxResult.success(resultMap);
     }
 
 

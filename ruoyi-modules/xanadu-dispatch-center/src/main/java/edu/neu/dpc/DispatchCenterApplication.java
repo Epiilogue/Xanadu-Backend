@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableCaching
 public class DispatchCenterApplication{
     public static void main(String[] args) {
-        //启动spring
-        System.setProperty("rocketmq.client.logUseSlf4j", "true");
         org.springframework.boot.SpringApplication.run(DispatchCenterApplication.class, args);
     }
 }

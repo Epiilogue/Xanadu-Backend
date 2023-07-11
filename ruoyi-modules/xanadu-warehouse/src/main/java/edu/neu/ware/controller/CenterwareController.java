@@ -51,19 +51,28 @@ public class CenterwareController {
             return AjaxResult.error("预警值不能小于100");
         }
         //最高值必须要大于预警值两倍
-        if (centerware.getMaxNumber() < centerware.getWarnNumber() * 4) {
+        if (centerware.getMaxNumber() < centerware.getWarnNumber() *2) {
             return AjaxResult.error("最高容量必须大于预警容量的四倍");
+        }
+        //如果不存在则创建
+        List<Centerware> list = centerwareService.list();
+        if (list.size() == 0) {
+            boolean result = centerwareService.save(centerware);
+            if (!result) {
+                return AjaxResult.error("配置失败");
+            }
+            return AjaxResult.success("配置成功");
         }
         //更新数据库
         boolean result = centerwareService.updateById(centerware);
         if (!result) {
-            return AjaxResult.error("更新失败");
+            return AjaxResult.error("配置失败");
         }
         return AjaxResult.success();
     }
 
     @GetMapping("/info")
-    @Cacheable
+    @Cacheable(key = "'centerwareInfo'")
     public AjaxResult getCenterwareInfo() {
         Centerware centerware = centerwareService.getById(1);
         if (centerware == null) {
@@ -71,7 +80,6 @@ public class CenterwareController {
         }
         return AjaxResult.success(centerware);
     }
-
     @GetMapping("/listAllStations")
     @ApiOperation(value = "获取所有分站以及中心仓库信息")
     public AjaxResult listAllStations() {

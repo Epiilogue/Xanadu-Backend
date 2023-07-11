@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Gaosong Xu
@@ -67,7 +67,7 @@ public class SubInputController {
     @ApiOperation("查询子库的所有调拨入库的单子")
     public AjaxResult listDispatch(@PathVariable("subwareId") Long subwareId) {
         QueryWrapper<CenterOutput> queryWrapper = new QueryWrapper<CenterOutput>().eq("subware_id", subwareId).eq("status", InputOutputStatus.OUTPUT)
-                .eq("type", InputOutputType.DISPATCH_OUT);
+                .eq("output_type", InputOutputType.DISPATCH_OUT);
         //拿到了列表后，需要回显
         return AjaxResult.success(centerOutputService.list(queryWrapper));
     }
@@ -123,9 +123,11 @@ public class SubInputController {
             boolean save = subStorageRecordService.save(subStorageRecord);
             if (!save) throw new ServiceException("插入商品库存失败");
             recordId = subStorageRecord.getId();
-        }
+            subStorageRecord = subStorageRecordService.getById(recordId);
+        } else
+            subStorageRecord = record;
 
-        subStorageRecord = subStorageRecordService.getById(recordId);
+
         //更新商品库存，增加可分配数量
         subStorageRecord.setTotalNum(subStorageRecord.getTotalNum() + centerOutput.getOutputNum());
         subStorageRecord.setAllocateAbleNum(subStorageRecord.getAllocateAbleNum() + centerOutput.getOutputNum());
@@ -133,12 +135,6 @@ public class SubInputController {
         if (!updateSuccess) throw new ServiceException("更新商品库存失败");
         return AjaxResult.success("商品调拨入库成功");
     }
-
-
-
-
-
-
 
 
 }

@@ -6,6 +6,7 @@ import edu.neu.ware.entity.CenterStorageRecord;
 import edu.neu.ware.mapper.CenterStorageRecordMapper;
 import edu.neu.ware.service.CenterStorageRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
     CenterStorageRecordMapper centerStorageRecordMapper;
 
     @Override
+    @Synchronized
     public CenterStorageRecord createProduct(CenterInput centerInput) {
         //中心仓库不存在该商品，需要创建记录并初始化
         CenterStorageRecord centerStorageRecord = new CenterStorageRecord();
@@ -41,6 +43,7 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
     }
 
     @Override
+    @Synchronized
     public void createProduct(String name, Long productId, Double price) {
         if (name == null || productId == null || price == null) return;
         //创建商品
@@ -58,6 +61,7 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
     }
 
     @Override
+    @Synchronized
     public void updateProduct(String name, Long productId, Double price) {
         //更新商品
         if (name == null || productId == null || price == null) return;
@@ -75,6 +79,7 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
     }
 
     @Override
+    @Synchronized
     public void deleteProduct(Long productId) {
         //注意幂等性，先查一下有没有相同id的商品
         QueryWrapper<CenterStorageRecord> record = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);

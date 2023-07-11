@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiOperation;
 import org.aspectj.weaver.loadtime.Aj;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/sub/task")
+@Transactional
 public class TaskController {
 
     /**
@@ -437,7 +439,8 @@ public class TaskController {
         //2.更新本地状态
         task.setTaskStatus(TaskStatus.COMPLETED);
         task.setReceiptId(receiptId);
-        taskService.save(task);
+        boolean saveTaskSuccess = taskService.updateById(task);
+        if (!saveTaskSuccess) throw new ServiceException("更新任务状态失败");
         //3.保存商品信息，对于不同的类型我们应当保存不同的商品信息
         List<ReceiptProduct> receiptProducts = receiptProductService.convertAndSave(receiptId, products, receipt.getState(), task.getTaskType());
         if (receiptProducts == null) throw new ServiceException("保存商品信息失败");
@@ -451,9 +454,23 @@ public class TaskController {
         boolean isSuccess = pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType(), subwareId);
         if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
         //5.更新远程状态
+        String status = convertStatus(receipt.getState());
         AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), receipt.getState());
         if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
         return AjaxResult.success("回执单填写成功");
+    }
+
+    private String convertStatus(String state) {
+        switch (state) {
+            case ReceiptStatus.COMPLETED:
+                return TaskStatus.COMPLETED;
+            case ReceiptStatus.FAILED:
+                return TaskStatus.FAILED;
+            case ReceiptStatus.PARTIAL_COMPLETED:
+                return TaskStatus.PARTIAL_COMPLETED;
+            default:
+                return null;
+        }
     }
 
     /**

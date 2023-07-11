@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
@@ -32,10 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-//@Component
+@Component
 @Slf4j
-//@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC, consumerGroup = "order-service-consumer-group")
-public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage> , RocketMQPushConsumerLifecycleListener {
+@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC,consumerGroup = "order-service-consumer-group",messageModel= MessageModel.BROADCASTING)
+public class DispatchListener implements RocketMQListener<DispatchMessage>{
 
     private static final String WARE_KEY = "wareLocation";
 
@@ -74,6 +75,7 @@ public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage
     @SuppressWarnings("all")
     public void onMessage(DispatchMessage dispatchMessage) {
         //拿到调度的订单id号以及目标分站id，我们还是需要查询一下订单是否被撤销，因为客户可能会撤销订单
+        System.out.println(dispatchMessage);
         Long id = dispatchMessage.getOrderId();
         Long substationId = dispatchMessage.getSubstationId();
         try {
@@ -154,11 +156,5 @@ public class DispatchMessageConsumer implements RocketMQListener<DispatchMessage
             //如果出现异常,自动调度失败
             log.error("调度失败", e);
         }
-    }
-
-    @Override
-    public void prepareStart(DefaultMQPushConsumer consumer) {
-        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_TIMESTAMP);
-        consumer.setConsumeTimestamp(UtilAll.timeMillisToHumanString3(System.currentTimeMillis()));
     }
 }

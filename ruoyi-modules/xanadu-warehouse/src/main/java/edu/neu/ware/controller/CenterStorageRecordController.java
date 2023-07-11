@@ -70,7 +70,8 @@ public class CenterStorageRecordController {
         //如果不缺货，返回null
         if (productIdMap == null || productIdMap.size() == 0) return null;
         ProductRecordsVo productRecordsVo = new ProductRecordsVo();
-        List<CenterStorageRecord> centerStorageRecords = centerStorageRecordService.listByIds(new ArrayList<>(productIdMap.keySet()));
+        QueryWrapper<CenterStorageRecord> queryWrapper = new QueryWrapper<CenterStorageRecord>().in("product_id", productIdMap.keySet());
+        List<CenterStorageRecord> centerStorageRecords = centerStorageRecordService.list(queryWrapper);
 
         centerStorageRecords.forEach(centerStorageRecord -> {
             if (centerStorageRecord.getAllocateAbleNum() < productIdMap.get(centerStorageRecord.getProductId())) {
@@ -104,7 +105,7 @@ public class CenterStorageRecordController {
     //获取列表
     @GetMapping("/list/{pageNum}/{pageSize}")
     @ApiOperation("获取中心仓库中的所有商品库存")
-    public AjaxResult pageList(@PathVariable Long pageNum,@PathVariable Long pageSize) {
+    public AjaxResult pageList(@PathVariable Long pageNum, @PathVariable Long pageSize) {
         return AjaxResult.success(centerStorageRecordService.page(new Page<>(pageNum, pageSize)));
     }
 
@@ -249,13 +250,13 @@ public class CenterStorageRecordController {
             lock.lock();
             UpdateWrapper<CenterStorageRecord> rollbackWrapper = new UpdateWrapper<CenterStorageRecord>()
                     .setSql("allocated_num=allocated_num-" + prevNum).setSql("allocate_able_num=allocate_able_num+" + prevNum)
-                    .ge("allocated_num", prevNum).eq("id", centerStorageRecord.getId());
+                    .ge("allocated_num", prevNum).eq("id", centerStorageRecord.getId()).ge("allocate_able_num", prevNum);
             boolean update = centerStorageRecordService.update(rollbackWrapper);
             if (!update) throw new ServiceException("撤回分配库存失败");
 
             UpdateWrapper<CenterStorageRecord> updateWrapper = new UpdateWrapper<CenterStorageRecord>()
                     .setSql("allocate_able_num=allocate_able_num-" + nowNum).setSql("allocated_num=allocated_num+" + nowNum)
-                    .ge("allocate_able_num", nowNum).eq("id", centerStorageRecord.getId());
+                    .ge("allocate_able_num", nowNum).eq("id", centerStorageRecord.getId()).ge("allocate_able_num", nowNum);
             update = centerStorageRecordService.update(updateWrapper);
             if (update) return AjaxResult.success("调度成功");
             else throw new ServiceException("调度失败");
