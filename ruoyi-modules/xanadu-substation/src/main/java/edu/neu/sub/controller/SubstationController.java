@@ -314,5 +314,12 @@ public class SubstationController {
         return money * 0.03 * (1.0 + (satisfaction - 0.5));
     }
 
+
+    @GetMapping("/feign/getSubstationBySubwareId/{subwareId}")
+    @ApiOperation(value = "根据仓库ID获取分站ID")
+    public Long getSubstationBySubwareId(@PathVariable("subwareId") Long subwareId){
+        QueryWrapper<Substation> eq = new QueryWrapper<Substation>().eq("subware_id", subwareId);
+        return substationService.getOne(eq).getId();
+    }
 }
 

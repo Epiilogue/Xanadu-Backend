@@ -18,4 +18,7 @@ public interface SubstationClient {
     @ApiOperation(value = "获取分站的信息")
     public AjaxResult getSubstation(@PathVariable("id") Long id) ;
 
+    @GetMapping("/sub/substation/feign/getSubstationBySubwareId/{subwareId}")
+    @ApiOperation(value = "根据仓库ID获取分站ID")
+    public Long getSubstationBySubwareId(@PathVariable("subwareId") Long subwareId);
 }

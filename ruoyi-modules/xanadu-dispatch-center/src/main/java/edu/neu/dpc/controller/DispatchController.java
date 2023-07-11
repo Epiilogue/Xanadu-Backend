@@ -119,14 +119,12 @@ public class DispatchController {
         //转为OrderVo
         OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
         //检查订单状态是否合法
-        if (orderVo.getStatus() != OrderStatusConstant.ALLOCATED) return AjaxResult.error("当前订单状态不可调度");
+        if (!Objects.equals(orderVo.getStatus(), OrderStatusConstant.ALLOCATED)) return AjaxResult.error("当前订单状态不可调度");
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
         if (remoteSubwareResult == null) throw new ServiceException("获取分库ID失败");
         if (remoteSubwareResult.isError()) return remoteSubwareResult;
-//        Long subwareId = (Long) remoteSubwareResult.get("data");
-        //传回的id可能为integer类型
         Long subwareId = remoteSubwareResult.get("data") instanceof Integer? Long.parseLong(remoteSubwareResult.get("data").toString()) :(Long) remoteSubwareResult.get("data");
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.SCHEDULED
@@ -233,18 +231,15 @@ public class DispatchController {
 
     @PutMapping("/dispatchProduct")
     @ApiOperation(value = "调度商品,传入参数为商品id和分库id,要求出库日期", notes = "调度商品")
-    public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long substationId,
+    public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long subwareId,
                                       @ApiParam("要求出库日期") @RequestParam("requireDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date requireDate,
                                       @ApiParam("商品信息") Product product) {
+        //根据subwareId获取分站id,可能不存在
+        Long substationId = substationClient.getSubstationBySubwareId(subwareId);
 
-        AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
-        if (remoteSubwareResult == null) throw new ServiceException("获取分库ID失败");
-        if (remoteSubwareResult.isError()) return remoteSubwareResult;
-        Long subwareId = (Long) remoteSubwareResult.get("data");
         //构造并保存调度单
         Dispatch dispatch = new Dispatch(null, subwareId, null, product.getId(), product.getNumber(), product.getProductName(),
                 product.getProductCategary(), requireDate, Dispatch.NOT_OUTPUT, substationId, false);
-
 
         boolean success = dispatchService.save(dispatch);
         //尝试修改库存，调度需要从可分配库存中减去对应的数量，添加到已分配库存中，后续从已分配库存中减去对应的数量
