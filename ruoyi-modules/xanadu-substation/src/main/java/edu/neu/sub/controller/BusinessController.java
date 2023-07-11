@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * 提供业务报表分析的所有数据信息
  */
 @RestController
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class BusinessController {
 
     @Autowired

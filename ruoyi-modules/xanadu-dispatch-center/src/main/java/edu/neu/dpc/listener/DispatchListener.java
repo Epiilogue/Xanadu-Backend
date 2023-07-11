@@ -71,7 +71,7 @@ public class DispatchListener implements RocketMQListener<DispatchMessage>{
     RedisTemplate redisTemplate;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @SuppressWarnings("all")
     public void onMessage(DispatchMessage dispatchMessage) {
         //拿到调度的订单id号以及目标分站id，我们还是需要查询一下订单是否被撤销，因为客户可能会撤销订单

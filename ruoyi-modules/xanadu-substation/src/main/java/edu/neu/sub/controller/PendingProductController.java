@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/sub/pendingProduct")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class PendingProductController {
 
     @Autowired

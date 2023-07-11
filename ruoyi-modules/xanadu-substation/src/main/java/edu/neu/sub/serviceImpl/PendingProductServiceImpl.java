@@ -24,7 +24,7 @@ import java.util.List;
  * @since 2023-06-19 11:12:41
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class PendingProductServiceImpl extends ServiceImpl<PendingProductMapper, PendingProduct> implements PendingProductService {
 
     @Override

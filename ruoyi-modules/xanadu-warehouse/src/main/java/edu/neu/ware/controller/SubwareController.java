@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @since 2023-06-02 03:42:21
  */
 @RestController
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 @RequestMapping("/ware/subware")
 @CacheConfig(cacheNames = "subware")
 public class SubwareController {

@@ -33,7 +33,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/sub/delivery")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DeliveryController {
     @Autowired
     ReceiptService receiptService;

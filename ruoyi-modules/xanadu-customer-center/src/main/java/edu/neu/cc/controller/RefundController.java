@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/cc/refund")
 @Api(tags = "RefundController", description = "处理退货换货")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class RefundController {
 
     /**

@@ -35,7 +35,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/ware/subInput")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class SubInputController {
 
     /**

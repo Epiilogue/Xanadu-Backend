@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/ware/subStorageRecord")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class SubStorageRecordController {
     //分站记录查看
     @Autowired

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/ware/centerOutput")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class CenterOutputController {
     @Autowired
     CenterOutputService centerOutputService;

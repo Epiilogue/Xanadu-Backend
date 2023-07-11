@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  */
 @RestController
 @RequestMapping("/sub/finance")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class FinanceController {
     /**
      * 录入时间段、商品种类查询条件，查询本分站一段时间内每种商品的送货收款情况，以及总的收款退款金额。

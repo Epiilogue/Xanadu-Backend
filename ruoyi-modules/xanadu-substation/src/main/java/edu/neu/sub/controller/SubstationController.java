@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/sub/substation")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class SubstationController {
     //分站的增删改查方法，需要制定管理人以及附属仓库，都是一对一关系
 

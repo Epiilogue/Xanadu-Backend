@@ -37,7 +37,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/ware/centerInput")
 @Api(tags = "CenterInputController", description = "中心仓库入库记录管理")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class CenterInputController {
 
 

@@ -44,7 +44,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/dpc/dispatch")
 @Api(value = "调度中心", tags = "调度中心")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 @CacheConfig(cacheNames = "dispatch")
 public class DispatchController {
 
