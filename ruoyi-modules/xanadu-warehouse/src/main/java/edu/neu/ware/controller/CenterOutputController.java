@@ -229,7 +229,7 @@ public class CenterOutputController {
      * 仓库名称、操作员、商品编号、商品名称、售价、数量、供销商、备注、商品数量总计、总金额、分发员、签收人、日期
      */
     @GetMapping("/printDistributionList")
-    @ApiOperation("打印配送单接口,只找已出库的")
+    @ApiOperation("打印分发单接口,只找已出库的")
     public AjaxResult printDistributionList(@RequestParam("date") Date date
             , @RequestParam(value = "productName", required = false) String productName,
                                             @RequestParam("subwareId") Long SubwareId) {
@@ -261,7 +261,7 @@ public class CenterOutputController {
                 //说明初始化，此时需要查询总库存量以及供应商的名称
                 supplierName = supplierNames.getOrDefault(centerOutput.getSupplierId(), "未知供应商");
                 inventoryVo.setSupplierName(supplierName);
-                Integer storage = centerStorageRecordService.getById(centerOutput.getProductId()).getTotalNum();
+                Integer storage = centerStorageRecordService.getByProductId(centerOutput.getProductId()).getTotalNum();
                 inventoryVo.setTotalNum(storage);
                 inventoryVo.setDate(date);
             }
