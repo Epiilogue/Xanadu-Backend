@@ -118,6 +118,8 @@ public class DispatchController {
         Object data = orderResult.get("data");
         //转为OrderVo
         OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
+        //检查订单状态是否合法
+        if (orderVo.getStatus() != OrderStatusConstant.ALLOCATED) return AjaxResult.error("当前订单状态不可调度");
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
