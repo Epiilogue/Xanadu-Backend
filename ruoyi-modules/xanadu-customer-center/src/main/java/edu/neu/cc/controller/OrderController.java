@@ -118,16 +118,15 @@ public class OrderController {
     @GetMapping(path = {"/detail/{orderId}/{orderType}", "detail/{orderId}"})
     @Cacheable(key = "#orderId")
     public AjaxResult getOrderDetailByOrderId(
-            @ApiParam(name = "orderId", value = "订单ID") @PathVariable Long orderId,
-            @ApiParam(name = "orderType", value = "订单类型", required = false) @PathVariable String orderType) {
+            @ApiParam(name = "orderId", value = "订单ID") @PathVariable("orderId") Long orderId,
+            @ApiParam(name = "orderType", value = "订单类型") @PathVariable("orderType") String orderType) {
         //根据不同的订单信息回显不同的数据
         AjaxResult ajaxResult = new AjaxResult(HttpStatus.SUCCESS, "查询成功");
-        Order order = null;
-        if (StringUtils.isEmpty(orderType)) {
-            order = orderService.getById(orderId);
-            if (order == null) return AjaxResult.error("订单不存在");
-            orderType = order.getOrderType();
-        }
+
+        Order order = orderService.getById(orderId);
+        if (order == null) return AjaxResult.error("订单不存在");
+        orderType = order.getOrderType();
+
         if (OperationTypeConstant.ORDER.equals(orderType)) {
             //回显neworder信息以及对应的商品信息
             NewOrder newOrder = newOrderService.getById(orderId);
@@ -241,13 +240,11 @@ public class OrderController {
 
     @ApiOperation("根据订单ID获取订单信息")
     @GetMapping("/feign/getOrder/{id}")
-    @Cacheable(key = "#id")
     public AjaxResult getOrderById(@PathVariable("id") Long id) {
         Order order = orderService.getById(id);
         if (order == null) return AjaxResult.error("订单不存在");
         if (order.getOrderType().equals(OperationTypeConstant.UNSUBSCRIBE))
             return AjaxResult.error("该订单为退订订单,无法调度");
-
 
         //根据订单类型获取对应的订单信息
         OrderVo orderVo = new OrderVo();
