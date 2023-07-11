@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.alibaba.druid.sql.visitor.SQLEvalVisitorUtils.eq;
+
 /**
  * <p>
  * 前端控制器
@@ -173,7 +175,7 @@ public class CenterOutputController {
         centerOutput.setStatus(InputOutputStatus.OUTPUT);
         centerOutput.setOutputTime(new Date());
         centerOutput.setActualNum(number);
-        Long userId= SecurityUtils.getUserId();
+        Long userId = SecurityUtils.getUserId();
         centerOutput.setOperatorId(userId);
         return AjaxResult.success(centerOutputService.updateById(centerOutput));
     }
@@ -242,7 +244,7 @@ public class CenterOutputController {
         String subwareName = subwareService.getById(SubwareId).getName();
 
         //获取所有的出库记录，字段为require_time
-        List<CenterOutput> centerOutputs = centerOutputService.list(new QueryWrapper<CenterOutput>().between("", start, end).eq("status", InputOutputStatus.OUTPUT));
+        List<CenterOutput> centerOutputs = centerOutputService.list(new QueryWrapper<CenterOutput>().between("output_time", start, end).or(q -> q.eq("status", InputOutputStatus.OUTPUT).eq("status", InputOutputStatus.SUB_INPUT)));
         centerOutputs = centerOutputs.stream().filter(centerOutput -> centerOutput.getSubwareId().equals(SubwareId)).collect(Collectors.toList());
         if (centerOutputs.size() == 0) return AjaxResult.error("未找到对应的出库记录");
         if (!StringUtil.isBlank(productName)) {
@@ -267,7 +269,7 @@ public class CenterOutputController {
             inventoryVo.setNumber(inventoryVo.getNumber() + centerOutput.getOutputNum());
             inventoryVo.setOperatorId(centerOutput.getOperatorId());
             inventoryVo.setTotalPrice(inventoryVo.getTotalPrice() + centerOutput.getOutputNum() * centerOutput.getProductPrice());
-            longInventoryHashMap.put(centerOutput.getProductId(),inventoryVo);
+            longInventoryHashMap.put(centerOutput.getProductId(), inventoryVo);
         });
         return AjaxResult.success(longInventoryHashMap.values());
     }
@@ -303,7 +305,7 @@ public class CenterOutputController {
         //分库ID可以直接由分站获取
         AjaxResult subwareIdResult = substationClient.getSubwareId(centerOutputVo.getSubstationId());
         //传回的id可能为integer类型
-        Long subwareId = subwareIdResult.get("data") instanceof Integer? Long.parseLong(subwareIdResult.get("data").toString()) :(Long) subwareIdResult.get("data");
+        Long subwareId = subwareIdResult.get("data") instanceof Integer ? Long.parseLong(subwareIdResult.get("data").toString()) : (Long) subwareIdResult.get("data");
         centerOutputVo.setSubwareId(subwareId);
         //修改信息
         BeanUtils.copyProperties(centerOutputVo, centerOutput);

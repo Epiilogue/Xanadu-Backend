@@ -93,7 +93,7 @@ public class SubwareController {
     public AjaxResult infoByUser(@PathVariable("userId") Long userId) {
         Subware subware = subwareService.getByManagerId(userId);
         if (subware == null) {
-            throw new ServiceException("该用户尚未管理分库");
+            return AjaxResult.success("该用户没有管理分库");
         }
         return AjaxResult.success(subware);
     }

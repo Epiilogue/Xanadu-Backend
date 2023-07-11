@@ -35,7 +35,7 @@ import java.util.*;
 
 @Component
 @Slf4j
-@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC,consumerGroup = "order-service-consumer-group",messageModel= MessageModel.BROADCASTING)
+@RocketMQMessageListener(topic = MQTopic.ORDER_TOPIC,consumerGroup = "order-service-group",messageModel= MessageModel.BROADCASTING)
 public class DispatchListener implements RocketMQListener<DispatchMessage>{
 
     private static final String WARE_KEY = "wareLocation";
