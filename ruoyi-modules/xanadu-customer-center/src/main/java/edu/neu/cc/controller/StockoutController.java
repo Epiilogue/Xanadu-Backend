@@ -173,6 +173,7 @@ public class StockoutController {
         //查询所有的缺货记录，然后按照需要的商品数量从小到大排序，如果入库数量足够的话就可以更新状态为已到货，否则重新置为已提交等待下一轮采购
         //过滤调-1 id
         ids = ids.stream().filter(id -> id != -1).collect(Collectors.toList());
+        if(ids.size()==0)return true;
         List<Stockout> stockouts = stockoutService.listByIds(ids);
         if (Objects.isNull(stockouts) || stockouts.size() == 0) return false;
         stockouts.sort(Comparator.comparingInt(Stockout::getNeedNumbers));
