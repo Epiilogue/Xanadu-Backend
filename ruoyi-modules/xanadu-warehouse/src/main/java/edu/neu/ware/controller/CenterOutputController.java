@@ -307,11 +307,9 @@ public class CenterOutputController {
         CenterOutput centerOutput = centerOutputService.getOne(centerOutputQueryWrapper);
         if (centerOutput == null) return AjaxResult.error("修改失败,未找到该出库记录");
         centerOutputVo.setProductPrice(centerOutput.getProductPrice());//设置商品价格
-        AjaxResult substationClientSubstationId = substationClient.getSubstationId(centerOutputVo.getSubstationId());
-        if (substationClientSubstationId.isError()) return AjaxResult.error("修改失败,未找到该分站");
-        //分库ID可以直接由分站获取
         AjaxResult subwareIdResult = substationClient.getSubwareId(centerOutputVo.getSubstationId());
         //传回的id可能为integer类型
+        if (subwareIdResult==null||subwareIdResult.isError())return AjaxResult.error("修改失败,未找到该分站");
         Long subwareId = subwareIdResult.get("data") instanceof Integer ? Long.parseLong(subwareIdResult.get("data").toString()) : (Long) subwareIdResult.get("data");
         centerOutputVo.setSubwareId(subwareId);
         //修改信息

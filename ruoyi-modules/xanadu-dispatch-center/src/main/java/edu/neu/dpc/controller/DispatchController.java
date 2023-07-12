@@ -312,7 +312,7 @@ public class DispatchController {
 //        Long subwareId = (Long) remoteSubwareResult.get("data");
         //传回的id可能为integer类型
         Long subwareId = remoteSubwareResult.get("data") instanceof Integer? Long.parseLong(remoteSubwareResult.get("data").toString()) :(Long) remoteSubwareResult.get("data");
-
+        dispatch.setSubwareId(subwareId);
 
         //若是需要修改调度的数量，需要将已分配减去原来的，可分配添加上原来的，已分配添加新增的，可分配减去新增的
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(prevDispatch.getProductId(), prevDispatch.getProductNum(), dispatch.getProductNum());
