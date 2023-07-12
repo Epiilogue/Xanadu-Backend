@@ -67,13 +67,14 @@ public class StockoutController {
     @GetMapping("/get/{id}")
     @ApiOperation("获取一条缺货记录")
     @Cacheable(key = "#id")
-    public AjaxResult getStockOut(@PathVariable(value = "id") String id){
+    public AjaxResult getStockOut(@PathVariable(value = "id") String id) {
         Stockout stockout = stockoutService.getById(id);
-        if(stockout == null){
+        if (stockout == null) {
             return AjaxResult.error("该商品不存在");
         }
         return AjaxResult.success(stockout);
     }
+
     @PutMapping("/edit")
     @ApiOperation("编辑缺货记录")
     @Caching(evict = {
@@ -170,6 +171,8 @@ public class StockoutController {
     @ApiOperation("更新缺货记录状态,feign远程调用专用，前端不要使用该接口,传递的参数id列表,实际到货数量")
     public Boolean updateLackRecordStatusToArrival(@RequestParam("number") Integer number, @RequestBody List<Long> ids) {
         //查询所有的缺货记录，然后按照需要的商品数量从小到大排序，如果入库数量足够的话就可以更新状态为已到货，否则重新置为已提交等待下一轮采购
+        //过滤调-1 id
+        ids = ids.stream().filter(id -> id != -1).collect(Collectors.toList());
         List<Stockout> stockouts = stockoutService.listByIds(ids);
         if (Objects.isNull(stockouts) || stockouts.size() == 0) return false;
         stockouts.sort(Comparator.comparingInt(Stockout::getNeedNumbers));

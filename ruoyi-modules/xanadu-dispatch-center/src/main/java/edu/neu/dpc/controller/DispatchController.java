@@ -279,12 +279,12 @@ public class DispatchController {
         Dispatch dispatch = dispatchService.getById(id);
         if (dispatch == null) return AjaxResult.error("调度单不存在");
         //检查状态是否为未提交
-        if (dispatch.getTaskId() != null&&dispatch.getStatus().equals(Dispatch.NOT_OUTPUT))
+        if (dispatch.getTaskId() != null && dispatch.getStatus().equals(Dispatch.NOT_OUTPUT))
             throw new ServiceException("该调度单已与任务单关联并且未出库，不允许删除");
 
         if (Dispatch.OUTPUTED.equals(dispatch.getStatus())) {
-            Boolean delete = centerWareClient.delete(dispatch.getId());
-            if (delete == null || !delete) throw new ServiceException("删除仓库出库调度记录失败");
+            boolean delete = dispatchService.removeById(dispatch);
+            if (!delete) throw new ServiceException("删除仓库出库调度记录失败");
             return AjaxResult.success("删除成功");
         }
         //如果是普通调度单并且未出库，说明需要回滚库存

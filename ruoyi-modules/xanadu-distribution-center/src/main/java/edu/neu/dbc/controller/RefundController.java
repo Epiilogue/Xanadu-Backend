@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -85,8 +86,8 @@ public class RefundController {
 
     @GetMapping("/searchForReturn")
     @ApiOperation("根据供应商 、进货日期段 、商品号查询需要进行退货安排的商品 ，查询结果包含以下信息： 查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数")
-    public AjaxResult listForReturn(@ApiParam("供应商ID") @RequestParam("supplierId") Long supplierId,
-                                    @ApiParam("商品ID") @RequestParam("productId") Long productId,
+    public AjaxResult listForReturn(@ApiParam("供应商ID") @RequestParam(value = "supplierId",required = false) Long supplierId,
+                                    @ApiParam("商品ID") @RequestParam(value = "productId",required = false) Long productId,
                                     @ApiParam("开始时间") @RequestParam("startTime") Date startTime,
                                     @ApiParam("结束时间") @RequestParam("endTime") Date endTime) {
         if (startTime == null || endTime == null) {
@@ -96,7 +97,7 @@ public class RefundController {
             return AjaxResult.error("开始时间不能大于结束时间");
         }
         if (supplierId == null && productId == null) {
-            return AjaxResult.error("供应商ID或商品ID为空");
+            return AjaxResult.error("供应商ID与商品ID都为空");
         }
 
         Product product;
@@ -106,15 +107,14 @@ public class RefundController {
 
         if (supplierId == null) {
             product = productService.getById(productId);
-            if (product == null) return AjaxResult.error("商品不存在");
+            if (product == null) return AjaxResult.success("商品不存在");
             //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
             queryWrapper = new QueryWrapper<PurchaseRecord>().
                     eq("product_id", productId).between("create_time", startTime, endTime).
-                    or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+                    or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).or(q->q.eq("status", PurchaseRecordStatusConstant.ARRIVED)));
         } else {
-            product = null;
             supplier = supplierService.getById(supplierId);
-            if (supplier == null) return AjaxResult.error("供应商不存在");
+            if (supplier == null) return AjaxResult.success("供应商不存在");
             if (productId == null)
                 //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
                 queryWrapper = new QueryWrapper<PurchaseRecord>().
@@ -132,14 +132,14 @@ public class RefundController {
         //查询采购单，采购单为已采购、已到货的都算入进货数量，以及查询当前的商品库存数
         //获取到所有的记录
         list = purchaseRecordService.list(queryWrapper);
-        if (list == null || list.size() == 0) return AjaxResult.error("查询结果为空");
+        if (list == null || list.size() == 0) return AjaxResult.success("查询结果为空");
         Map<Long, Refund> refundMap = new HashMap<>();
         list.forEach(p -> {
             //对于每一条购买记录，我们都需要将其映射未对应的商品refund记录列表
             Long searchId = p.getProductId();
             if (!refundMap.containsKey(searchId)) {
                 StorageVo storageVo = wareCenterStorageRecordClient.getStorage(productId);
-                if (storageVo == null) throw new ServiceException("查询商品库存失败");
+                if (storageVo == null) return;
                 Refund refund = new Refund(null, p.getSupplierId(), p.getProductId(), p.getProductName(), p.getProductPrice(), 0,
                         storageVo.getTotalNum(), storageVo.getReturnedNum(), null, false, null);
                 refundMap.put(searchId, refund);
