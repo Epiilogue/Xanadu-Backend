@@ -286,10 +286,9 @@ public class DispatchController {
         //重新回滚库存,删除掉之前的但是增加0
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(dispatch.getProductId(), dispatch.getProductNum(), 0);
         if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
-        if (!dispatchService.removeById(dispatch)) throw new ServiceException("更新调度单状态失败");
+        if (!dispatchService.removeById(dispatch)) throw new ServiceException("删除调度单失败");
         Boolean delete = centerWareClient.delete(dispatch.getId());
         if (delete == null || !delete) throw new ServiceException("删除仓库出库调度记录失败");
-
         return AjaxResult.success("删除成功");
     }
 

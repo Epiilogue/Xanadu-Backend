@@ -166,6 +166,12 @@ public class CenterOutputController {
                         if (!success) throw new ServiceException("出库失败，更新订单状态失败");
                     }
                 }
+                if (centerOutput.getOutputId() != null) {
+                    //更新远程调度单状态为已调度出库
+                    AjaxResult updateResult = taskClient.updateDispatchStatus(centerOutput.getOutputId());
+                    if (updateResult == null)
+                        throw new ServiceException("出库失败，更新调度单状态失败");
+                }
                 break;
         }
         //需要更新total_num

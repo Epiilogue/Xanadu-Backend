@@ -124,7 +124,6 @@ public class ProductController {
         ResponseEntity<String> getResult = restTemplate.getForEntity(url, String.class);
         Map map = null;
         try {
-//            map = JSON.parseObject(getResult.getBody(), Map.class);
             ObjectMapper objectMapper  = new ObjectMapper();
             map = objectMapper.readValue(getResult.getBody(), Map.class);
         } catch (Exception e) {
