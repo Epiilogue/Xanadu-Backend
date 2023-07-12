@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/ware/centerStorageRecord")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class CenterStorageRecordController {
 
     @Autowired

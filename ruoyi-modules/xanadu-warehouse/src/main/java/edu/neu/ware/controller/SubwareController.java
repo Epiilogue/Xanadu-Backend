@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @since 2023-06-02 03:42:21
  */
 @RestController
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 @RequestMapping("/ware/subware")
 @CacheConfig(cacheNames = "subware")
 public class SubwareController {
@@ -93,7 +93,7 @@ public class SubwareController {
     public AjaxResult infoByUser(@PathVariable("userId") Long userId) {
         Subware subware = subwareService.getByManagerId(userId);
         if (subware == null) {
-            throw new ServiceException("该用户尚未管理分库");
+            return AjaxResult.success("该用户没有管理分库");
         }
         return AjaxResult.success(subware);
     }

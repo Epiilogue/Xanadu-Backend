@@ -88,5 +88,11 @@ public class CenterStorageRecordServiceImpl extends ServiceImpl<CenterStorageRec
         this.removeById(centerStorageRecord.getId());
     }
 
+    @Override
+    public CenterStorageRecord getByProductId(Long productId) {
+        QueryWrapper<CenterStorageRecord> record = new QueryWrapper<CenterStorageRecord>().eq("product_id", productId);
+        return this.getOne(record);
+    }
+
 
 }

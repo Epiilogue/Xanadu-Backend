@@ -22,4 +22,6 @@ public interface CenterStorageRecordService extends IService<CenterStorageRecord
 
     void deleteProduct(Long productId);
 
+    CenterStorageRecord getByProductId(Long productId);
+
 }

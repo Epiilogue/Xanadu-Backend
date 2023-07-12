@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/cc/newOrder")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class NewOrderController {
 
 

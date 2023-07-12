@@ -11,7 +11,7 @@
  Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 10/07/2023 11:09:42
+ Date: 11/07/2023 14:46:40
 */
 
 SET NAMES utf8mb4;
@@ -47,6 +47,10 @@ CREATE TABLE `sub_daily_report`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of sub_daily_report
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for sub_delivery
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_delivery`;
@@ -59,6 +63,10 @@ CREATE TABLE `sub_delivery`  (
   `time` datetime NOT NULL COMMENT '日期(天)',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '投递费结算' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sub_delivery
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sub_finance
@@ -79,6 +87,10 @@ CREATE TABLE `sub_finance`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '商品收款' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of sub_finance
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for sub_master_sub
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_master_sub`;
@@ -87,6 +99,10 @@ CREATE TABLE `sub_master_sub`  (
   `sub_id` bigint(20) NULL DEFAULT NULL COMMENT '分站ID',
   PRIMARY KEY (`master_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sub_master_sub
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sub_pending_product
@@ -102,7 +118,13 @@ CREATE TABLE `sub_pending_product`  (
   `source` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '来源',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分库ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sub_pending_product
+-- ----------------------------
+INSERT INTO `sub_pending_product` VALUES (1, 1, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 405.01, 0, NULL, 1);
+INSERT INTO `sub_pending_product` VALUES (2, 1, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 800.02, 0, NULL, 1);
 
 -- ----------------------------
 -- Table structure for sub_receipt
@@ -130,7 +152,12 @@ CREATE TABLE `sub_receipt`  (
   `output_money` double(20, 2) NULL DEFAULT NULL COMMENT '总退款',
   `invoice_number` bigint(20) NULL DEFAULT NULL COMMENT '发票号',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '回执单' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '回执单' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sub_receipt
+-- ----------------------------
+INSERT INTO `sub_receipt` VALUES (2, 1, '徐高松', '15824035076', 7, '送货收款', '成功', 3, 9, '成功完成任务', '东北大学', '2023-07-09 00:00:00', '2023-07-10 23:04:03', 4, 2410.06, 4, 0, 2410.06, 0.00, NULL);
 
 -- ----------------------------
 -- Table structure for sub_receipt_product
@@ -149,6 +176,12 @@ CREATE TABLE `sub_receipt_product`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '订单商品的签收情况' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of sub_receipt_product
+-- ----------------------------
+INSERT INTO `sub_receipt_product` VALUES (2, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 405.01, 2, 2, 0, 810.02, 0.00);
+INSERT INTO `sub_receipt_product` VALUES (2, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 800.02, 2, 2, 0, 1600.04, 0.00);
+
+-- ----------------------------
 -- Table structure for sub_substation
 -- ----------------------------
 DROP TABLE IF EXISTS `sub_substation`;
@@ -159,7 +192,14 @@ CREATE TABLE `sub_substation`  (
   `phone` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL COMMENT '分站电话',
   `subware_id` bigint(20) NULL DEFAULT NULL COMMENT '分站对应的分仓库的ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci COMMENT = '分站' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci COMMENT = '分站' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sub_substation
+-- ----------------------------
+INSERT INTO `sub_substation` VALUES (6, '浙江站', '浙江省台州市临海市', '154587954', 2);
+INSERT INTO `sub_substation` VALUES (7, '海南站', '海南省海口市琼山区', '545634654', 1);
+INSERT INTO `sub_substation` VALUES (8, '河北站', '河北省石家庄市长安区范光胡同8号', '546245621', 3);
 
 -- ----------------------------
 -- Table structure for sub_task
@@ -185,7 +225,12 @@ CREATE TABLE `sub_task`  (
   `need_invoice` tinyint(1) NULL DEFAULT NULL COMMENT '是否需要发票',
   `receipt_id` bigint(20) NULL DEFAULT NULL COMMENT '回执ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '任务单' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '任务单' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sub_task
+-- ----------------------------
+INSERT INTO `sub_task` VALUES (1, 8, '徐高松', '15824035076', '东北大学', 20, 3, 4, 2410.06, '2023-07-10 00:00:00', '2023-07-10 22:06:34', '送货收款', '已完成', '[{\"number\":2,\"price\":405.01,\"productCategary\":\"电脑\",\"productId\":7,\"productName\":\"Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线\",\"refundAble\":true},{\"number\":2,\"price\":800.02,\"productCategary\":\"玩具\",\"productId\":9,\"productName\":\"LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物\",\"refundAble\":true}]', 7, 0, 1, 2);
 
 -- ----------------------------
 -- Table structure for sub_user_sub
@@ -195,5 +240,10 @@ CREATE TABLE `sub_user_sub`  (
   `user_id` bigint(20) NULL DEFAULT NULL COMMENT '快递员ID',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID'
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sub_user_sub
+-- ----------------------------
+INSERT INTO `sub_user_sub` VALUES (3, 7);
 
 SET FOREIGN_KEY_CHECKS = 1;

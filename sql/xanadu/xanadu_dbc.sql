@@ -11,7 +11,7 @@
  Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 10/07/2023 11:11:50
+ Date: 11/07/2023 14:46:28
 */
 
 SET NAMES utf8mb4;
@@ -30,6 +30,27 @@ CREATE TABLE `dbc_categary`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of dbc_categary
+-- ----------------------------
+INSERT INTO `dbc_categary` VALUES (1, 0, 1, '手机');
+INSERT INTO `dbc_categary` VALUES (2, 1, 2, '华为手机');
+INSERT INTO `dbc_categary` VALUES (3, 1, 2, '苹果手机');
+INSERT INTO `dbc_categary` VALUES (4, 0, 1, '电脑');
+INSERT INTO `dbc_categary` VALUES (5, 4, 2, '苹果电脑');
+INSERT INTO `dbc_categary` VALUES (6, 4, 2, '联想电脑');
+INSERT INTO `dbc_categary` VALUES (7, 0, 1, '衣服');
+INSERT INTO `dbc_categary` VALUES (8, 7, 2, '爱国李宁');
+INSERT INTO `dbc_categary` VALUES (9, 7, 2, '耐克');
+INSERT INTO `dbc_categary` VALUES (10, 0, 1, '玩具');
+INSERT INTO `dbc_categary` VALUES (11, 10, 2, '毛绒玩具');
+INSERT INTO `dbc_categary` VALUES (12, 10, 2, '积木玩具');
+INSERT INTO `dbc_categary` VALUES (13, 10, 2, '模型玩具');
+INSERT INTO `dbc_categary` VALUES (14, 1, 2, 'vivo手机');
+INSERT INTO `dbc_categary` VALUES (15, 4, 2, '戴尔电脑');
+INSERT INTO `dbc_categary` VALUES (16, 7, 2, '阿迪达斯');
+INSERT INTO `dbc_categary` VALUES (17, 7, 2, '安踏');
+
+-- ----------------------------
 -- Table structure for dbc_lack_record
 -- ----------------------------
 DROP TABLE IF EXISTS `dbc_lack_record`;
@@ -46,6 +67,10 @@ CREATE TABLE `dbc_lack_record`  (
   `source` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '缺货来源',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of dbc_lack_record
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for dbc_product
@@ -72,6 +97,18 @@ CREATE TABLE `dbc_product`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of dbc_product
+-- ----------------------------
+INSERT INTO `dbc_product` VALUES (1, 'dddd', 1, 2, 133.03, 111.00, 6, 0, 0, 'daaa', 0, '2023-07-08 11:21:14', '2023-07-08 11:21:14', 'https://xanadu-image.oss-cn-beijing.aliyuncs.com/2023-07-08/198ad0a2-6990-4668-863a-466b8dbaa83e_系统架构.jpg', 444, 5667);
+INSERT INTO `dbc_product` VALUES (2, 'sss', 1, 2, 13.04, 4.00, 6, 1, 1, 'sss', 0, '2023-07-08 14:39:06', '2023-07-08 14:39:06', 'https://xanadu-image.oss-cn-beijing.aliyuncs.com/2023-07-09/b339b8c5-598d-4a7e-876f-d11f36b19117_17.png', 4, 55);
+INSERT INTO `dbc_product` VALUES (3, 'eqeq', 1, 2, 3334.03, 2222.00, 8, 0, 0, 'dddd', 0, '2023-07-08 14:43:24', '2023-07-08 14:43:24', '', 444, 333);
+INSERT INTO `dbc_product` VALUES (4, 'aaaa', 1, 2, 123.04, 23.00, 10, 1, 0, 'dffff', 0, '2023-07-08 14:50:04', '2023-07-08 14:50:04', '', 434, 23233);
+INSERT INTO `dbc_product` VALUES (5, 'macbook', 4, 5, 2562.04, 1202.00, 11, 0, 1, '无', 1, '2023-07-08 15:38:52', '2023-07-09 22:45:49', '', 333, 2133);
+INSERT INTO `dbc_product` VALUES (6, '华为智选 鼎桥 TDTech M40 5G手机 8GB+256GB', 1, 2, 402.04, 2299.00, 5, 0, 0, '华为', 1, '2023-07-09 21:28:00', '2023-07-09 21:36:44', 'https://img3m1.ddimg.cn/94/14/11181060391-1_l_1.jpg', 500, 600);
+INSERT INTO `dbc_product` VALUES (7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 4, 6, 405.01, 393.00, 10, 1, 1, 'dsdd', 0, '2023-07-09 21:55:19', '2023-07-09 21:55:19', 'https://img3m7.ddimg.cn/41/32/11129923967-1_l_1.jpg', 222, 233);
+INSERT INTO `dbc_product` VALUES (9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 10, 12, 800.02, 169.00, 6, 1, 1, '乐高记录', 0, '2023-07-10 10:08:21', '2023-07-10 10:08:21', 'https://img3m4.ddimg.cn/62/4/11401678394-1_l_3.jpg', 200, 100);
+
+-- ----------------------------
 -- Table structure for dbc_purchase_record
 -- ----------------------------
 DROP TABLE IF EXISTS `dbc_purchase_record`;
@@ -89,7 +126,12 @@ CREATE TABLE `dbc_purchase_record`  (
   `total_cost` double(20, 2) NULL DEFAULT NULL COMMENT '进货单总消费',
   `lack_ids` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '缺货单的ID列表字符串',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of dbc_purchase_record
+-- ----------------------------
+INSERT INTO `dbc_purchase_record` VALUES (1, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 10, 222, '2023-07-10 13:07:02', '已到货', '2023-07-10 13:07:02', 0, 405.01, 89912.22, '-1,');
 
 -- ----------------------------
 -- Table structure for dbc_refund
@@ -111,6 +153,10 @@ CREATE TABLE `dbc_refund`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of dbc_refund
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for dbc_supplier
 -- ----------------------------
 DROP TABLE IF EXISTS `dbc_supplier`;
@@ -126,5 +172,15 @@ CREATE TABLE `dbc_supplier`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of dbc_supplier
+-- ----------------------------
+INSERT INTO `dbc_supplier` VALUES (4, 'Grace Rogers', '375 Huanqu South Street 2nd Alley', 'etevsPM9sg', '139-9671-9208', 'RnHcXgpix3', 'YJ9Cd223MF', '2019-07-30 00:09:58', '2022-12-30 02:28:19');
+INSERT INTO `dbc_supplier` VALUES (5, 'Chin Sum Wing', '463 Flatbush Ave', 'ZyzHvIrzXf', '718-769-2127', '3ewMhTOFnW', 'Jx8ZjPPLQb', '2011-03-30 12:57:34', '2013-02-10 10:29:11');
+INSERT INTO `dbc_supplier` VALUES (6, 'Wang Jiehong', '1-7-16 Saidaiji Akodacho', 'stvVfMzPlk', '80-1767-3292', 'k1PrlFhP01', 'Wk6b94Xkq6', '2007-06-26 22:31:39', '2011-10-08 00:51:26');
+INSERT INTO `dbc_supplier` VALUES (8, 'Yamashita Takuya', '192 Lower Temple Street', 'sV5DsE3Ij8', '(121) 381 7384', 'OBeYvrjYTU', 'k7IaHlJ4iP', '2022-11-13 13:52:40', '2007-08-24 18:02:47');
+INSERT INTO `dbc_supplier` VALUES (10, 'Kwong Sze Yu', '880 Wooster Street', 'vvAuuMmwsi', '212-496-8986', 'KvtylH5odj', 'valxxNA6kN', '2000-12-04 20:22:44', '2004-04-20 05:07:01');
+INSERT INTO `dbc_supplier` VALUES (11, 'Ichikawa Ryota', '873 Portland St', '0oKPMmwxhf', '5274 118890', '4jfxcbKLPj', '2qBMe79JxE', '2011-08-02 06:02:59', '2023-06-26 03:56:20');
 
 SET FOREIGN_KEY_CHECKS = 1;

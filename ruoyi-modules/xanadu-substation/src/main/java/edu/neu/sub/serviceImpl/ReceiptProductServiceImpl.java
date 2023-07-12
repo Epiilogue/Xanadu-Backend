@@ -23,7 +23,7 @@ import java.util.List;
  * @since 2023-06-16 03:27:59
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class ReceiptProductServiceImpl extends ServiceImpl<ReceiptProductMapper, ReceiptProduct> implements ReceiptProductService {
 
     @Autowired

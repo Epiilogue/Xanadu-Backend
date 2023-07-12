@@ -45,7 +45,6 @@ public class TaskController {
     CCOrderClient ccOrderClient;
 
 
-    @ApiOperation("根据子站ID获取所有的任务列表")
     @GetMapping("/list")
     public AjaxResult list() {
         List<Task> list = taskService.list();
@@ -70,6 +69,28 @@ public class TaskController {
         });
         return AjaxResult.success(taskVos);
     }
+
+    @GetMapping("/getTask/{taskId}")
+    public AjaxResult getTask(@PathVariable("taskId") Long taskId) {
+        Task task = taskService.getById(taskId);
+        Long orderId = task.getOrderId();
+        AjaxResult orderResult = ccOrderClient.getOrder(orderId);
+        //检查返回结果是否有错误,如果有错误则不生成vo
+        if (orderResult.isError()) {
+            return AjaxResult.error("查询任务失败");
+        }
+        //获取订单信息
+        Object data = orderResult.get("data");
+        //转为OrderVo
+        OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
+        //拼接为TaskVo
+        TaskVo taskVo = new TaskVo();
+        BeanUtils.copyProperties(orderVo, taskVo);
+        BeanUtils.copyProperties(task, taskVo);
+        return AjaxResult.success(taskVo);
+    }
+
+
 
     @GetMapping("/feign/getOrderIdByTaskId/{taskId}")
     @ApiOperation("根据任务id获取订单id")

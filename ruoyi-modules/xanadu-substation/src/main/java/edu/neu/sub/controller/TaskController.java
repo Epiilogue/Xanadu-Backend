@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/sub/task")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class TaskController {
 
     /**
