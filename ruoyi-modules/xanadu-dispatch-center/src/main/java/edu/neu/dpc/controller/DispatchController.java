@@ -80,7 +80,6 @@ public class DispatchController {
     }
 
 
-
     @GetMapping("/get/{id}")
     @ApiOperation("获取调拨单")
     @Cacheable(key = "#id")
@@ -109,7 +108,7 @@ public class DispatchController {
     @ApiOperation(value = "手动调度订单,传入参数为订单id和分站id", notes = "调度订单")
     public AjaxResult dispatchOrder(@ApiParam("订单ID") @PathVariable("id") Long id,
                                     @ApiParam("子站ID") @PathVariable("substationId") Long substationId,
-                                    @ApiParam("预计出库日期") @RequestParam("outDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date outDate) {
+                                    @ApiParam("预计出库日期") @RequestParam("outDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date outDate) {
         //拉取订单信息，生成任务单
         AjaxResult orderResult = ccOrderClient.getOrder(id);
         //检查返回结果是否有错误
@@ -119,13 +118,14 @@ public class DispatchController {
         //转为OrderVo
         OrderVo orderVo = JSON.parseObject(JSON.toJSONString(data), OrderVo.class);
         //检查订单状态是否合法
-        if (!Objects.equals(orderVo.getStatus(), OrderStatusConstant.CAN_BE_ALLOCATED)) return AjaxResult.error("当前订单状态不可调度");
+        if (!Objects.equals(orderVo.getStatus(), OrderStatusConstant.CAN_BE_ALLOCATED))
+            return AjaxResult.error("当前订单状态不可调度");
         String taskType = taskService.resolveTaskType(orderVo);
         if (taskType == null) throw new ServiceException("无法解析任务类型");
         AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
         if (remoteSubwareResult == null) throw new ServiceException("获取分库ID失败");
         if (remoteSubwareResult.isError()) return remoteSubwareResult;
-        Long subwareId = remoteSubwareResult.get("data") instanceof Integer? Long.parseLong(remoteSubwareResult.get("data").toString()) :(Long) remoteSubwareResult.get("data");
+        Long subwareId = remoteSubwareResult.get("data") instanceof Integer ? Long.parseLong(remoteSubwareResult.get("data").toString()) : (Long) remoteSubwareResult.get("data");
         //生成任务单
         Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.SCHEDULED
                 , false, taskType);
@@ -232,8 +232,8 @@ public class DispatchController {
     @PutMapping("/dispatchProduct")
     @ApiOperation(value = "调度商品,传入参数为商品id和分库id,要求出库日期", notes = "调度商品")
     public AjaxResult dispatchProduct(@ApiParam("分站ID") @RequestParam("subwareId") Long subwareId,
-                                      @ApiParam("要求出库日期") @RequestParam("requireDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date requireDate,
-                                      @ApiParam("商品信息")@RequestBody Product product) {
+                                      @ApiParam("要求出库日期") @RequestParam("requireDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date requireDate,
+                                      @ApiParam("商品信息") @RequestBody Product product) {
 
         //根据subwareId获取分站id,可能不存在
         Long substationId = substationClient.getSubstationBySubwareId(subwareId);
@@ -279,10 +279,15 @@ public class DispatchController {
         Dispatch dispatch = dispatchService.getById(id);
         if (dispatch == null) return AjaxResult.error("调度单不存在");
         //检查状态是否为未提交
-        if (dispatch.getTaskId() != null) throw new ServiceException("该调度单已与任务单关联，不允许删除");
-        if (!Objects.equals(dispatch.getStatus(), Dispatch.NOT_OUTPUT))
-            return AjaxResult.error("商品已出库，不允许删除记录");
-        dispatch.setStatus(Dispatch.NOT_OUTPUT);
+        if (dispatch.getTaskId() != null&&dispatch.getStatus().equals(Dispatch.NOT_OUTPUT))
+            throw new ServiceException("该调度单已与任务单关联并且未出库，不允许删除");
+
+        if (Dispatch.OUTPUTED.equals(dispatch.getStatus())) {
+            Boolean delete = centerWareClient.delete(dispatch.getId());
+            if (delete == null || !delete) throw new ServiceException("删除仓库出库调度记录失败");
+            return AjaxResult.success("删除成功");
+        }
+        //如果是普通调度单并且未出库，说明需要回滚库存
         //重新回滚库存,删除掉之前的但是增加0
         AjaxResult reDispatchSuccess = centerWareClient.reDispatch(dispatch.getProductId(), dispatch.getProductNum(), 0);
         if (reDispatchSuccess.isError()) throw new ServiceException("修改库存失败: " + reDispatchSuccess.getMsg());
@@ -311,7 +316,7 @@ public class DispatchController {
         if (remoteSubwareResult.isError()) throw new ServiceException("获取分库ID失败");
 //        Long subwareId = (Long) remoteSubwareResult.get("data");
         //传回的id可能为integer类型
-        Long subwareId = remoteSubwareResult.get("data") instanceof Integer? Long.parseLong(remoteSubwareResult.get("data").toString()) :(Long) remoteSubwareResult.get("data");
+        Long subwareId = remoteSubwareResult.get("data") instanceof Integer ? Long.parseLong(remoteSubwareResult.get("data").toString()) : (Long) remoteSubwareResult.get("data");
         dispatch.setSubwareId(subwareId);
 
         //若是需要修改调度的数量，需要将已分配减去原来的，可分配添加上原来的，已分配添加新增的，可分配减去新增的
