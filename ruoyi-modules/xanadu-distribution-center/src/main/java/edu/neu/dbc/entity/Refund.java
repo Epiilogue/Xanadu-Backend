@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -27,6 +28,7 @@ import lombok.Setter;
 @TableName("dbc_refund")
 @ApiModel(value = "Refund对象", description = "")
 @AllArgsConstructor
+@NoArgsConstructor
 public class Refund implements Serializable {
 
     private static final long serialVersionUID = 1L;
