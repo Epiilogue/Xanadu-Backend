@@ -66,10 +66,8 @@ public class SubInputController {
     @GetMapping("/listDispatch/{subwareId}")
     @ApiOperation("查询子库的所有调拨入库的单子")
     public AjaxResult listDispatch(@PathVariable("subwareId") Long subwareId) {
-        QueryWrapper<CenterOutput> queryWrapper = new QueryWrapper<CenterOutput>().eq("subware_id", subwareId).eq("status", InputOutputStatus.OUTPUT)
-                .eq("output_type", InputOutputType.DISPATCH_OUT);
-        //拿到了列表后，需要回显
-        return AjaxResult.success(centerOutputService.list(queryWrapper));
+        QueryWrapper<SubInput> queryWrapper = new QueryWrapper<SubInput>().eq("subware_id", subwareId).eq("input_type", InputOutputType.DISPATCH);
+        return AjaxResult.success(subInputService.list(queryWrapper));
     }
 
 
