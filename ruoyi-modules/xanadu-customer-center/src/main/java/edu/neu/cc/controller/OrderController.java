@@ -119,7 +119,7 @@ public class OrderController {
     @Cacheable(key = "#orderId")
     public AjaxResult getOrderDetailByOrderId(
             @ApiParam(name = "orderId", value = "订单ID") @PathVariable("orderId") Long orderId,
-            @ApiParam(name = "orderType", value = "订单类型") @PathVariable("orderType") String orderType) {
+            @ApiParam(name = "orderType", value = "订单类型") @PathVariable(value = "orderType",required = false) String orderType) {
         //根据不同的订单信息回显不同的数据
         AjaxResult ajaxResult = new AjaxResult(HttpStatus.SUCCESS, "查询成功");
 
