@@ -61,8 +61,8 @@ public class InvoiceController {
     @GetMapping("/listByReceipt")
     @ApiOperation("筛选未领用和已登记的发票")
     @CrossOrigin
-    public AjaxResult listByReceipt() {
-        QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("substation_id", "暂无信息")
+    public AjaxResult listByReceipt(@RequestParam(value = "substationId") String substationId) {
+        QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("substation_id", substationId)
                 .eq("registration","已登记");
         List<Invoice> invoiceList =  invoiceService.list(queryWrapper);
         return AjaxResult.success(invoiceList);
