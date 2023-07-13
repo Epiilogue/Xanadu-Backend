@@ -112,7 +112,7 @@ public class RefundController {
             //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
             queryWrapper = new QueryWrapper<PurchaseRecord>().
                     eq("product_id", productId).between("create_time", startTime, endTime).
-                    or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).or(q -> q.eq("status", PurchaseRecordStatusConstant.ARRIVED)));
+                    and(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).or(q -> q.eq("status", PurchaseRecordStatusConstant.ARRIVED)));
         } else {
             supplier = supplierService.getById(supplierId);
             if (supplier == null) return AjaxResult.success("供应商不存在");
@@ -125,7 +125,7 @@ public class RefundController {
                 //1.查询采购单，采购单为已采购、已到货的都算入进货数量，需要注意时间范围，商品ID，供货商ID
                 queryWrapper = new QueryWrapper<PurchaseRecord>().
                         eq("supplier_id", supplierId).between("create_time", startTime, endTime).eq("product_id", productId).
-                        or(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).eq("status", PurchaseRecordStatusConstant.ARRIVED));
+                        and(i -> i.eq("status", PurchaseRecordStatusConstant.PURCHASED).or(q -> q.eq("status", PurchaseRecordStatusConstant.ARRIVED)));
 
 
         }
