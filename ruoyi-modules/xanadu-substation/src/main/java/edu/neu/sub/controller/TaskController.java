@@ -140,7 +140,9 @@ public class TaskController {
     @ApiOperation(value = "获取子站所有正在处理的任务记录,对应正在处理的任务页面")
     public AjaxResult listHanding(@PathVariable("subId") Long subId) {
         //此时返回的是本站所有已分配的记录等，支持删除记录
-        return AjaxResult.success(taskService.list());
+        QueryWrapper<Task> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("sub_id",subId);
+        return AjaxResult.success(taskService.list(queryWrapper));
     }
 
     @DeleteMapping("/delete/{taskId}")

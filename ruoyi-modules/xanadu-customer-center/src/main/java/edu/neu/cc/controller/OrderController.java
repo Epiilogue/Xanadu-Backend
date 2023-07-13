@@ -268,6 +268,7 @@ public class OrderController {
                 NewOrder prevOrder = newOrderService.getById(newOrderId);
                 if (prevOrder == null) return AjaxResult.error("原始订单不存在");
                 BeanUtils.copyProperties(prevOrder, orderVo);
+                orderVo.setId(id);
                 orderVo.setReceiverName(prevOrder.getReceiverName());
                 List<Product> refundProducts = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(refundProducts);
