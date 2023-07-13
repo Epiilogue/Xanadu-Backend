@@ -145,7 +145,7 @@ public class InvoiceController {
     @CrossOrigin
     public AjaxResult getTotalId(@PathVariable String subId) {
         QueryWrapper<Invoice> queryWrapper = new QueryWrapper<Invoice>().eq("substation_id", subId);
-        Invoice invoice = invoiceService.getOne(queryWrapper);
+        Invoice invoice = invoiceService.getOne(queryWrapper,false);
         return AjaxResult.success(invoice.getId());
     }
 
