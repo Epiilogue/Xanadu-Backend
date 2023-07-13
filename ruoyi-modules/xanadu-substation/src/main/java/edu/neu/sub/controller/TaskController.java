@@ -386,18 +386,20 @@ public class TaskController {
         if (task == null) return AjaxResult.error("回执任务不存在");
         Long subwareId = substationService.getById(task.getSubId()).getSubwareId();
 
+        if (!TaskStatus.DELIVERED.equals(task.getTaskStatus()))
+            return AjaxResult.error("当前任务状态无法填写回执单");
         switch (task.getTaskType()) {
             case TaskType.DELIVERY:
             case TaskType.PAYMENT_DELIVERY:
             case TaskType.EXCHANGE:
-                //检查任务状态是不是已领货
-                if (!TaskStatus.RECEIVED.equals(task.getTaskStatus()))
-                    return AjaxResult.error("当前任务状态无法填写回执单");
-                break;
+//                //检查任务状态是不是已领货
+//                if (!TaskStatus.RECEIVED.equals(task.getTaskStatus()))
+//                    return AjaxResult.error("当前任务状态无法填写回执单");
+//                break;
             case TaskType.RETURN:
-                //检查任务状态是不是已分配
-                if (!TaskStatus.ASSIGNED.equals(task.getTaskStatus()))
-                    return AjaxResult.error("当前任务状态无法填写回执单");
+//                //检查任务状态是不是已分配
+////                if (!TaskStatus.ASSIGNED.equals(task.getTaskStatus()))
+//                    return AjaxResult.error("当前任务状态无法填写回执单");
                 break;
             default:
                 return AjaxResult.error("当前任务类型无法填写回执单");
@@ -455,7 +457,7 @@ public class TaskController {
         if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
         //5.更新远程状态
         String status = convertStatus(receipt.getState());
-        AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), receipt.getState());
+        AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), status);
         if (ajaxResult == null || ajaxResult.isError()) throw new ServiceException("更新远程任务状态失败");
         return AjaxResult.success("回执单填写成功");
     }
