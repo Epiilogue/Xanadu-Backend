@@ -16,6 +16,7 @@ import edu.neu.ware.vo.CenterInputVo;
 import edu.neu.ware.vo.PendingProductVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/ware/subOutput")
+@Transactional(rollbackFor = Exception.class)
 public class SubOutputController {
 
     @Autowired
