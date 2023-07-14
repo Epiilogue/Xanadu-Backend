@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -42,6 +43,7 @@ import static com.ruoyi.common.core.utils.PageUtils.startPage;
  */
 @RestController
 @RequestMapping("/dbc/refund")
+@Transactional(rollbackFor = Exception.class)
 public class RefundController {
 
 

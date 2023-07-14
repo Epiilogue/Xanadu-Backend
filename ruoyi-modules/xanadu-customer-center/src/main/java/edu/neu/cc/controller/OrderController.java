@@ -43,6 +43,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/cc/order")
 @CacheConfig(cacheNames = "order")
+@Transactional(rollbackFor = Exception.class)
 public class OrderController {
 
     @Autowired

@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/cc/stockout")
 @CacheConfig(cacheNames = "stockout")
+@Transactional(rollbackFor = Exception.class)
 public class StockoutController {
 
     @Autowired

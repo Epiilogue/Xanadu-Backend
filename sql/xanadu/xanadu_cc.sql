@@ -11,7 +11,7 @@
  Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 11/07/2023 14:46:13
+ Date: 14/07/2023 09:30:41
 */
 
 SET NAMES utf8mb4;
@@ -107,17 +107,21 @@ CREATE TABLE `cc_new_order`  (
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   `new_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '订购类型（先付款后送货，先送货后付款）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of cc_new_order
 -- ----------------------------
 INSERT INTO `cc_new_order` VALUES (3, '15824035076', '', '2023-07-08', 1, '东北大学', '徐高松', 1, 2, '货到付款');
-INSERT INTO `cc_new_order` VALUES (5, '15824035076', '', '2023-07-13', 0, '东北大学', '徐高松', 0, NULL, '货到付款');
-INSERT INTO `cc_new_order` VALUES (6, '15824035076', '', '2023-06-27', 0, '东北大学', '徐高松', 0, NULL, '货到付款');
-INSERT INTO `cc_new_order` VALUES (18, '15824035076', '', '2023-07-06', 0, '东北大学', '徐高松', 0, NULL, '货到付款');
+INSERT INTO `cc_new_order` VALUES (5, '15824035076', '', '2023-07-13', 0, '东北大学', '徐高松', 0, 7, '货到付款');
+INSERT INTO `cc_new_order` VALUES (6, '15824035076', '', '2023-06-27', 0, '东北大学', '徐高松', 0, 6, '货到付款');
+INSERT INTO `cc_new_order` VALUES (18, '15824035076', '', '2023-07-06', 0, '东北大学', '徐高松', 0, 8, '货到付款');
 INSERT INTO `cc_new_order` VALUES (19, '15824035076', '', '2023-07-09', 0, '东北大学', '徐高松', 0, 6, '货到付款');
 INSERT INTO `cc_new_order` VALUES (20, '15824035076', '电脑玩具', '2023-07-08', 1, '东北大学', '徐高松', 0, 7, '货到付款');
+INSERT INTO `cc_new_order` VALUES (21, '15824035076', '', '2023-07-13', 1, '东北大学', '徐高松', 0, 7, '货到付款');
+INSERT INTO `cc_new_order` VALUES (22, '15824035076', '', '2023-07-12', 1, '东北大学', '徐高松', 0, 6, '货到付款');
+INSERT INTO `cc_new_order` VALUES (23, '15824035076', '', '2023-07-14', 1, '东北大学', '徐高松', 0, 6, '货到付款');
+INSERT INTO `cc_new_order` VALUES (25, '15824035076', '易碎物品', '2023-07-21', 1, '东北大学', '徐高松', 0, 6, '付款送货');
 
 -- ----------------------------
 -- Table structure for cc_operation
@@ -133,7 +137,7 @@ CREATE TABLE `cc_operation`  (
   `numbers` int(10) NULL DEFAULT NULL COMMENT '操作商品数量',
   `total_amount` double(20, 2) NULL DEFAULT NULL COMMENT '操作金额',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 69 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of cc_operation
@@ -151,6 +155,50 @@ INSERT INTO `cc_operation` VALUES (21, '2023-07-11 09:31:52', 1, 8, 5, '撤销',
 INSERT INTO `cc_operation` VALUES (22, '2023-07-11 09:31:52', 1, 8, 6, '撤销', 3, 159.00);
 INSERT INTO `cc_operation` VALUES (23, '2023-07-11 09:31:52', 1, 8, 19, '撤销', 6, 438.21);
 INSERT INTO `cc_operation` VALUES (24, '2023-07-11 09:31:52', 1, 8, 20, '新订', 4, 2410.06);
+INSERT INTO `cc_operation` VALUES (25, '2023-07-11 14:57:06', 1, 8, 21, '新订', 13, 4449.19);
+INSERT INTO `cc_operation` VALUES (26, '2023-07-11 15:15:36', 1, 8, 22, '新订', 550, 420260.50);
+INSERT INTO `cc_operation` VALUES (27, '2023-07-11 17:13:57', 1, 8, 21, '新订', 6, 3615.09);
+INSERT INTO `cc_operation` VALUES (28, '2023-07-11 20:11:47', 1, 8, 21, '新订', 6, 3615.09);
+INSERT INTO `cc_operation` VALUES (29, '2023-07-11 20:11:47', 1, 8, 22, '新订', 550, 420260.50);
+INSERT INTO `cc_operation` VALUES (30, '2023-07-11 20:11:47', 1, 8, 21, '新订', 13, 4449.19);
+INSERT INTO `cc_operation` VALUES (31, '2023-07-11 22:28:34', 1, 8, 22, '新订', 6, 3615.09);
+INSERT INTO `cc_operation` VALUES (32, '2023-07-12 09:45:51', 1, 8, 22, '新订', 6, 3615.09);
+INSERT INTO `cc_operation` VALUES (33, '2023-07-13 10:38:18', 1, 14, 21, '新订', 30, 5510.80);
+INSERT INTO `cc_operation` VALUES (34, '2023-07-13 10:41:42', 1, 14, 21, '新订', 30, 5510.80);
+INSERT INTO `cc_operation` VALUES (35, '2023-07-13 10:42:52', 1, 14, 22, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (36, '2023-07-13 10:45:09', 1, 14, 23, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (37, '2023-07-13 10:49:16', 1, 14, 24, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (38, '2023-07-13 10:49:25', 1, 14, 25, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (39, '2023-07-13 10:50:07', 1, 14, 26, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (40, '2023-07-13 10:50:18', 1, 14, 27, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (41, '2023-07-13 10:55:14', 1, 14, 28, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (42, '2023-07-13 10:57:44', 1, 14, 29, '新订', 500, 66515.00);
+INSERT INTO `cc_operation` VALUES (43, '2023-07-13 10:59:26', 1, 14, 30, '新订', 20, 1360.80);
+INSERT INTO `cc_operation` VALUES (44, '2023-07-13 11:09:31', 1, 14, 31, '新订', 20, 1360.80);
+INSERT INTO `cc_operation` VALUES (45, '2023-07-13 13:02:33', 1, 14, 26, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (46, '2023-07-13 13:02:33', 1, 14, 23, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (47, '2023-07-13 13:02:33', 1, 14, 24, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (48, '2023-07-13 13:02:33', 1, 14, 27, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (49, '2023-07-13 13:02:33', 1, 14, 25, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (50, '2023-07-13 13:02:33', 1, 14, 29, '新订', 500, 66515.00);
+INSERT INTO `cc_operation` VALUES (51, '2023-07-13 13:02:33', 1, 14, 22, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (52, '2023-07-13 13:02:33', 1, 14, 31, '新订', 20, 1360.80);
+INSERT INTO `cc_operation` VALUES (53, '2023-07-13 13:02:33', 1, 14, 28, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (54, '2023-07-13 13:02:33', 1, 14, 30, '新订', 20, 1360.80);
+INSERT INTO `cc_operation` VALUES (55, '2023-07-13 19:39:57', 1, 14, 29, '新订', 500, 66515.00);
+INSERT INTO `cc_operation` VALUES (56, '2023-07-13 19:39:57', 1, 14, 23, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (57, '2023-07-13 19:39:57', 1, 14, 28, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (58, '2023-07-13 19:39:57', 1, 14, 26, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (59, '2023-07-13 19:39:57', 1, 14, 25, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (60, '2023-07-13 19:39:57', 1, 14, 27, '新订', 30, 42670.80);
+INSERT INTO `cc_operation` VALUES (61, '2023-07-13 19:39:57', 1, 14, 22, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (62, '2023-07-13 19:39:57', 1, 14, 31, '新订', 20, 1360.80);
+INSERT INTO `cc_operation` VALUES (63, '2023-07-13 19:39:57', 1, 14, 21, '新订', 30, 5510.80);
+INSERT INTO `cc_operation` VALUES (64, '2023-07-13 19:39:57', 1, 14, 30, '新订', 20, 1360.80);
+INSERT INTO `cc_operation` VALUES (65, '2023-07-13 19:39:57', 1, 14, 24, '新订', 30, 37520.80);
+INSERT INTO `cc_operation` VALUES (66, '2023-07-13 20:44:40', 1, 8, 23, '新订', 20, 8070.50);
+INSERT INTO `cc_operation` VALUES (67, '2023-07-13 20:46:16', 1, 8, 24, '退货', 2, 1205.03);
+INSERT INTO `cc_operation` VALUES (68, '2023-07-13 20:52:52', 1, 8, 25, '新订', 2, 1205.03);
 
 -- ----------------------------
 -- Table structure for cc_order
@@ -164,21 +212,26 @@ CREATE TABLE `cc_order`  (
   `deadline` date NULL DEFAULT NULL COMMENT '要求完成日期',
   `numbers` int(20) NULL DEFAULT NULL COMMENT '涉及的商品数量',
   `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '订单状态',
-  `total_amout` double(20, 2) NULL DEFAULT NULL COMMENT '涉及的金额',
+  `total_amount` double(20, 2) NULL DEFAULT NULL COMMENT '涉及的金额',
   `user_id` bigint(20) NULL DEFAULT NULL COMMENT '操作员工ID',
   `deleted` tinyint(1) NULL DEFAULT 0 COMMENT '删除标记',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of cc_order
 -- ----------------------------
-INSERT INTO `cc_order` VALUES (5, 8, '2023-07-09 16:22:47', '新订', '2023-07-14', 5, '缺货', 292.00, 1, 0);
-INSERT INTO `cc_order` VALUES (6, 8, '2023-07-09 16:41:08', '新订', '2023-06-28', 3, '缺货', 159.00, 1, 0);
+INSERT INTO `cc_order` VALUES (5, 8, '2023-07-09 16:22:47', '新订', '2023-07-14', 5, '已调度', 292.00, 1, 0);
+INSERT INTO `cc_order` VALUES (6, 8, '2023-07-09 16:41:08', '新订', '2023-06-28', 3, '已调度', 159.00, 1, 0);
 INSERT INTO `cc_order` VALUES (17, 8, '2023-07-09 17:09:29', '退订', NULL, 2, '无效', 146.00, 1, 0);
-INSERT INTO `cc_order` VALUES (18, 8, '2023-07-10 13:28:43', '新订', '2023-07-08', 6, '缺货', 3615.09, 1, 0);
+INSERT INTO `cc_order` VALUES (18, 8, '2023-07-10 13:28:43', '新订', '2023-07-08', 6, '已调度', 3615.09, 1, 0);
 INSERT INTO `cc_order` VALUES (19, 8, '2023-07-10 13:51:24', '新订', '2023-07-10', 6, '已调度', 438.21, 1, 0);
-INSERT INTO `cc_order` VALUES (20, 8, '2023-07-10 19:49:09', '新订', '2023-07-10', 4, '已完成', 2410.06, 1, 0);
+INSERT INTO `cc_order` VALUES (20, 8, '2023-07-10 19:49:09', '新订', '2023-07-10', 4, '已分配', 2410.06, 1, 0);
+INSERT INTO `cc_order` VALUES (21, 8, '2023-07-11 17:13:56', '新订', '2023-07-14', 6, '部分完成', 3615.09, 1, 0);
+INSERT INTO `cc_order` VALUES (22, 8, '2023-07-11 22:28:34', '新订', '2023-07-13', 6, '配送站到货', 3615.09, 1, 0);
+INSERT INTO `cc_order` VALUES (23, 8, '2023-07-13 20:44:40', '新订', '2023-07-15', 20, '已调度', 8070.50, 1, 0);
+INSERT INTO `cc_order` VALUES (24, 8, '2023-07-10 19:49:09', '退货', '2023-07-10', 2, '可分配', 1205.03, 1, 0);
+INSERT INTO `cc_order` VALUES (25, 8, '2023-07-13 20:52:52', '新订', '2023-07-29', 2, '已调度', 1205.03, 1, 0);
 
 -- ----------------------------
 -- Table structure for cc_product
@@ -196,7 +249,7 @@ CREATE TABLE `cc_product`  (
   `refund_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以退货',
   `change_able` tinyint(1) NULL DEFAULT NULL COMMENT '是否可以换货',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 39 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 49 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of cc_product
@@ -215,6 +268,16 @@ INSERT INTO `cc_product` VALUES (35, 19, 1, 'dddd', 3, 133.03, '手机', NULL, 0
 INSERT INTO `cc_product` VALUES (36, 19, 2, 'sss', 3, 13.04, '手机', NULL, 1, 1);
 INSERT INTO `cc_product` VALUES (37, 20, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 2, 405.01, '电脑', NULL, 1, 1);
 INSERT INTO `cc_product` VALUES (38, 20, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 2, 800.02, '玩具', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (39, 21, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 3, 405.01, '电脑', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (40, 21, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 3, 800.02, '玩具', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (41, 22, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 3, 405.01, '电脑', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (42, 22, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 3, 800.02, '玩具', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (43, 23, 6, '华为智选 鼎桥 TDTech M40 5G手机 8GB+256GB', 10, 402.04, '手机', NULL, 0, 0);
+INSERT INTO `cc_product` VALUES (44, 23, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 10, 405.01, '电脑', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (45, 24, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 1, 405.01, NULL, NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (46, 24, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 1, 800.02, NULL, NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (47, 25, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 1, 405.01, '电脑', NULL, 1, 1);
+INSERT INTO `cc_product` VALUES (48, 25, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 1, 800.02, '玩具', NULL, 1, 1);
 
 -- ----------------------------
 -- Table structure for cc_refund
@@ -228,12 +291,13 @@ CREATE TABLE `cc_refund`  (
   `deleted` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '是否删除',
   `substation_id` bigint(20) NULL DEFAULT NULL COMMENT '子站ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of cc_refund
 -- ----------------------------
 INSERT INTO `cc_refund` VALUES (17, 6, '', '退订', NULL, NULL);
+INSERT INTO `cc_refund` VALUES (24, 20, '', '退货', NULL, 7);
 
 -- ----------------------------
 -- Table structure for cc_stockout
@@ -254,17 +318,17 @@ CREATE TABLE `cc_stockout`  (
 -- ----------------------------
 -- Records of cc_stockout
 -- ----------------------------
-INSERT INTO `cc_stockout` VALUES (1, 3, 5, 2, '2023-07-08 17:05:01', 1, '已提交', 0);
+INSERT INTO `cc_stockout` VALUES (1, 3, 5, 2, '2023-07-08 17:05:01', 1, '已到货', 0);
 INSERT INTO `cc_stockout` VALUES (2, 3, 4, 1, '2023-07-08 17:05:01', 1, '未提交', 1);
 INSERT INTO `cc_stockout` VALUES (3, 4, 1, 2, '2023-07-09 15:44:32', 1, '未提交', 1);
 INSERT INTO `cc_stockout` VALUES (4, 4, 2, 2, '2023-07-09 15:44:32', 1, '未提交', 1);
-INSERT INTO `cc_stockout` VALUES (5, 5, 1, 2, '2023-07-09 16:22:47', 1, '已提交', 0);
-INSERT INTO `cc_stockout` VALUES (6, 5, 2, 2, '2023-07-09 16:22:47', 1, '已提交', 0);
-INSERT INTO `cc_stockout` VALUES (7, 6, 1, 2, '2023-07-09 16:41:08', 1, '已提交', 0);
-INSERT INTO `cc_stockout` VALUES (8, 6, 2, 3, '2023-07-09 16:41:08', 1, '已提交', 0);
+INSERT INTO `cc_stockout` VALUES (5, 5, 1, 2, '2023-07-09 16:22:47', 1, '已到货', 0);
+INSERT INTO `cc_stockout` VALUES (6, 5, 2, 2, '2023-07-09 16:22:47', 1, '已到货', 0);
+INSERT INTO `cc_stockout` VALUES (7, 6, 1, 2, '2023-07-09 16:41:08', 1, '已到货', 0);
+INSERT INTO `cc_stockout` VALUES (8, 6, 2, 3, '2023-07-09 16:41:08', 1, '已到货', 0);
 INSERT INTO `cc_stockout` VALUES (9, 6, 1, 1, '2023-07-09 17:09:30', NULL, '未提交', 1);
 INSERT INTO `cc_stockout` VALUES (10, 6, 2, 2, '2023-07-09 17:09:30', NULL, '未提交', 1);
-INSERT INTO `cc_stockout` VALUES (11, 18, 7, 3, '2023-07-10 13:28:44', 1, '未提交', 0);
-INSERT INTO `cc_stockout` VALUES (12, 18, 9, 3, '2023-07-10 13:28:44', 1, '未提交', 0);
+INSERT INTO `cc_stockout` VALUES (11, 18, 7, 3, '2023-07-10 13:28:44', 1, '已到货', 0);
+INSERT INTO `cc_stockout` VALUES (12, 18, 9, 3, '2023-07-10 13:28:44', 1, '已到货', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
