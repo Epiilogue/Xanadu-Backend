@@ -163,16 +163,14 @@ public class BusinessController {
      * 客户满意度分析，需要给出平均分，以及每个分段的数量0-10，输入信息分站ID，时间段（不输默认全部）
      */
     @GetMapping("/getCustomerSatisfactionAnalysis/{substationId}")
-    public AjaxResult getCustomerSatisfactionAnalysis(@PathVariable("substationId") Long substationId,
-                                                      @RequestParam("startTime") Date startTime,
-                                                      @RequestParam("endTime") Date endTime) {
+    public AjaxResult getCustomerSatisfactionAnalysis(@RequestParam("startTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
+                                                      @RequestParam("endTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
         //检查时间是否合法
         if (startTime == null || endTime == null) return AjaxResult.error("时间不能为空");
         if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
-        if (substationId == null) return AjaxResult.error("分站ID不能为空");
-        QueryWrapper<Receipt> queryWrapper = new QueryWrapper<Receipt>().eq("sub_id", substationId).between("create_time", startTime, endTime);
+        QueryWrapper<Receipt> queryWrapper = new QueryWrapper<Receipt>().between("create_time", startTime, endTime);
         List<Receipt> list = receiptService.list(queryWrapper);
-        if (list == null || list.size() == 0) return AjaxResult.error("该分站在该时间段内没有完成任务");
+        if (list == null || list.size() == 0) return AjaxResult.error("该时间段内没有任务完成");
         int[] arr = new int[11];
         //1.拿到所有的满意度，然后添加到map中
         list.stream().map(Receipt::getFeedback).forEach(satisfaction -> {
