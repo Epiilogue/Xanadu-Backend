@@ -70,6 +70,15 @@ public class SubInputController {
         return AjaxResult.success(subInputService.list(queryWrapper));
     }
 
+    @GetMapping("/listToDispatch/{subwareId}")
+    @ApiOperation("查询子库的所有等待调拨入库的单子")
+    public AjaxResult listToDispatch(@PathVariable("subwareId") Long subwareId) {
+        QueryWrapper<CenterOutput> queryWrapper = new QueryWrapper<CenterOutput>().eq("subware_id", subwareId).eq("status", InputOutputStatus.OUTPUT)
+                .eq("output_type", InputOutputType.DISPATCH_OUT);
+        //拿到了列表后，需要回显
+        return AjaxResult.success(centerOutputService.list(queryWrapper));
+    }
+
 
     @GetMapping("/listRefund/{subwareId}")
     @ApiOperation("查询子库的所有重新入库的单子")

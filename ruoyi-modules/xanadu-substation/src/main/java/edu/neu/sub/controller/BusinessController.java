@@ -162,7 +162,7 @@ public class BusinessController {
     /**
      * 客户满意度分析，需要给出平均分，以及每个分段的数量0-10，输入信息分站ID，时间段（不输默认全部）
      */
-    @GetMapping("/getCustomerSatisfactionAnalysis/{substationId}")
+    @GetMapping("/getCustomerSatisfactionAnalysis")
     public AjaxResult getCustomerSatisfactionAnalysis(@RequestParam("startTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
                                                       @RequestParam("endTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
         //检查时间是否合法
