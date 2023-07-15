@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -82,6 +83,7 @@ public class PendingProductServiceImpl extends ServiceImpl<PendingProductMapper,
             default:
                 return false;
         }
-        return this.saveBatch(pendingProducts);
+        //只保存待处理数量不为0的商品
+        return this.saveBatch(pendingProducts.stream().filter(pending->pending.getDealNumber()!=0).collect(Collectors.toList()));
     }
 }

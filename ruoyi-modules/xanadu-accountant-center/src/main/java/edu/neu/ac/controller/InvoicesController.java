@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import edu.neu.ac.entity.Invoices;
 import edu.neu.ac.service.InvoicesService;
 import edu.neu.base.constant.cc.TaskType;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.ruoyi.common.core.utils.bean.BeanUtils;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -16,8 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ruoyi.common.core.utils.PageUtils.startPage;
 import org.springframework.web.bind.annotation.RestController;
@@ -88,7 +93,6 @@ public class InvoicesController {
     @ApiOperation(value = "修改发票", notes = "修改发票")
     @CrossOrigin
     public AjaxResult updateInvoice(@RequestBody Invoices invoices) {
-
         boolean res = invoicesService.updateById(invoices);
         if (!res) {
             return AjaxResult.error("修改发票失败");
@@ -106,6 +110,17 @@ public class InvoicesController {
         Invoices invoices = invoicesService.getById(Id);
         invoices.setPrintTime(da);
         return AjaxResult.success("打印成功", invoices);
+    }
+
+    @PostMapping("/feign/check")
+    @ApiOperation("获取已经领用过发票的订单列表,feign调用")
+    @ApiParam(name = "orderIds", value = "需要判断是否领用过发票的订单id列表")
+    public List<Long> check(@RequestBody List<Long> orderIds) {
+        QueryWrapper<Invoices> queryWrapper=new QueryWrapper<>();
+        queryWrapper.in("order_id",orderIds);
+        List<Invoices> invoices=invoicesService.list(queryWrapper);
+        if(invoices.size()==0) return new ArrayList<>();
+        return invoicesService.list(queryWrapper).stream().map(invoice->Long.valueOf(invoice.getOrderId())).collect(Collectors.toList());
     }
 
 

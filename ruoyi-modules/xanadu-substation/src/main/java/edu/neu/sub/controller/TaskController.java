@@ -15,6 +15,7 @@ import edu.neu.sub.entity.Receipt;
 import edu.neu.sub.entity.ReceiptProduct;
 import edu.neu.sub.entity.Substation;
 import edu.neu.sub.entity.Task;
+import edu.neu.sub.feign.InvoicesClient;
 import edu.neu.sub.feign.SubwareClient;
 import edu.neu.sub.feign.TaskClient;
 import edu.neu.sub.service.*;
@@ -70,7 +71,8 @@ public class TaskController {
     @Autowired
     RemoteUserService remoteUserService;
 
-
+    @Autowired
+    InvoicesClient invoicesClient;
 
     @GetMapping("/listByUserId/{userId}")
     @ApiOperation(value = "获取子站所有任务记录,对应所有任务页面")
@@ -143,6 +145,20 @@ public class TaskController {
         QueryWrapper<Task> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("sub_id",subId);
         return AjaxResult.success(taskService.list(queryWrapper));
+    }
+
+    @GetMapping("/listInvoiceNeed/{subId}")
+    @ApiOperation(value = "获取子站所有需要发票且未领用发票的任务记录")
+    public AjaxResult listInvoiceNeed(@PathVariable("subId") Long subId) {
+        //查询本站所有已分配且需要发票的任务
+        QueryWrapper<Task> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("sub_id",subId).eq("need_invoice",true);
+        List<Task> taskList=taskService.list(queryWrapper);
+        if(taskList.size()==0) return AjaxResult.success(taskList);
+        //获取领用过发票的订单id
+        List<Long> orderWithInvoice = invoicesClient.check(taskList.stream().map(Task::getOrderId).collect(Collectors.toList()));
+        taskList=taskList.stream().filter(task->orderWithInvoice.indexOf(task.getOrderId())==-1).collect(Collectors.toList());
+        return AjaxResult.success(taskList);
     }
 
     @DeleteMapping("/delete/{taskId}")
@@ -340,11 +356,16 @@ public class TaskController {
         queryWrapper.eq("task_id", taskId).eq("task_type", TaskType.PAYMENT);
         Receipt existReceipt = receiptService.getOne(queryWrapper);
         if (existReceipt != null) return AjaxResult.error("回执单已存在");
+        //保存回执
+        boolean save = receiptService.save(receipt);
+        if (!save) return AjaxResult.error("保存回执单失败");
+        Long receiptId = receipt.getId();
         //根据收款回执单的最终结果执行不同的操作，如果是失败的单子，就将订单状态以及所有的本地或者远程任务状态更新为失败
         boolean success;
         switch (receipt.getState()) {
             case ReceiptStatus.FAILED:
                 task.setTaskStatus(TaskStatus.FAILED);
+                task.setReceiptId(receiptId);
                 //更新本地任务状态
                 success = taskService.updateById(task);
                 if (!success) throw new RuntimeException("更新本地任务状态失败");
@@ -356,6 +377,7 @@ public class TaskController {
             case ReceiptStatus.COMPLETED:
                 //1.更新本地任务状态
                 task.setTaskStatus(TaskStatus.COMPLETED);
+                task.setReceiptId(receiptId);
                 success = taskService.updateById(task);
                 if (!success) throw new RuntimeException("更新本地任务状态失败");
                 //2.更新远程任务状态
@@ -441,7 +463,7 @@ public class TaskController {
         if (!save) return AjaxResult.error("保存回执单失败");
         Long receiptId = receipt.getId();
         //2.更新本地状态
-        task.setTaskStatus(TaskStatus.COMPLETED);
+        task.setTaskStatus(convertStatus(receipt.getState()));
         task.setReceiptId(receiptId);
         boolean saveTaskSuccess = taskService.updateById(task);
         if (!saveTaskSuccess) throw new ServiceException("更新任务状态失败");

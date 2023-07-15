@@ -21,10 +21,13 @@ import io.swagger.annotations.ApiParam;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,6 +43,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/cc/newOrder")
+@CacheConfig(cacheNames = "order")
 @Transactional(rollbackFor = Exception.class)
 public class NewOrderController {
 
@@ -188,6 +192,11 @@ public class NewOrderController {
         //撤销订单,删除订单以及相关的缺货记录、商品记录
         //删除订单
         orderService.removeById(orderId);
+        //删除新订单或退货单
+        if(order.getOrderType().equals(OperationTypeConstant.ORDER))
+            newOrderService.removeById(orderId);
+        else if(!order.getOrderType().equals(OperationTypeConstant.CANCEL))
+            refundService.removeById(orderId);
         //删除缺货记录，只有状态为未提交才允许删除
         stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
         //如果订单为可分配状态，还需要撤销锁定的库存
@@ -218,6 +227,7 @@ public class NewOrderController {
 
     @ApiOperation("退订订单")
     @PostMapping("/unsubscribe")
+    @CacheEvict(key = "#unSubscribeVo.orderId")
     public AjaxResult unsubscribeOrder(@RequestBody UnSubscribeVo unSubscribeVo) {
         if (unSubscribeVo == null) return AjaxResult.error("退订信息不能为空");
         Long orderId = unSubscribeVo.getOrderId();
@@ -273,6 +283,8 @@ public class NewOrderController {
             product.setProductName(prev.getProductName());
             product.setNumber(number);
             product.setPrice(productIdPriceMap.get(productId));
+            product.setChangeAble(prev.getChangeAble());
+            product.setRefundAble(prev.getRefundAble());
             productService.save(product);
             //如果原订单状态为可分配订单，还需要解锁库存
             if (order.getStatus().equals(OrderStatusConstant.CAN_BE_ALLOCATED)) {
@@ -288,9 +300,15 @@ public class NewOrderController {
 
         //更新map,productIdNumberMap存的是新的order中商品的数量
         unSubscribeVo.getProductsMap().forEach((productId, number) -> productIdNumberMap.put(productId, productIdNumberMap.get(productId) - number));
-        //发起远程调用，获取新的状态
-        ProductRecordsVo result = wareCenterStorageRecordClient.check(productIdNumberMap);
-
+        //对于缺货的订单，发起远程调用，获取新的状态
+        ProductRecordsVo result=new ProductRecordsVo();
+        if(order.getStatus().equals(OrderStatusConstant.OUT_OF_STOCK)){
+            result = wareCenterStorageRecordClient.check(productIdNumberMap);
+        //可分配的订单已经锁定库存，不再检查可分配数量是否充足
+        } else{
+            result.setIsLack(false);
+            result.setProductIdNumberMap(new HashMap<>());
+        }
         //如果退货后不缺货了，需要删除掉之前所有的未提交的缺货记录，订单状态改为已分配，并重新锁定库存
         if (!result.getIsLack() && order.getStatus().equals(OrderStatusConstant.OUT_OF_STOCK)) {
             //删除所有原来的未提交的缺货记录
@@ -307,11 +325,16 @@ public class NewOrderController {
             //删除所有原来的未提交的缺货记录
             stockoutService.remove(new QueryWrapper<Stockout>().eq("order_id", orderId).eq("status", StockoutConstant.UNCOMMITTED));
             //重新插入缺货记录
+            Map<Long, Integer> idNumberMap = result.getProductIdNumberMap();
             productIdNumberMap.forEach((productId, number) -> {
+                //不缺货的商品不再生成缺货记录
+                if(!idNumberMap.containsKey(productId))
+                    return;
                 Stockout stockout = new Stockout();
                 stockout.setOrderId(orderId);
+                stockout.setCreateBy(userId);
                 stockout.setProductId(productId);
-                stockout.setNeedNumbers(result.getProductIdNumberMap().get(productId));
+                stockout.setNeedNumbers(idNumberMap.get(productId));
                 stockout.setStatus(StockoutConstant.UNCOMMITTED);
                 stockoutService.save(stockout);
             });
@@ -323,7 +346,8 @@ public class NewOrderController {
         productIdNumberMap.forEach((productId, number) -> {
             Product product = productService.getOne(new QueryWrapper<Product>().eq("order_id", orderId).eq("product_id", productId));
             product.setNumber(number);
-            if (idNumberMap.containsKey(productId)) product.setIslack(true);
+            //修改商品状态为不缺货
+            if (!idNumberMap.containsKey(productId)) product.setIslack(false);
             if (product.getNumber() == 0) {
                 productService.removeById(product.getId());
             } else {
