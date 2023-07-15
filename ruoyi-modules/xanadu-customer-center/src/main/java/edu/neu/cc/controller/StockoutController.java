@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/cc/stockout")
 @CacheConfig(cacheNames = "stockout")
+@Transactional(rollbackFor = Exception.class)
 public class StockoutController {
 
     @Autowired

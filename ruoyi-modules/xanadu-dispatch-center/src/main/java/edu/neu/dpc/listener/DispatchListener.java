@@ -90,7 +90,7 @@ public class DispatchListener implements RocketMQListener<DispatchMessage>{
             AjaxResult remoteSubwareResult = substationClient.getSubwareId(substationId);
             if (remoteSubwareResult == null || remoteSubwareResult.isError())
                 throw new ServiceException("获取分库ID失败");
-            Long subwareId = (Long) remoteSubwareResult.get("data");
+            Long subwareId = remoteSubwareResult.get("data") instanceof Integer ? Long.parseLong(remoteSubwareResult.get("data").toString()) : (Long) remoteSubwareResult.get("data");
             Task task = new Task(null, orderVo.getId(), substationId, TaskStatus.SCHEDULED
                     , false, taskType);
             boolean success = taskService.save(task);

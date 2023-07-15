@@ -16,6 +16,7 @@ import edu.neu.ware.vo.CenterInputVo;
 import edu.neu.ware.vo.PendingProductVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/ware/subOutput")
+@Transactional(rollbackFor = Exception.class)
 public class SubOutputController {
 
     @Autowired
@@ -113,7 +115,7 @@ public class SubOutputController {
         //需要拿到分站ID，这个可以根据分库来查询
         AjaxResult substationIdRes = substationClient.getSubstationId(subOutput.getSubwareId());
         if (substationIdRes == null || substationIdRes.isError()) throw new ServiceException("查询分站信息失败");
-        Long substationId = (Long) substationIdRes.get("data");
+        Long substationId = substationIdRes.get("data") instanceof Integer ? Long.parseLong(substationIdRes.get("data").toString()) : (Long) substationIdRes.get("data");
         //需要给中心仓库添加记录,传入的追踪记录ID是自己的id
         CenterInput centerInput = new CenterInput(null, subOutput.getId(), InputOutputType.RETURN, subOutput.getProductId(), subOutput.getProductName(), subOutput.getActualNum(), null,
                 null, InputOutputStatus.NOT_INPUT, null, substationId, subOutput.getSubwareId(), 0);

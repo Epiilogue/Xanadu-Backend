@@ -11,7 +11,7 @@
  Target Server Version : 50719 (5.7.19-log)
  File Encoding         : 65001
 
- Date: 11/07/2023 14:46:28
+ Date: 14/07/2023 09:30:47
 */
 
 SET NAMES utf8mb4;
@@ -100,13 +100,13 @@ CREATE TABLE `dbc_product`  (
 -- Records of dbc_product
 -- ----------------------------
 INSERT INTO `dbc_product` VALUES (1, 'dddd', 1, 2, 133.03, 111.00, 6, 0, 0, 'daaa', 0, '2023-07-08 11:21:14', '2023-07-08 11:21:14', 'https://xanadu-image.oss-cn-beijing.aliyuncs.com/2023-07-08/198ad0a2-6990-4668-863a-466b8dbaa83e_系统架构.jpg', 444, 5667);
-INSERT INTO `dbc_product` VALUES (2, 'sss', 1, 2, 13.04, 4.00, 6, 1, 1, 'sss', 0, '2023-07-08 14:39:06', '2023-07-08 14:39:06', 'https://xanadu-image.oss-cn-beijing.aliyuncs.com/2023-07-09/b339b8c5-598d-4a7e-876f-d11f36b19117_17.png', 4, 55);
-INSERT INTO `dbc_product` VALUES (3, 'eqeq', 1, 2, 3334.03, 2222.00, 8, 0, 0, 'dddd', 0, '2023-07-08 14:43:24', '2023-07-08 14:43:24', '', 444, 333);
-INSERT INTO `dbc_product` VALUES (4, 'aaaa', 1, 2, 123.04, 23.00, 10, 1, 0, 'dffff', 0, '2023-07-08 14:50:04', '2023-07-08 14:50:04', '', 434, 23233);
-INSERT INTO `dbc_product` VALUES (5, 'macbook', 4, 5, 2562.04, 1202.00, 11, 0, 1, '无', 1, '2023-07-08 15:38:52', '2023-07-09 22:45:49', '', 333, 2133);
-INSERT INTO `dbc_product` VALUES (6, '华为智选 鼎桥 TDTech M40 5G手机 8GB+256GB', 1, 2, 402.04, 2299.00, 5, 0, 0, '华为', 1, '2023-07-09 21:28:00', '2023-07-09 21:36:44', 'https://img3m1.ddimg.cn/94/14/11181060391-1_l_1.jpg', 500, 600);
-INSERT INTO `dbc_product` VALUES (7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 4, 6, 405.01, 393.00, 10, 1, 1, 'dsdd', 0, '2023-07-09 21:55:19', '2023-07-09 21:55:19', 'https://img3m7.ddimg.cn/41/32/11129923967-1_l_1.jpg', 222, 233);
-INSERT INTO `dbc_product` VALUES (9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 10, 12, 800.02, 169.00, 6, 1, 1, '乐高记录', 0, '2023-07-10 10:08:21', '2023-07-10 10:08:21', 'https://img3m4.ddimg.cn/62/4/11401678394-1_l_3.jpg', 200, 100);
+INSERT INTO `dbc_product` VALUES (2, 'sss', 1, 2, 13.04, 4.00, 6, 1, 1, 'sss', 0, '2023-07-08 14:39:06', '2023-07-08 14:39:06', 'https://xanadu-image.oss-cn-beijing.aliyuncs.com/2023-07-09/b339b8c5-598d-4a7e-876f-d11f36b19117_17.png', 40, 5667);
+INSERT INTO `dbc_product` VALUES (3, 'eqeq', 1, 2, 3334.03, 2222.00, 8, 0, 0, 'dddd', 0, '2023-07-08 14:43:24', '2023-07-08 14:43:24', '', 444, 5667);
+INSERT INTO `dbc_product` VALUES (4, 'aaaa', 1, 2, 123.04, 23.00, 10, 1, 0, 'dffff', 0, '2023-07-08 14:50:04', '2023-07-08 14:50:04', '', 434, 5667);
+INSERT INTO `dbc_product` VALUES (5, 'macbook', 4, 5, 2562.04, 1202.00, 11, 0, 1, '无', 0, '2023-07-08 15:38:52', '2023-07-09 22:45:49', '', 333, 5667);
+INSERT INTO `dbc_product` VALUES (6, '华为智选 鼎桥 TDTech M40 5G手机 8GB+256GB', 1, 2, 402.04, 2299.00, 5, 0, 0, '华为', 0, '2023-07-09 21:28:00', '2023-07-09 21:36:44', 'https://img3m1.ddimg.cn/94/14/11181060391-1_l_1.jpg', 500, 5667);
+INSERT INTO `dbc_product` VALUES (7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 4, 6, 405.01, 393.00, 10, 1, 1, 'dsdd', 0, '2023-07-09 21:55:19', '2023-07-09 21:55:19', 'https://img3m7.ddimg.cn/41/32/11129923967-1_l_1.jpg', 222, 5667);
+INSERT INTO `dbc_product` VALUES (9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 10, 12, 800.02, 169.00, 6, 1, 1, '乐高记录', 0, '2023-07-10 10:08:21', '2023-07-10 10:08:21', 'https://img3m4.ddimg.cn/62/4/11401678394-1_l_3.jpg', 200, 5667);
 
 -- ----------------------------
 -- Table structure for dbc_purchase_record
@@ -126,12 +126,19 @@ CREATE TABLE `dbc_purchase_record`  (
   `total_cost` double(20, 2) NULL DEFAULT NULL COMMENT '进货单总消费',
   `lack_ids` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '缺货单的ID列表字符串',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of dbc_purchase_record
 -- ----------------------------
 INSERT INTO `dbc_purchase_record` VALUES (1, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 10, 222, '2023-07-10 13:07:02', '已到货', '2023-07-10 13:07:02', 0, 405.01, 89912.22, '-1,');
+INSERT INTO `dbc_purchase_record` VALUES (2, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 10, 28, '2023-07-12 23:06:34', '已到货', '2023-07-12 23:06:34', 0, 405.01, 11340.28, '-1,');
+INSERT INTO `dbc_purchase_record` VALUES (3, 1, 'dddd', 6, 5, '2023-07-13 09:47:02', '已到货', '2023-07-13 09:47:02', 0, 133.03, 665.15, '5,7,');
+INSERT INTO `dbc_purchase_record` VALUES (4, 2, 'sss', 6, 5, '2023-07-13 09:51:47', '已到货', '2023-07-13 09:51:47', 0, 13.04, 65.20, '6,8,');
+INSERT INTO `dbc_purchase_record` VALUES (5, 1, 'dddd', 6, 267, '2023-07-13 09:56:55', '已到货', '2023-07-13 09:56:55', 0, 133.03, 35519.01, '-1,');
+INSERT INTO `dbc_purchase_record` VALUES (6, 5, 'macbook', 11, 2, '2023-07-13 09:57:10', '已到货', '2023-07-13 09:57:10', 0, 2562.04, 5124.08, '1,');
+INSERT INTO `dbc_purchase_record` VALUES (7, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 10, 3, '2023-07-13 10:16:07', '已到货', '2023-07-13 10:16:07', 0, 405.01, 1215.03, '11,');
+INSERT INTO `dbc_purchase_record` VALUES (8, 9, 'LEGO乐高积木玩具 超级赛车系列 76916 保时捷 963 男孩女孩生日礼物', 6, 3, '2023-07-13 10:16:09', '已到货', '2023-07-13 10:16:09', 0, 800.02, 2400.06, '12,');
 
 -- ----------------------------
 -- Table structure for dbc_refund
@@ -150,11 +157,12 @@ CREATE TABLE `dbc_refund`  (
   `product_price` double(20, 2) NULL DEFAULT NULL COMMENT '商品单价',
   `refund_time` datetime NULL DEFAULT NULL COMMENT '退货时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of dbc_refund
 -- ----------------------------
+INSERT INTO `dbc_refund` VALUES (1, 10, 7, 'Lenovo联想电脑音响蓝牙音箱台式机笔记本手机通用家用低音炮超重低音长条多媒体迷你有线', 253, 444, 1, '已提交', 0, 405.01, '2023-07-13 21:25:58');
 
 -- ----------------------------
 -- Table structure for dbc_supplier

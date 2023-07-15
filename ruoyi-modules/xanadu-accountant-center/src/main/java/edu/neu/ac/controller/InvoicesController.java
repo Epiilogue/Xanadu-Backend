@@ -45,6 +45,24 @@ public class InvoicesController {
         return AjaxResult.success(invoicesList);
     }
 
+    @ApiOperation("查询发票")
+    @GetMapping("selectlist")
+    @CrossOrigin
+    public AjaxResult selectlist(@RequestParam(value = "employee", required = false) String employee, @RequestParam(value = "invoiceNumber", required = false) String invoiceNumber,
+                                 @RequestParam(value = "batch", required = false) int batch) {
+        QueryWrapper<Invoices> queryWrapper = new QueryWrapper<>();
+        if( employee == null || invoiceNumber == null || batch == 0){
+            return AjaxResult.error("查询失败");
+        }
+        else {
+            queryWrapper.eq("employee", employee);
+            queryWrapper.eq("number", invoiceNumber);
+            queryWrapper.eq("batch", batch);
+            List<Invoices> invoicesList = invoicesService.list(queryWrapper);
+            return AjaxResult.success("查询成功", invoicesList);
+        }
+    }
+
     @GetMapping("/getinvoicebytotalid/{totalid}")
     @ApiOperation("通过totalid获取发票信息")
     @CrossOrigin
@@ -78,7 +96,7 @@ public class InvoicesController {
         return AjaxResult.success("修改成功", invoices);
     }
 
-    @ApiOperation("返回打印发票的所有数据")
+    @ApiOperation("返回打印发票的数据")
     @GetMapping("/printInvoices/{Id}")
     @CrossOrigin
     public AjaxResult printReceipt(@PathVariable("Id") Long Id) {
@@ -89,5 +107,8 @@ public class InvoicesController {
         invoices.setPrintTime(da);
         return AjaxResult.success("打印成功", invoices);
     }
+
+
+
 }
 

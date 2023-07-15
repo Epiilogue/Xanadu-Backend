@@ -83,6 +83,10 @@ public class RefundController {
            throw new ServiceException("原订单状态未完成，不允许换货");
         if (!preOrder.getOrderType().equals(OperationTypeConstant.ORDER))
            throw new ServiceException("原订单不是新订类型，不允许换货");
+        //检查一下原订单是不是已经有换货或者退货订单了，如果有不允许再换货或者退货
+        //需要去refund查一下有没有order_id为原订单的记录，如果有则不允许换货
+        List<Refund> refundList = refundService.list(new QueryWrapper<Refund>().eq("order_id", refundVo.getOrderId()));
+        if (refundList.size() > 0)throw new ServiceException("原订单已经有换货或者退货记录，不允许再换货");
 
         NewOrder newOrder = newOrderService.getById(preOrder.getId());
         if (newOrder == null)throw new ServiceException("原订单不存在");
@@ -189,8 +193,12 @@ public class RefundController {
         if (!preOrder.getOrderType().equals(OperationTypeConstant.ORDER))
            throw new ServiceException("原订单不是新订类型，不允许换货");
 
-        NewOrder newOrder = newOrderService.getById(preOrder.getId());
+        NewOrder newOrder = newOrderService.getById(refundVo.getOrderId());
         if (newOrder == null)throw new ServiceException("原订单不存在");
+
+        List<Refund> refundList = refundService.list(new QueryWrapper<Refund>().eq("order_id", refundVo.getOrderId()));
+        if (refundList.size() > 0)throw new ServiceException("原订单已经有换货或者退货记录，不允许再换货");
+
         Long substationId = newOrder.getSubstationId();
         Order order = new Order();
         Refund refund = new Refund();
