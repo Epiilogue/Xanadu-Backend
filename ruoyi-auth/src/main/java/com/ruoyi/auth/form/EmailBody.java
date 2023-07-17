@@ -7,6 +7,15 @@ public class EmailBody implements Serializable {
      * 用户名
      */
     private String email;
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public String getEmail() {
         return email;

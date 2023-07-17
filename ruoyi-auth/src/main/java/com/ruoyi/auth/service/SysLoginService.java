@@ -131,14 +131,12 @@ public class SysLoginService {
             recordLogService.recordLogininfor(userInfo.getUsername(), Constants.LOGIN_FAIL, "用户已停用，请联系管理员");
             throw new ServiceException("对不起，您的账号：" + userInfo.getUsername() + " 已停用");
         }
-        //生成验证码，连带着用户名一起存入redis，之后直接就能找到了
+        //生成验证码
         String code = RandomUtil.randomNumbers(6);
-        redisService.setCacheObject(CacheConstants.EMAIL_CODE_KEY + email, code + ":" + user.getUserName(), CacheConstants.EMAIL, TimeUnit.MINUTES);
-
         EmailBody emailBody = new EmailBody();
         emailBody.setEmail(email);
         emailBody.setCode(code);
-
+        emailBody.setUserName(userInfo.getUsername());
         try {
             rocketMQTemplate.syncSend(MQTopic.EMAIL_TOPIC, emailBody);
         } catch (Exception e) {
