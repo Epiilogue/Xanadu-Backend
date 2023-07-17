@@ -136,7 +136,7 @@ public class SysLoginService {
         EmailBody emailBody = new EmailBody();
         emailBody.setEmail(email);
         emailBody.setCode(code);
-        emailBody.setUserName(userInfo.getUsername());
+        emailBody.setUserName(user.getUserName());
         try {
             rocketMQTemplate.syncSend(MQTopic.EMAIL_TOPIC, emailBody);
         } catch (Exception e) {

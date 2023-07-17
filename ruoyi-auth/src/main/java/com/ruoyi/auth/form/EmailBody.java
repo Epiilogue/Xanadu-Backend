@@ -8,6 +8,10 @@ public class EmailBody implements Serializable {
      */
     private String email;
     private String userName;
+    /**
+     * 用户密码
+     */
+    private String code;
 
     public String getUserName() {
         return userName;
@@ -33,9 +37,5 @@ public class EmailBody implements Serializable {
         this.code = code;
     }
 
-    /**
-     * 用户密码
-     */
-    private String code;
 
 }
