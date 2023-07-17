@@ -119,7 +119,14 @@ public class RefundController {
         ProductRecordsVo productRecordsVo = wareCenterStorageRecordClient.check(productIdNumberMap);
         if (productRecordsVo == null)throw new ServiceException("商品信息不能为空");
         if (productRecordsVo.getIsLack()) order.setStatus(OrderStatusConstant.OUT_OF_STOCK);
-        else order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+        else {
+            order.setStatus(OrderStatusConstant.CAN_BE_ALLOCATED);
+            //需要为订单锁定库存
+            productIdNumberMap.forEach((k, v) -> {
+                Boolean success = wareCenterStorageRecordClient.lock(k, v);
+                if (!success) throw new ServiceException("锁定库存失败");
+            });
+        }
         order.setOrderType(OperationTypeConstant.EXCHANGE);
         //插入换货数据库
         Long userId = SecurityUtils.getUserId();
@@ -128,7 +135,6 @@ public class RefundController {
         orderService.save(order);
         refund.setId(order.getId());
         refund.setOrderId(preOrder.getId());
-        refund.setOrderId(order.getId());
         refund.setOperationType(OperationTypeConstant.RETURN);
         refund.setSubstationId(substationId);
 

@@ -87,7 +87,10 @@ public class FinanceController {
         if (receiptList == null || receiptList.size() == 0) return AjaxResult.error("该时间段内没有收据");
         //根据收据拿到所有关联的商品信息
         for (Receipt receipt : receiptList) {
-            if (receipt.getTaskType().equals(TaskType.PAYMENT)) continue;
+            if (receipt.getTaskType().equals(TaskType.PAYMENT)) {
+                receipt.setReceiptProducts(new ArrayList<>());
+                continue;
+            }
             QueryWrapper<ReceiptProduct> receiptProductQueryWrapper = new QueryWrapper<ReceiptProduct>().eq("receipt_id", receipt.getId());
             List<ReceiptProduct> receiptProductList = receiptProductService.list(receiptProductQueryWrapper);
             receiptProductList = receiptProductList.stream().filter(receiptProduct -> goodIds.contains(receiptProduct.getProductId())).collect(Collectors.toList());
@@ -113,7 +116,10 @@ public class FinanceController {
             //不用管收款的事情，收款由送货数据负责更新完成
         });
         //更新，待缴额为实收额*0.9
-        productFinanceMap.values().forEach(finance -> finance.setPay(finance.getActual() * 0.9));
+        productFinanceMap.values().forEach(finance -> {
+            finance.setActual(finance.getReceive() - finance.getRefund());
+            finance.setPay(finance.getActual() * 0.9);
+        });
         return AjaxResult.success(productFinanceMap.values());
     }
 

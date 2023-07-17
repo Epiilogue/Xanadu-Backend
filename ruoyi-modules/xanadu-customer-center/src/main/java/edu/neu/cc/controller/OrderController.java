@@ -272,6 +272,7 @@ public class OrderController {
                 BeanUtils.copyProperties(prevOrder, orderVo);
                 orderVo.setId(id);
                 orderVo.setReceiverName(prevOrder.getReceiverName());
+                orderVo.setPhone(prevOrder.getTelephone());
                 List<Product> refundProducts = productService.list(new QueryWrapper<Product>().eq("order_id", id));
                 orderVo.setProducts(refundProducts);
                 return AjaxResult.success(orderVo);

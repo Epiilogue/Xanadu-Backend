@@ -89,7 +89,8 @@ public class ReceiptProductServiceImpl extends ServiceImpl<ReceiptProductMapper,
                     case TaskType.PAYMENT_DELIVERY:
                         receiptProducts.forEach(p -> {
                             p.setSignNum(0);
-                            p.setReturnNum(p.getAllNum());
+                            p.setReturnNum(0);
+//                            p.setReturnNum(p.getAllNum());
                         });
                         break;
                 }
@@ -113,7 +114,7 @@ public class ReceiptProductServiceImpl extends ServiceImpl<ReceiptProductMapper,
                         break;
                     case TaskType.RETURN:
                         receiptProducts.forEach(p -> {
-                                    Integer actualNum = p.getReturnNum();//先拿到实际数量
+                                    Integer actualNum = p.getSignNum();//先拿到实际数量
                                     p.setSignNum(0);
                                     p.setReturnNum(actualNum);//实际退回来几个，就签收几个
                                     p.setOutputMoney(actualNum * p.getPrice());

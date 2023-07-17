@@ -108,7 +108,7 @@ public class CategaryController {
     @GetMapping("/feign/getGoods/{id}")
     public AjaxResult getGoods(@PathVariable("id") Integer id) {
         Categary categary = categaryService.getById(id);
-        if (categary.getLevel() == 0) return AjaxResult.error("商品分类填写不完整");
+        if (categary.getLevel() == 1) return AjaxResult.error("商品分类填写不完整");
         //查找所有的同分类ID的商品列表
         QueryWrapper<Product> secondCategray = new QueryWrapper<Product>().eq("second_categray", id);
         List<Long> Idlist = productService.list(secondCategray).stream().map(Product::getId).collect(Collectors.toList());

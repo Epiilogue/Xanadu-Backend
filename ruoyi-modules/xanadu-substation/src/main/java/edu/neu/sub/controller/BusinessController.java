@@ -61,8 +61,8 @@ public class BusinessController {
      */
     @GetMapping("/getSubstationDeliveryAnalysis/{substationId}}")
     public AjaxResult getSubstationDeliveryAnalysis(@PathVariable("substationId") Long substationId,
-                                                    @RequestParam("startTime") Date startTime,
-                                                    @RequestParam("endTime") Date endTime) {
+                                                    @RequestParam("startTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
+                                                    @RequestParam("endTime") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
         //检查时间是否合法
         if (startTime == null || endTime == null) return AjaxResult.error("时间不能为空");
         if (startTime.after(endTime)) return AjaxResult.error("开始时间不能大于结束时间");
