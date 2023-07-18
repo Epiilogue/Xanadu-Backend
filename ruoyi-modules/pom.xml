@@ -16,7 +16,8 @@
         <module>xanadu-dispatch-center</module>
         <module>xanadu-substation</module>
         <module>xanadu-accountant-center</module>
-
+        <module>xanadu-warehouse</module>
+        <module>xanadu_base</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>
