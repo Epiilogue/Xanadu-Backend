@@ -83,7 +83,7 @@ public class DeliveryController {
                 todayUnfinishedMoney += formula(receipt.getInputMoney(), receipt.getFeedback());
             } else if (receipt.getTaskType().equals(TaskType.DELIVERY)) {
                 //找到对应的收款回执加上收款回执的钱
-                QueryWrapper<Receipt> paymentReceiptQueryWrapper = new QueryWrapper<Receipt>().eq("task_id", receipt.getTaskId()).eq("task_type", TaskType.PAYMENT_DELIVERY);
+                QueryWrapper<Receipt> paymentReceiptQueryWrapper = new QueryWrapper<Receipt>().eq("task_id", receipt.getTaskId()).eq("task_type", TaskType.PAYMENT);
                 Receipt paymentReceipt = receiptService.getOne(paymentReceiptQueryWrapper);
                 todayUnfinishedMoney += formula(paymentReceipt.getInputMoney(), paymentReceipt.getFeedback());
             }
