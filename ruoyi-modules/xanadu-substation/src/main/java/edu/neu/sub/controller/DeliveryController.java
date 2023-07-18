@@ -96,10 +96,10 @@ public class DeliveryController {
     }
 
     /**
-     * 配送费为送货或者送货收款的每一单实收款*0.03*(1.0+(客户满意度-0.5))
+     * 配送费为送货或者送货收款的每一单实收款*0.03*(1.0+(客户满意度-5))
      */
     private Double formula(Double money, Integer satisfaction) {
-        return money * 0.03 * (1.0 + (satisfaction - 5));
+        return money * 0.03 * (1.0 + (satisfaction*0.1 - 0.5));
     }
 
 
