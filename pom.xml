@@ -9,8 +9,6 @@
     <version>3.6.2</version>
 
     <name>ruoyi</name>
-    <url>http://www.ruoyi.vip</url>
-    <description>若依微服务系统</description>
 
     <properties>
         <ruoyi.version>3.6.2</ruoyi.version>
@@ -218,14 +216,9 @@
     <modules>
         <module>ruoyi-auth</module>
         <module>ruoyi-gateway</module>
-        <module>ruoyi-visual</module>
         <module>ruoyi-modules</module>
         <module>ruoyi-api</module>
         <module>ruoyi-common</module>
-        <module>ruoyi-modules/mybatisplus-generator</module>
-        <module>ruoyi-modules/xanadu_base</module>
-        <module>ruoyi-modules/xanadu-warehouse</module>
-        <module>ruoyi-modules/xanadu-accountant-center</module>
     </modules>
     <packaging>pom</packaging>
 

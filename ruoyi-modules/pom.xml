@@ -10,9 +10,6 @@
 
     <modules>
         <module>ruoyi-system</module>
-        <module>ruoyi-gen</module>
-        <module>ruoyi-job</module>
-        <module>ruoyi-file</module>
         <module>xanadu-customer-center</module>
         <module>xanadu-customer-center</module>
         <module>xanadu-distribution-center</module>

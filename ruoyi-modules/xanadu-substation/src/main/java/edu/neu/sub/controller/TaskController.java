@@ -477,8 +477,7 @@ public class TaskController {
         boolean b = receiptService.updateById(receipt);
         if (!b) throw new ServiceException("更新回执单失败");
         //4.自动生成待处理商品信息单，保存到数据库，等待操作人员入库或者退货处理
-        boolean isSuccess = pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType(), subwareId);
-        if (!isSuccess) throw new ServiceException("保存待处理商品信息失败");
+        pendingProductService.convertAndSave(taskId, products, receipt.getState(), task.getTaskType(), subwareId);
         //5.更新远程状态
         String status = convertStatus(receipt.getState());
         AjaxResult ajaxResult = taskClient.updateTaskStatus(task.getId(), status);
