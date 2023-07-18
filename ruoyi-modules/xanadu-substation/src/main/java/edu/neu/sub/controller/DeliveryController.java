@@ -79,13 +79,8 @@ public class DeliveryController {
         //今日待结算：送货或者送货收款的每一单实收款*(1.0+(客户满意度-0.5))
         double todayUnfinishedMoney = 0.0;
         for (Receipt receipt : list) {
-            if (receipt.getTaskType().equals(TaskType.PAYMENT_DELIVERY)) {
+            if (receipt.getTaskType().equals(TaskType.PAYMENT_DELIVERY)||receipt.getTaskType().equals(TaskType.PAYMENT)) {
                 todayUnfinishedMoney += formula(receipt.getInputMoney(), receipt.getFeedback());
-            } else if (receipt.getTaskType().equals(TaskType.DELIVERY)) {
-                //找到对应的收款回执加上收款回执的钱
-                QueryWrapper<Receipt> paymentReceiptQueryWrapper = new QueryWrapper<Receipt>().eq("task_id", receipt.getTaskId()).eq("task_type", TaskType.PAYMENT);
-                Receipt paymentReceipt = receiptService.getOne(paymentReceiptQueryWrapper);
-                todayUnfinishedMoney += formula(paymentReceipt.getInputMoney(), paymentReceipt.getFeedback());
             }
         }
         delivery.setTodayDeliveryFee(todayUnfinishedMoney);
